@@ -1,0 +1,419 @@
+/* =========================================
+   MPD — MOBILE UI
+   Based on MPH visual structure
+   ========================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #eefbdd;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #eefbdd;
+  color: #173f2c;
+  min-height: 100vh;
+}
+
+/* -----------------------------------------
+   APP CONTAINER
+   ----------------------------------------- */
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 22px 15px 105px;
+}
+
+/* -----------------------------------------
+   HEADER
+   ----------------------------------------- */
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.top-header h1 {
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #111111;
+  margin-bottom: 10px;
+}
+
+.top-header p {
+  font-size: 17px;
+  line-height: 1.45;
+  color: #6e746d;
+}
+
+.logout-btn {
+  flex-shrink: 0;
+  border: 1px solid #dddddd;
+  background: #ffffff;
+  color: #444444;
+  border-radius: 12px;
+  padding: 9px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* -----------------------------------------
+   STREAK
+   ----------------------------------------- */
+
+.streak-card {
+  background: #ffffff;
+  border-radius: 30px;
+  min-height: 62px;
+  padding: 12px 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+}
+
+.streak-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.streak-icon {
+  font-size: 31px;
+  line-height: 1;
+}
+
+.streak-left strong {
+  color: #202020;
+  font-size: 18px;
+}
+
+.streak-message {
+  color: #315f47;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* -----------------------------------------
+   GENERAL SECTION
+   ----------------------------------------- */
+
+.content-section,
+.tracker-section {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px 17px;
+  margin-bottom: 18px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+}
+
+.content-section h2,
+.tracker-section h2 {
+  color: #215b42;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 17px;
+}
+
+/* -----------------------------------------
+   PDF LIBRARY
+   2 COLUMNS
+   ----------------------------------------- */
+
+.pdf-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px 11px;
+}
+
+.pdf-card {
+  min-width: 0;
+  cursor: pointer;
+  text-align: left;
+  border: none;
+  background: transparent;
+}
+
+.pdf-cover {
+  width: 100%;
+  aspect-ratio: 21 / 26;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #edf3e9;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 8px;
+}
+
+.pdf-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pdf-cover.placeholder {
+  background: #dfead6;
+  color: #215b42;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.pdf-card p {
+  color: #292929;
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 700;
+
+  padding: 0 2px;
+}
+
+/* -----------------------------------------
+   TRACKER SECTION
+   ----------------------------------------- */
+
+.tracker-section {
+  padding-bottom: 17px;
+}
+
+.tracker-section h2 {
+  margin-bottom: 12px;
+}
+
+.tracker-card {
+  width: 100%;
+  min-height: 91px;
+
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  padding: 13px 13px;
+
+  border: 0;
+  border-radius: 19px;
+
+  background: #f5f8ef;
+  color: #173f2c;
+
+  text-align: left;
+  cursor: pointer;
+
+  margin-bottom: 10px;
+}
+
+.tracker-card:last-child {
+  margin-bottom: 0;
+}
+
+.tracker-icon {
+  width: 55px;
+  height: 55px;
+  flex: 0 0 55px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #17603f;
+  color: #ffffff;
+
+  font-size: 25px;
+}
+
+.tracker-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tracker-info h3 {
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #1c543b;
+  margin-bottom: 5px;
+}
+
+.tracker-info p {
+  color: #6d746d;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.tracker-arrow {
+  flex: 0 0 auto;
+  font-size: 25px;
+  color: #6d746d;
+  line-height: 1;
+}
+
+/* -----------------------------------------
+   BOTTOM NAVIGATION
+   ----------------------------------------- */
+
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+
+  transform: translateX(-50%);
+
+  width: min(100%, 480px);
+
+  background: #ffffff;
+
+  border-radius: 27px 27px 0 0;
+
+  padding: 9px 7px 10px;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
+
+  z-index: 100;
+}
+
+.nav-item {
+  border: 0;
+  background: transparent;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 4px;
+
+  color: #777777;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  min-height: 61px;
+}
+
+.nav-icon {
+  width: 43px;
+  height: 43px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #cbd8b9;
+  color: #ffffff;
+
+  font-size: 21px;
+
+  transition: 0.2s ease;
+}
+
+.nav-item.active {
+  color: #205a40;
+}
+
+.nav-item.active .nav-icon {
+  background: #17603f;
+  transform: translateY(-2px);
+}
+
+/* -----------------------------------------
+   TOUCH / BUTTON FEEDBACK
+   ----------------------------------------- */
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.nav-item:active {
+  transform: none;
+}
+
+/* -----------------------------------------
+   MOBILE ONLY
+   ----------------------------------------- */
+
+@media (min-width: 481px) {
+  body {
+    background: #dfead6;
+  }
+
+  .app {
+    background: #eefbdd;
+    min-height: 100vh;
+  }
+}
+
+/* -----------------------------------------
+   SMALL PHONES
+   ----------------------------------------- */
+
+@media (max-width: 360px) {
+
+  .app {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .top-header h1 {
+    font-size: 28px;
+  }
+
+  .top-header p {
+    font-size: 15px;
+  }
+
+  .pdf-grid {
+    gap: 10px 9px;
+  }
+
+  .pdf-card p {
+    font-size: 12px;
+  }
+
+  .tracker-info h3 {
+    font-size: 13px;
+  }
+
+  .tracker-info p {
+    font-size: 11px;
+  }
+
+  .nav-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
