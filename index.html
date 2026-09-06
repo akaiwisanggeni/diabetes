@@ -1,0 +1,206 @@
+  <!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Meal Plan Diabetes</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- HEADER -->
+    <header class="top-header">
+      <div>
+        <h1>Hi, <span id="user-name">Akai</span></h1>
+        <p>Semangat juga pola makan dan hidup<br>sehat hari ini!</p>
+      </div>
+
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </header>
+
+
+    <!-- STREAK -->
+    <section class="streak-card">
+      <div class="streak-left">
+        <span class="streak-icon">🔥</span>
+        <strong><span id="streak-count">2</span> Day Streak</strong>
+      </div>
+
+      <span class="streak-message">Keep it up!</span>
+    </section>
+
+
+    <!-- PDF LIBRARY -->
+    <section class="content-section">
+      <h2>MPD LIBRARY</h2>
+
+      <div id="pdf-grid" class="pdf-grid">
+
+        <!-- PDF cards akan diisi dari Supabase -->
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 01</span>
+          </div>
+          <p>Mengenal Diabetes</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 02</span>
+          </div>
+          <p>30 Menu Ramah Diabetes</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 03</span>
+          </div>
+          <p>Cheat Sheet Makanan</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 04</span>
+          </div>
+          <p>Panduan Porsi Makan</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 05</span>
+          </div>
+          <p>Pengganti Karbohidrat</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 06</span>
+          </div>
+          <p>Daftar Belanja</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 07</span>
+          </div>
+          <p>Meal Plan Diabetes</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 08</span>
+          </div>
+          <p>Cemilan Ramah Diabetes</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 09</span>
+          </div>
+          <p>Minuman & Gula</p>
+        </div>
+
+        <div class="pdf-card">
+          <div class="pdf-cover placeholder">
+            <span>PDF 10</span>
+          </div>
+          <p>Makan di Luar</p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- TRACKER -->
+    <section class="tracker-section">
+
+      <h2>TRACKER</h2>
+
+      <!-- GULA DARAH -->
+      <button class="tracker-card" data-page="blood-sugar">
+        <div class="tracker-icon">
+          🩸
+        </div>
+
+        <div class="tracker-info">
+          <h3>TRACKER GULA DARAH</h3>
+          <p>Catat dan pantau kadar gula darahmu secara berkala.</p>
+        </div>
+
+        <span class="tracker-arrow">›</span>
+      </button>
+
+
+      <!-- BERAT BADAN -->
+      <button class="tracker-card" data-page="weight">
+        <div class="tracker-icon">
+          ⚖️
+        </div>
+
+        <div class="tracker-info">
+          <h3>TRACKER BERAT BADAN</h3>
+          <p>Pantau perubahan berat badan dan progresmu.</p>
+        </div>
+
+        <span class="tracker-arrow">›</span>
+      </button>
+
+
+      <!-- KALKULATOR KARBOHIDRAT -->
+      <button class="tracker-card" data-page="carb-calculator">
+        <div class="tracker-icon">
+          🧮
+        </div>
+
+        <div class="tracker-info">
+          <h3>KALKULATOR KARBOHIDRAT</h3>
+          <p>Hitung kebutuhan dan jumlah karbohidrat makananmu.</p>
+        </div>
+
+        <span class="tracker-arrow">›</span>
+      </button>
+
+    </section>
+
+
+    <!-- FOOTER NAVIGATION -->
+    <nav class="bottom-nav">
+
+      <button class="nav-item active" data-page="home">
+        <div class="nav-icon">⌂</div>
+        <span>Home</span>
+      </button>
+
+      <button class="nav-item" data-page="blood-sugar">
+        <div class="nav-icon">🩸</div>
+        <span>Gula Darah</span>
+      </button>
+
+      <button class="nav-item" data-page="weight">
+        <div class="nav-icon">⚖️</div>
+        <span>BB Tracker</span>
+      </button>
+
+      <button class="nav-item" data-page="carb-calculator">
+        <div class="nav-icon">🧮</div>
+        <span>Karbo Calc</span>
+      </button>
+
+    </nav>
+
+  </div>
+
+
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- APP SCRIPT -->
+  <script src="script.js"></script>
+
+</body>
+</html>
