@@ -890,7 +890,7 @@ async function loadBloodSugarRecords() {
 
 
 /* =========================================================
-   12A. BLOOD SUGAR CHART UI
+   12A. BLOOD SUGAR PROGRESS LIST UI
    ========================================================= */
 
 function ensureBloodSugarChartUI() {
@@ -899,10 +899,7 @@ function ensureBloodSugarChartUI() {
 
   if (document.querySelector('#mpd-blood-sugar-chart-card')) return;
 
-  const historySection =
-    page.querySelector('.tracker-history') ||
-    page.querySelector('#blood-sugar-list')?.parentElement;
-
+  const historySection = page.querySelector('.tracker-history');
   if (!historySection) return;
 
   const style = document.createElement('style');
@@ -915,24 +912,28 @@ function ensureBloodSugarChartUI() {
       background: #ffffff;
       box-shadow: 0 6px 20px rgba(0,0,0,.05);
     }
+
     #mpd-blood-sugar-chart-card .mpd-chart-title {
       font-size: 17px;
       font-weight: 800;
       color: #1f5f4a;
       margin-bottom: 4px;
     }
+
     #mpd-blood-sugar-chart-card .mpd-chart-subtitle {
       font-size: 13px;
       line-height: 1.45;
       color: #6d756f;
       margin-bottom: 12px;
     }
+
     #mpd-blood-sugar-chart-card .mpd-blood-sugar-periods {
       display: flex;
       gap: 7px;
       flex-wrap: wrap;
       margin-bottom: 14px;
     }
+
     #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn {
       border: 1px solid #d7ded8;
       background: #f7f9f7;
@@ -943,42 +944,69 @@ function ensureBloodSugarChartUI() {
       font-weight: 700;
       cursor: pointer;
     }
+
     #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn.active {
       background: #679343;
       border-color: #679343;
       color: #ffffff;
     }
-    #mpd-blood-sugar-chart-card .mpd-chart-wrap {
-      width: 100%;
-      overflow: hidden;
-    }
-    #mpd-blood-sugar-chart-card #mpd-blood-sugar-chart {
-      display: block;
-      width: 100%;
-      height: 190px;
-    }
-    #mpd-blood-sugar-chart-card .mpd-chart-empty {
-      min-height: 150px;
+
+    #mpd-blood-sugar-progress-list {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .mpd-blood-sugar-progress-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+      padding: 12px 13px;
+      border: 1px solid #edf0eb;
+      border-radius: 14px;
+      background: #fafcf9;
+    }
+
+    .mpd-blood-sugar-progress-date {
+      font-size: 12px;
+      color: #6d756f;
+      align-self: center;
+    }
+
+    .mpd-blood-sugar-progress-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1f5f4a;
+      white-space: nowrap;
+    }
+
+    .mpd-blood-sugar-progress-value span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6d756f;
+    }
+
+    .mpd-blood-sugar-progress-type {
+      grid-column: 1 / -1;
+      font-size: 11px;
+      color: #6d756f;
+    }
+
+    .mpd-blood-sugar-progress-change {
+      grid-column: 1 / -1;
+      font-size: 11px;
+      color: #6d756f;
+    }
+
+    .mpd-blood-sugar-progress-empty {
+      padding: 18px 12px;
       text-align: center;
-      padding: 20px;
       color: #707a73;
       font-size: 13px;
       line-height: 1.5;
-    }
-    @media (max-width: 480px) {
-      #mpd-blood-sugar-chart-card {
-        padding: 16px;
-        border-radius: 16px;
-      }
-      #mpd-blood-sugar-chart-card #mpd-blood-sugar-chart {
-        height: 175px;
-      }
-      #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn {
-        padding: 6px 10px;
-      }
+      border: 1px dashed #dfe5df;
+      border-radius: 14px;
+      background: #fafcf9;
     }
   `;
   document.head.appendChild(style);
@@ -988,14 +1016,14 @@ function ensureBloodSugarChartUI() {
   card.innerHTML = `
     <div class="mpd-chart-title">Progress Gula Darah</div>
     <div class="mpd-chart-subtitle">
-      Perkembangan hasil pengukuran berdasarkan catatanmu
+      Pengukuran terbaru dalam periode yang kamu pilih
     </div>
 
     <div
       id="mpd-blood-sugar-chart-period-controls"
       class="mpd-blood-sugar-periods"
       role="tablist"
-      aria-label="Periode grafik gula darah"
+      aria-label="Periode progress gula darah"
     >
       <button type="button" data-period="7" class="mpd-blood-sugar-period-btn active">Minggu</button>
       <button type="button" data-period="30" class="mpd-blood-sugar-period-btn">1 Bulan</button>
@@ -1003,31 +1031,7 @@ function ensureBloodSugarChartUI() {
       <button type="button" data-period="180" class="mpd-blood-sugar-period-btn">6 Bulan</button>
     </div>
 
-    <div class="mpd-chart-wrap">
-      <div id="mpd-blood-sugar-chart-empty" class="mpd-chart-empty">
-        Belum ada cukup data pada periode ini untuk menampilkan grafik.
-      </div>
-
-      <svg
-        id="mpd-blood-sugar-chart"
-        viewBox="0 0 700 220"
-        preserveAspectRatio="none"
-        style="display:none;"
-        aria-label="Grafik perkembangan gula darah"
-        role="img"
-      >
-        <g id="mpd-blood-sugar-grid"></g>
-        <polyline
-          id="mpd-blood-sugar-chart-line"
-          fill="none"
-          stroke="#679343"
-          stroke-width="4"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        ></polyline>
-        <g id="mpd-blood-sugar-chart-dots"></g>
-      </svg>
-    </div>
+    <div id="mpd-blood-sugar-progress-list"></div>
   `;
 
   historySection.parentNode.insertBefore(card, historySection);
@@ -1059,131 +1063,85 @@ function setupBloodSugarChartPeriods() {
 
 
 function renderBloodSugarChart() {
-  const chart = document.querySelector('#mpd-blood-sugar-chart');
-  const empty = document.querySelector('#mpd-blood-sugar-chart-empty');
-  const line = document.querySelector('#mpd-blood-sugar-chart-line');
-  const dots = document.querySelector('#mpd-blood-sugar-chart-dots');
-  const grid = document.querySelector('#mpd-blood-sugar-grid');
+  const container =
+    document.querySelector('#mpd-blood-sugar-progress-list');
 
-  if (!chart || !empty) return;
+  if (!container) return;
 
   const today = new Date();
   today.setHours(23, 59, 59, 999);
 
   const cutoff = new Date();
   cutoff.setHours(0, 0, 0, 0);
-  cutoff.setDate(cutoff.getDate() - (selectedBloodSugarChartDays - 1));
+  cutoff.setDate(
+    cutoff.getDate() - (selectedBloodSugarChartDays - 1)
+  );
 
-  const chartData =
+  const progressData =
     (bloodSugarRecords || [])
       .filter((item) => {
         const date = getRecordDate(item.recorded_at);
         return date && date >= cutoff && date <= today;
       })
       .sort((a, b) =>
-        getRecordDate(a.recorded_at) - getRecordDate(b.recorded_at)
+        getRecordDate(b.recorded_at) - getRecordDate(a.recorded_at)
       );
 
-  if (chartData.length < 2) {
-    chart.style.display = 'none';
-    empty.style.display = 'flex';
-    empty.textContent =
-      'Belum ada cukup data pada periode ini untuk menampilkan grafik. Catat minimal 2 pengukuran.';
+  if (!progressData.length) {
+    container.innerHTML = `
+      <div class="mpd-blood-sugar-progress-empty">
+        Belum ada pengukuran pada periode ini.
+      </div>
+    `;
     return;
   }
 
-  chart.style.display = 'block';
-  empty.style.display = 'none';
+  container.innerHTML = progressData
+    .map((record, index) => {
+      const value = Number(record.blood_sugar);
+      const previous = progressData[index + 1];
+      const previousValue = previous
+        ? Number(previous.blood_sugar)
+        : null;
 
-  const width = 700;
-  const height = 220;
-  const paddingX = 28;
-  const paddingY = 25;
+      let changeHtml = '';
 
-  const values = chartData.map((item) => Number(item.blood_sugar));
-  const minValue = Math.min(...values);
-  const maxValue = Math.max(...values);
-  const range = maxValue - minValue || Math.max(10, minValue * 0.08 || 10);
-  const chartMin = Math.max(0, minValue - range * 0.15);
-  const chartMax = maxValue + range * 0.15;
-  const chartRange = chartMax - chartMin || 1;
+      if (Number.isFinite(value) && Number.isFinite(previousValue)) {
+        const difference = value - previousValue;
+        const sign = difference > 0 ? '+' : '';
+        changeHtml = `
+          <div class="mpd-blood-sugar-progress-change">
+            ${sign}${formatNumber(difference)} mg/dL dari pengukuran sebelumnya
+          </div>
+        `;
+      }
 
-  const points = chartData.map((item, index) => {
-    const x =
-      paddingX +
-      (index / Math.max(chartData.length - 1, 1)) *
-        (width - paddingX * 2);
+      return `
+        <div class="mpd-blood-sugar-progress-item">
+          <div class="mpd-blood-sugar-progress-date">
+            ${escapeHtml(formatDate(record.recorded_at))}
+          </div>
 
-    const y =
-      height -
-      paddingY -
-      ((Number(item.blood_sugar) - chartMin) / chartRange) *
-        (height - paddingY * 2);
+          <div class="mpd-blood-sugar-progress-value">
+            ${escapeHtml(String(record.blood_sugar ?? '-'))}
+            <span>mg/dL</span>
+          </div>
 
-    return {
-      x,
-      y,
-      value: Number(item.blood_sugar),
-      date: item.recorded_at
-    };
-  });
+          ${
+            record.measurement_type
+              ? `
+                <div class="mpd-blood-sugar-progress-type">
+                  ${escapeHtml(record.measurement_type)}
+                </div>
+              `
+              : ''
+          }
 
-  if (line) {
-    line.setAttribute(
-      'points',
-      points.map((point) => `${point.x},${point.y}`).join(' ')
-    );
-  }
-
-  if (dots) {
-    dots.innerHTML = '';
-
-    points.forEach((point) => {
-      const circle = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'circle'
-      );
-
-      circle.setAttribute('cx', point.x);
-      circle.setAttribute('cy', point.y);
-      circle.setAttribute('r', '5');
-      circle.setAttribute('fill', '#679343');
-
-      const title = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'title'
-      );
-      title.textContent =
-        `${formatDate(point.date)} — ${formatNumber(point.value)} mg/dL`;
-      circle.appendChild(title);
-
-      dots.appendChild(circle);
-    });
-  }
-
-  if (grid) {
-    grid.innerHTML = '';
-
-    for (let i = 0; i <= 4; i++) {
-      const y =
-        paddingY +
-        (i / 4) * (height - paddingY * 2);
-
-      const gridLine = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'line'
-      );
-
-      gridLine.setAttribute('x1', paddingX);
-      gridLine.setAttribute('x2', width - paddingX);
-      gridLine.setAttribute('y1', y);
-      gridLine.setAttribute('y2', y);
-      gridLine.setAttribute('stroke', '#e7e4dc');
-      gridLine.setAttribute('stroke-width', '1');
-
-      grid.appendChild(gridLine);
-    }
-  }
+          ${changeHtml}
+        </div>
+      `;
+    })
+    .join('');
 }
 
 
