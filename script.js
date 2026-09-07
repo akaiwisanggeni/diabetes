@@ -14,6 +14,23 @@ const SUPABASE_PUBLISHABLE_KEY =
 
 let supabaseClient = null;
 
+/* =========================================================
+   1A. FIREBASE CONFIG
+   ========================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKkF_sbyDWnf_bl3xKdgarJEsR0-BtSo",
+  authDomain: "aman-diabetes.firebaseapp.com",
+  projectId: "aman-diabetes",
+  storageBucket: "aman-diabetes.firebasestorage.app",
+  messagingSenderId: "739137930683",
+  appId: "1:739137930683:web:8b83beb766e60d3c48309e"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const firebaseAuth = firebase.auth();
+const firebaseDb = firebase.firestore();
 
 /* =========================================================
    2. APP STATE
