@@ -23,6 +23,7 @@ let currentUser = null;
 let pdfLibrary = [];
 let bloodSugarRecords = [];
 let weightRecords = [];
+let selectedWeightChartDays = 7;
 
 
 /* =========================================================
@@ -42,7 +43,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupPdfViewer();
 
   setupBloodSugarTracker();
+  ensureWeightChartUI();
   setupWeightTracker();
+  setupWeightChartPeriods();
   setupCarbCalculator();
 
   /* =======================================================
@@ -1009,6 +1012,301 @@ function csvEscape(value) {
    14. WEIGHT TRACKER
    ========================================================= */
 
+/* =========================================================
+   14A. WEIGHT CHART UI
+   ========================================================= */
+
+function ensureWeightChartUI() {
+  const weightPage = document.querySelector('#weight');
+  if (!weightPage) return;
+
+  // Do not duplicate the chart if the script/UI is initialized again.
+  if (document.querySelector('#mpd-weight-chart-card')) return;
+
+  const historySection =
+    weightPage.querySelector('.tracker-history') ||
+    weightPage.querySelector('#weight-list')?.parentElement;
+
+  if (!historySection) return;
+
+  const style = document.createElement('style');
+  style.id = 'mpd-weight-chart-style';
+  style.textContent = `
+    #mpd-weight-chart-card {
+      margin: 18px 0;
+      padding: 18px;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 6px 20px rgba(0,0,0,.05);
+    }
+    #mpd-weight-chart-card .mpd-chart-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1f5f4a;
+      margin-bottom: 4px;
+    }
+    #mpd-weight-chart-card .mpd-chart-subtitle {
+      font-size: 13px;
+      line-height: 1.45;
+      color: #6d756f;
+      margin-bottom: 12px;
+    }
+    #mpd-weight-chart-card .mpd-weight-chart-periods {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    #mpd-weight-chart-card .mpd-weight-period-btn {
+      border: 1px solid #d7ded8;
+      background: #f7f9f7;
+      color: #506057;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #mpd-weight-chart-card .mpd-weight-period-btn.active {
+      background: #679343;
+      border-color: #679343;
+      color: #ffffff;
+    }
+    #mpd-weight-chart-card .mpd-chart-wrap {
+      width: 100%;
+      overflow: hidden;
+    }
+    #mpd-weight-chart-card #mpd-weight-chart {
+      display: block;
+      width: 100%;
+      height: 220px;
+    }
+    #mpd-weight-chart-card .mpd-chart-empty {
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      color: #707a73;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media (max-width: 480px) {
+      #mpd-weight-chart-card {
+        padding: 16px;
+        border-radius: 16px;
+      }
+      #mpd-weight-chart-card #mpd-weight-chart {
+        height: 190px;
+      }
+      #mpd-weight-chart-card .mpd-weight-period-btn {
+        padding: 6px 10px;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const card = document.createElement('section');
+  card.id = 'mpd-weight-chart-card';
+  card.innerHTML = `
+    <div class="mpd-chart-title">Progress 6 Bulan</div>
+    <div class="mpd-chart-subtitle">
+      Perkembangan berat badan berdasarkan catatanmu
+    </div>
+
+    <div
+      id="mpd-weight-chart-period-controls"
+      class="mpd-weight-chart-periods"
+      role="tablist"
+      aria-label="Periode grafik berat badan"
+    >
+      <button type="button" data-period="7" class="mpd-weight-period-btn active">Minggu</button>
+      <button type="button" data-period="30" class="mpd-weight-period-btn">1 Bulan</button>
+      <button type="button" data-period="90" class="mpd-weight-period-btn">3 Bulan</button>
+      <button type="button" data-period="180" class="mpd-weight-period-btn">6 Bulan</button>
+    </div>
+
+    <div class="mpd-chart-wrap">
+      <div id="mpd-weight-chart-empty" class="mpd-chart-empty">
+        Belum ada cukup data untuk menampilkan grafik.
+      </div>
+
+      <svg
+        id="mpd-weight-chart"
+        viewBox="0 0 700 240"
+        preserveAspectRatio="none"
+        style="display:none;"
+        aria-label="Grafik perkembangan berat badan"
+        role="img"
+      >
+        <g id="mpd-weight-grid"></g>
+        <polyline
+          id="mpd-weight-chart-line"
+          fill="none"
+          stroke="#679343"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></polyline>
+        <g id="mpd-weight-chart-dots"></g>
+      </svg>
+    </div>
+  `;
+
+  historySection.parentNode.insertBefore(card, historySection);
+}
+
+
+function setupWeightChartPeriods() {
+  const controls =
+    document.querySelector('#mpd-weight-chart-period-controls');
+
+  if (!controls) return;
+
+  const buttons =
+    controls.querySelectorAll('.mpd-weight-period-btn');
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      selectedWeightChartDays =
+        Number(button.dataset.period) || 7;
+
+      buttons.forEach((item) => {
+        item.classList.toggle('active', item === button);
+      });
+
+      renderWeightChart();
+    });
+  });
+}
+
+
+function renderWeightChart() {
+  const chart = document.querySelector('#mpd-weight-chart');
+  const empty = document.querySelector('#mpd-weight-chart-empty');
+  const line = document.querySelector('#mpd-weight-chart-line');
+  const dots = document.querySelector('#mpd-weight-chart-dots');
+  const grid = document.querySelector('#mpd-weight-grid');
+
+  if (!chart || !empty) return;
+
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - (selectedWeightChartDays - 1));
+
+  const chartData =
+    (weightRecords || [])
+      .filter((item) => {
+        const date = new Date(item.recorded_at);
+        return !Number.isNaN(date.getTime()) && date >= cutoff && date <= today;
+      })
+      .sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+
+  if (chartData.length < 2) {
+    chart.style.display = 'none';
+    empty.style.display = 'flex';
+    empty.textContent =
+      'Belum ada cukup data pada periode ini untuk menampilkan grafik.';
+    return;
+  }
+
+  chart.style.display = 'block';
+  empty.style.display = 'none';
+
+  const width = 700;
+  const height = 240;
+  const paddingX = 25;
+  const paddingY = 25;
+
+  const values = chartData.map((item) => Number(item.weight));
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const range = maxValue - minValue || 1;
+
+  const points = chartData.map((item, index) => {
+    const x =
+      paddingX +
+      (index / Math.max(chartData.length - 1, 1)) *
+        (width - paddingX * 2);
+
+    const y =
+      height -
+      paddingY -
+      ((Number(item.weight) - minValue) / range) *
+        (height - paddingY * 2);
+
+    return {
+      x,
+      y,
+      value: Number(item.weight),
+      date: item.recorded_at
+    };
+  });
+
+  if (line) {
+    line.setAttribute(
+      'points',
+      points.map((point) => `${point.x},${point.y}`).join(' ')
+    );
+  }
+
+  if (dots) {
+    dots.innerHTML = '';
+
+    points.forEach((point) => {
+      const circle = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'circle'
+      );
+
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', '5');
+      circle.setAttribute('fill', '#679343');
+
+      const title = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'title'
+      );
+      title.textContent =
+        `${formatDate(point.date)} — ${formatNumber(point.value)} kg`;
+      circle.appendChild(title);
+
+      dots.appendChild(circle);
+    });
+  }
+
+  if (grid) {
+    grid.innerHTML = '';
+    const gridCount = 4;
+
+    for (let i = 0; i <= gridCount; i++) {
+      const y =
+        paddingY +
+        (i / gridCount) * (height - paddingY * 2);
+
+      const gridLine = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'line'
+      );
+
+      gridLine.setAttribute('x1', paddingX);
+      gridLine.setAttribute('x2', width - paddingX);
+      gridLine.setAttribute('y1', y);
+      gridLine.setAttribute('y2', y);
+      gridLine.setAttribute('stroke', '#e7e4dc');
+      gridLine.setAttribute('stroke-width', '1');
+
+      grid.appendChild(gridLine);
+    }
+  }
+}
+
+
 function setupWeightTracker() {
   const form =
     document.querySelector("#weight-form") ||
@@ -1131,6 +1429,8 @@ async function loadWeightRecords() {
     renderWeightRecords(
       weightRecords
     );
+
+    renderWeightChart();
 
   } catch (error) {
     console.error(error);
