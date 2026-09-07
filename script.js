@@ -8,7 +8,7 @@
    ========================================================= */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBKkF_sbyDWnf_bl3xKdgarJEsR0-BtSo",
+  apiKey: "AIzaSyBKkfC_sbyDWnf_bl3xKdgarJEsR0-BtSo",
   authDomain: "aman-diabetes.firebaseapp.com",
   projectId: "aman-diabetes",
   storageBucket: "aman-diabetes.firebasestorage.app",
