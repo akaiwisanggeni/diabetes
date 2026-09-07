@@ -30,6 +30,7 @@ let pdfLibrary = [];
 let bloodSugarRecords = [];
 let weightRecords = [];
 let selectedWeightChartDays = 7;
+let selectedBloodSugarChartDays = 7;
 
 
 /* =========================================================
@@ -64,6 +65,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupMagicLinkForm();
   setupPdfViewer();
 
+  ensureBloodSugarChartUI();
+  setupBloodSugarChartPeriods();
   setupBloodSugarTracker();
   ensureWeightChartUI();
   setupWeightTracker();
@@ -840,10 +843,11 @@ async function loadBloodSugarRecords() {
   );
 
   try {
+    // Ambil berdasarkan user saja, lalu urutkan di browser.
+    // Ini menghindari kebutuhan composite index Firestore.
     const snapshot = await firebaseDb
       .collection("blood_sugar_tracker")
       .where("user_id", "==", currentUser.uid)
-      .orderBy("recorded_at", "desc")
       .get();
 
     bloodSugarRecords =
@@ -853,14 +857,19 @@ async function loadBloodSugarRecords() {
           ...doc.data()
         }))
         .filter((record) => {
-          const date = new Date(record.recorded_at);
+          const date = getRecordDate(record.recorded_at);
 
           return (
-            !Number.isNaN(date.getTime()) &&
+            date &&
             date >= sixMonthsAgo
           );
-        });
+        })
+        .sort((a, b) =>
+          getRecordDate(b.recorded_at) -
+          getRecordDate(a.recorded_at)
+        );
 
+    renderBloodSugarChart();
     renderBloodSugarRecords(
       bloodSugarRecords
     );
@@ -876,6 +885,304 @@ async function loadBloodSugarRecords() {
     renderBloodSugarRecords(
       bloodSugarRecords
     );
+  }
+}
+
+
+/* =========================================================
+   12A. BLOOD SUGAR CHART UI
+   ========================================================= */
+
+function ensureBloodSugarChartUI() {
+  const page = document.querySelector('#blood-sugar');
+  if (!page) return;
+
+  if (document.querySelector('#mpd-blood-sugar-chart-card')) return;
+
+  const historySection =
+    page.querySelector('.tracker-history') ||
+    page.querySelector('#blood-sugar-list')?.parentElement;
+
+  if (!historySection) return;
+
+  const style = document.createElement('style');
+  style.id = 'mpd-blood-sugar-chart-style';
+  style.textContent = `
+    #mpd-blood-sugar-chart-card {
+      margin: 18px 0;
+      padding: 18px;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 6px 20px rgba(0,0,0,.05);
+    }
+    #mpd-blood-sugar-chart-card .mpd-chart-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1f5f4a;
+      margin-bottom: 4px;
+    }
+    #mpd-blood-sugar-chart-card .mpd-chart-subtitle {
+      font-size: 13px;
+      line-height: 1.45;
+      color: #6d756f;
+      margin-bottom: 12px;
+    }
+    #mpd-blood-sugar-chart-card .mpd-blood-sugar-periods {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn {
+      border: 1px solid #d7ded8;
+      background: #f7f9f7;
+      color: #506057;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn.active {
+      background: #679343;
+      border-color: #679343;
+      color: #ffffff;
+    }
+    #mpd-blood-sugar-chart-card .mpd-chart-wrap {
+      width: 100%;
+      overflow: hidden;
+    }
+    #mpd-blood-sugar-chart-card #mpd-blood-sugar-chart {
+      display: block;
+      width: 100%;
+      height: 190px;
+    }
+    #mpd-blood-sugar-chart-card .mpd-chart-empty {
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      color: #707a73;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media (max-width: 480px) {
+      #mpd-blood-sugar-chart-card {
+        padding: 16px;
+        border-radius: 16px;
+      }
+      #mpd-blood-sugar-chart-card #mpd-blood-sugar-chart {
+        height: 175px;
+      }
+      #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn {
+        padding: 6px 10px;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const card = document.createElement('section');
+  card.id = 'mpd-blood-sugar-chart-card';
+  card.innerHTML = `
+    <div class="mpd-chart-title">Progress Gula Darah</div>
+    <div class="mpd-chart-subtitle">
+      Perkembangan hasil pengukuran berdasarkan catatanmu
+    </div>
+
+    <div
+      id="mpd-blood-sugar-chart-period-controls"
+      class="mpd-blood-sugar-periods"
+      role="tablist"
+      aria-label="Periode grafik gula darah"
+    >
+      <button type="button" data-period="7" class="mpd-blood-sugar-period-btn active">Minggu</button>
+      <button type="button" data-period="30" class="mpd-blood-sugar-period-btn">1 Bulan</button>
+      <button type="button" data-period="90" class="mpd-blood-sugar-period-btn">3 Bulan</button>
+      <button type="button" data-period="180" class="mpd-blood-sugar-period-btn">6 Bulan</button>
+    </div>
+
+    <div class="mpd-chart-wrap">
+      <div id="mpd-blood-sugar-chart-empty" class="mpd-chart-empty">
+        Belum ada cukup data pada periode ini untuk menampilkan grafik.
+      </div>
+
+      <svg
+        id="mpd-blood-sugar-chart"
+        viewBox="0 0 700 220"
+        preserveAspectRatio="none"
+        style="display:none;"
+        aria-label="Grafik perkembangan gula darah"
+        role="img"
+      >
+        <g id="mpd-blood-sugar-grid"></g>
+        <polyline
+          id="mpd-blood-sugar-chart-line"
+          fill="none"
+          stroke="#679343"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></polyline>
+        <g id="mpd-blood-sugar-chart-dots"></g>
+      </svg>
+    </div>
+  `;
+
+  historySection.parentNode.insertBefore(card, historySection);
+}
+
+
+function setupBloodSugarChartPeriods() {
+  const controls =
+    document.querySelector('#mpd-blood-sugar-chart-period-controls');
+
+  if (!controls) return;
+
+  const buttons =
+    controls.querySelectorAll('.mpd-blood-sugar-period-btn');
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      selectedBloodSugarChartDays =
+        Number(button.dataset.period) || 7;
+
+      buttons.forEach((item) => {
+        item.classList.toggle('active', item === button);
+      });
+
+      renderBloodSugarChart();
+    });
+  });
+}
+
+
+function renderBloodSugarChart() {
+  const chart = document.querySelector('#mpd-blood-sugar-chart');
+  const empty = document.querySelector('#mpd-blood-sugar-chart-empty');
+  const line = document.querySelector('#mpd-blood-sugar-chart-line');
+  const dots = document.querySelector('#mpd-blood-sugar-chart-dots');
+  const grid = document.querySelector('#mpd-blood-sugar-grid');
+
+  if (!chart || !empty) return;
+
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+
+  const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() - (selectedBloodSugarChartDays - 1));
+
+  const chartData =
+    (bloodSugarRecords || [])
+      .filter((item) => {
+        const date = getRecordDate(item.recorded_at);
+        return date && date >= cutoff && date <= today;
+      })
+      .sort((a, b) =>
+        getRecordDate(a.recorded_at) - getRecordDate(b.recorded_at)
+      );
+
+  if (chartData.length < 2) {
+    chart.style.display = 'none';
+    empty.style.display = 'flex';
+    empty.textContent =
+      'Belum ada cukup data pada periode ini untuk menampilkan grafik. Catat minimal 2 pengukuran.';
+    return;
+  }
+
+  chart.style.display = 'block';
+  empty.style.display = 'none';
+
+  const width = 700;
+  const height = 220;
+  const paddingX = 28;
+  const paddingY = 25;
+
+  const values = chartData.map((item) => Number(item.blood_sugar));
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const range = maxValue - minValue || Math.max(10, minValue * 0.08 || 10);
+  const chartMin = Math.max(0, minValue - range * 0.15);
+  const chartMax = maxValue + range * 0.15;
+  const chartRange = chartMax - chartMin || 1;
+
+  const points = chartData.map((item, index) => {
+    const x =
+      paddingX +
+      (index / Math.max(chartData.length - 1, 1)) *
+        (width - paddingX * 2);
+
+    const y =
+      height -
+      paddingY -
+      ((Number(item.blood_sugar) - chartMin) / chartRange) *
+        (height - paddingY * 2);
+
+    return {
+      x,
+      y,
+      value: Number(item.blood_sugar),
+      date: item.recorded_at
+    };
+  });
+
+  if (line) {
+    line.setAttribute(
+      'points',
+      points.map((point) => `${point.x},${point.y}`).join(' ')
+    );
+  }
+
+  if (dots) {
+    dots.innerHTML = '';
+
+    points.forEach((point) => {
+      const circle = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'circle'
+      );
+
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', '5');
+      circle.setAttribute('fill', '#679343');
+
+      const title = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'title'
+      );
+      title.textContent =
+        `${formatDate(point.date)} — ${formatNumber(point.value)} mg/dL`;
+      circle.appendChild(title);
+
+      dots.appendChild(circle);
+    });
+  }
+
+  if (grid) {
+    grid.innerHTML = '';
+
+    for (let i = 0; i <= 4; i++) {
+      const y =
+        paddingY +
+        (i / 4) * (height - paddingY * 2);
+
+      const gridLine = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'line'
+      );
+
+      gridLine.setAttribute('x1', paddingX);
+      gridLine.setAttribute('x2', width - paddingX);
+      gridLine.setAttribute('y1', y);
+      gridLine.setAttribute('y2', y);
+      gridLine.setAttribute('stroke', '#e7e4dc');
+      gridLine.setAttribute('stroke-width', '1');
+
+      grid.appendChild(gridLine);
+    }
   }
 }
 
@@ -1864,13 +2171,30 @@ function dateOnlyToTimestamp(dateValue) {
 }
 
 
+function getRecordDate(value) {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (value && typeof value.toDate === "function") {
+    const date = value.toDate();
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+
 function formatDate(dateString) {
   if (!dateString) return "-";
 
   const date =
-    new Date(dateString);
+    getRecordDate(dateString);
 
-  if (Number.isNaN(date.getTime())) {
+  if (!date) {
     return "-";
   }
 
