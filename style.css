@@ -1,7 +1,7 @@
-/* =========================================
-   MPD — MOBILE UI
-   Based on MPH visual structure
-   ========================================= */
+/* =========================================================
+   MPD — MEAL PLAN DIABETES
+   Complete Mobile UI
+   ========================================================= */
 
 * {
   box-sizing: border-box;
@@ -10,82 +10,251 @@
 }
 
 html {
-  background: #eefbdd;
+  background: #dfead6;
   scroll-behavior: smooth;
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background: #eefbdd;
+  background: #dfead6;
   color: #173f2c;
   min-height: 100vh;
 }
 
-/* -----------------------------------------
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-screen {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 18px;
+
+  background: #eefbdd;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+
+  background: #ffffff;
+  border-radius: 28px;
+
+  padding: 32px 25px;
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+}
+
+.login-card h1 {
+  color: #173f2c;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 800;
+
+  margin-bottom: 10px;
+}
+
+.login-card > p {
+  color: #6e746d;
+  font-size: 15px;
+  line-height: 1.5;
+
+  margin-bottom: 25px;
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-card label {
+  color: #315f47;
+  font-size: 13px;
+  font-weight: 700;
+
+  margin-bottom: 7px;
+}
+
+.login-card input {
+  width: 100%;
+
+  border: 1px solid #d8ded3;
+  border-radius: 13px;
+
+  background: #fafcf8;
+  color: #173f2c;
+
+  padding: 13px 14px;
+
+  font-size: 15px;
+
+  outline: none;
+
+  margin-bottom: 14px;
+}
+
+.login-card input:focus {
+  border-color: #17603f;
+  background: #ffffff;
+}
+
+.primary-btn {
+  width: 100%;
+
+  border: 0;
+  border-radius: 14px;
+
+  padding: 13px 16px;
+
+  background: #17603f;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #124d33;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
+.login-message {
+  min-height: 20px;
+
+  color: #315f47 !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+
+  margin-top: 14px !important;
+  margin-bottom: 0 !important;
+}
+
+/* =========================================================
    APP CONTAINER
-   ----------------------------------------- */
+   ========================================================= */
+
+.app-screen {
+  width: 100%;
+  min-height: 100vh;
+}
 
 .app {
   width: 100%;
   max-width: 480px;
   min-height: 100vh;
+
   margin: 0 auto;
+
   padding: 22px 15px 105px;
+
+  background: #eefbdd;
 }
 
-/* -----------------------------------------
-   HEADER
-   ----------------------------------------- */
+/* =========================================================
+   GENERAL PAGE
+   ========================================================= */
+
+.page {
+  width: 100%;
+}
+
+.tracker-page {
+  padding-bottom: 20px;
+}
+
+/* =========================================================
+   HOME HEADER
+   ========================================================= */
 
 .top-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+
   gap: 12px;
+
   margin-bottom: 22px;
 }
 
 .top-header h1 {
+  color: #111111;
+
   font-size: 32px;
   line-height: 1.1;
   font-weight: 800;
-  color: #111111;
+
   margin-bottom: 10px;
 }
 
 .top-header p {
+  color: #6e746d;
+
   font-size: 17px;
   line-height: 1.45;
-  color: #6e746d;
 }
 
 .logout-btn {
   flex-shrink: 0;
+
   border: 1px solid #dddddd;
+  border-radius: 12px;
+
   background: #ffffff;
   color: #444444;
-  border-radius: 12px;
+
   padding: 9px 15px;
+
   font-size: 13px;
   font-weight: 600;
+
   cursor: pointer;
 }
 
-/* -----------------------------------------
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
    STREAK
-   ----------------------------------------- */
+   ========================================================= */
 
 .streak-card {
-  background: #ffffff;
-  border-radius: 30px;
-  min-height: 62px;
-  padding: 12px 18px;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
 
+  min-height: 62px;
+
+  padding: 12px 18px;
+
   margin-bottom: 20px;
+
+  background: #ffffff;
+  border-radius: 30px;
 
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
 }
@@ -93,6 +262,7 @@ body {
 .streak-left {
   display: flex;
   align-items: center;
+
   gap: 9px;
 }
 
@@ -103,24 +273,28 @@ body {
 
 .streak-left strong {
   color: #202020;
+
   font-size: 18px;
 }
 
 .streak-message {
   color: #315f47;
+
   font-size: 14px;
   font-weight: 700;
 }
 
-/* -----------------------------------------
+/* =========================================================
    GENERAL SECTION
-   ----------------------------------------- */
+   ========================================================= */
 
 .content-section,
 .tracker-section {
   background: #ffffff;
   border-radius: 24px;
+
   padding: 20px 17px;
+
   margin-bottom: 18px;
 
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
@@ -129,70 +303,12 @@ body {
 .content-section h2,
 .tracker-section h2 {
   color: #215b42;
+
   font-size: 18px;
   font-weight: 800;
+
   margin-bottom: 17px;
 }
-
-/* -----------------------------------------
-   PDF LIBRARY
-   2 COLUMNS
-   ----------------------------------------- */
-
-.pdf-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px 11px;
-}
-
-.pdf-card {
-  min-width: 0;
-  cursor: pointer;
-  text-align: left;
-  border: none;
-  background: transparent;
-}
-
-.pdf-cover {
-  width: 100%;
-  aspect-ratio: 21 / 26;
-  border-radius: 13px;
-  overflow: hidden;
-  background: #edf3e9;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 8px;
-}
-
-.pdf-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.pdf-cover.placeholder {
-  background: #dfead6;
-  color: #215b42;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.pdf-card p {
-  color: #292929;
-  font-size: 13px;
-  line-height: 1.3;
-  font-weight: 700;
-
-  padding: 0 2px;
-}
-
-/* -----------------------------------------
-   TRACKER SECTION
-   ----------------------------------------- */
 
 .tracker-section {
   padding-bottom: 17px;
@@ -202,15 +318,95 @@ body {
   margin-bottom: 12px;
 }
 
+/* =========================================================
+   PDF LIBRARY
+   ========================================================= */
+
+.pdf-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 15px 11px;
+}
+
+.pdf-card {
+  width: 100%;
+  min-width: 0;
+
+  display: block;
+
+  border: 0;
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.pdf-cover-wrapper {
+  width: 100%;
+
+  aspect-ratio: 21 / 26;
+
+  overflow: hidden;
+
+  border-radius: 13px;
+
+  background: #dfead6;
+
+  margin-bottom: 8px;
+
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.05);
+}
+
+.pdf-cover {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+.pdf-title {
+  color: #292929;
+
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 700;
+
+  padding: 0 2px;
+}
+
+.pdf-message {
+  grid-column: 1 / -1;
+
+  padding: 25px 10px;
+
+  color: #6d746d;
+
+  text-align: center;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   TRACKER CARDS
+   ========================================================= */
+
 .tracker-card {
   width: 100%;
   min-height: 91px;
 
   display: flex;
   align-items: center;
+
   gap: 13px;
 
-  padding: 13px 13px;
+  padding: 13px;
+
+  margin-bottom: 10px;
 
   border: 0;
   border-radius: 19px;
@@ -219,25 +415,29 @@ body {
   color: #173f2c;
 
   text-align: left;
-  cursor: pointer;
 
-  margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .tracker-card:last-child {
   margin-bottom: 0;
 }
 
+.tracker-card:active {
+  transform: scale(0.985);
+}
+
 .tracker-icon {
   width: 55px;
   height: 55px;
-  flex: 0 0 55px;
 
-  border-radius: 50%;
+  flex: 0 0 55px;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  border-radius: 50%;
 
   background: #17603f;
   color: #ffffff;
@@ -251,32 +451,456 @@ body {
 }
 
 .tracker-info h3 {
+  color: #1c543b;
+
   font-size: 14px;
   line-height: 1.25;
   font-weight: 800;
-  color: #1c543b;
+
   margin-bottom: 5px;
 }
 
 .tracker-info p {
   color: #6d746d;
+
   font-size: 12px;
   line-height: 1.35;
 }
 
 .tracker-arrow {
   flex: 0 0 auto;
-  font-size: 25px;
+
   color: #6d746d;
+
+  font-size: 25px;
   line-height: 1;
 }
 
-/* -----------------------------------------
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 48px;
+
+  margin-bottom: 20px;
+}
+
+.page-header h1 {
+  color: #173f2c;
+
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 800;
+
+  text-align: center;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 42px;
+  height: 42px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #173f2c;
+
+  font-size: 30px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.back-button:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+/* =========================================================
+   TRACKER FORM
+   ========================================================= */
+
+.tracker-form-card {
+  background: #ffffff;
+  border-radius: 24px;
+
+  padding: 20px 17px;
+
+  margin-bottom: 18px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+}
+
+.tracker-form-card h2,
+.tracker-history h2 {
+  color: #215b42;
+
+  font-size: 18px;
+  font-weight: 800;
+
+  margin-bottom: 17px;
+}
+
+.tracker-form-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.tracker-form-card label {
+  color: #315f47;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  margin-bottom: 7px;
+}
+
+.tracker-form-card input,
+.tracker-form-card select,
+.tracker-form-card textarea {
+  width: 100%;
+
+  border: 1px solid #d8ded3;
+  border-radius: 12px;
+
+  background: #fafcf8;
+  color: #173f2c;
+
+  padding: 12px 13px;
+
+  font-size: 14px;
+
+  outline: none;
+
+  margin-bottom: 15px;
+}
+
+.tracker-form-card input:focus,
+.tracker-form-card select:focus,
+.tracker-form-card textarea:focus {
+  border-color: #17603f;
+  background: #ffffff;
+}
+
+.tracker-form-card textarea {
+  resize: vertical;
+
+  min-height: 82px;
+}
+
+.input-with-unit {
+  position: relative;
+
+  width: 100%;
+}
+
+.input-with-unit input {
+  padding-right: 68px;
+}
+
+.input-with-unit span {
+  position: absolute;
+
+  right: 13px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: #6d746d;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   TRACKER HISTORY
+   ========================================================= */
+
+.tracker-history {
+  width: 100%;
+}
+
+.tracker-history > h2 {
+  margin-bottom: 12px;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 8px;
+}
+
+.section-title-row h2 {
+  margin-bottom: 0;
+}
+
+.tracker-period {
+  color: #777777;
+
+  font-size: 12px;
+  line-height: 1.4;
+
+  margin-bottom: 12px;
+}
+
+.secondary-btn {
+  flex-shrink: 0;
+
+  border: 1px solid #cfd8c8;
+  border-radius: 11px;
+
+  background: #ffffff;
+  color: #215b42;
+
+  padding: 8px 11px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.secondary-btn:active {
+  transform: scale(0.97);
+}
+
+.empty-state {
+  padding: 24px 15px;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  color: #777777;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+/* =========================================================
+   TRACKER ROW
+   ========================================================= */
+
+.tracker-row {
+  width: 100%;
+
+  background: #ffffff;
+
+  border-radius: 17px;
+
+  padding: 14px 15px;
+
+  margin-bottom: 9px;
+
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.035);
+}
+
+.tracker-date {
+  color: #777777;
+
+  font-size: 11px;
+  line-height: 1.3;
+
+  margin-bottom: 5px;
+}
+
+.tracker-value {
+  color: #173f2c;
+
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 800;
+
+  margin-bottom: 5px;
+}
+
+.tracker-value span {
+  color: #777777;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tracker-type {
+  color: #315f47;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  margin-bottom: 3px;
+}
+
+.tracker-notes {
+  color: #6d746d;
+
+  font-size: 12px;
+  line-height: 1.4;
+
+  margin-top: 6px;
+
+  padding-top: 7px;
+
+  border-top: 1px solid #edf0eb;
+}
+
+/* =========================================================
+   CARBOHYDRATE RESULT
+   ========================================================= */
+
+.carb-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 105px;
+
+  margin-top: 5px;
+
+  padding: 18px;
+
+  border-radius: 20px;
+
+  background: #f0f6e9;
+
+  text-align: center;
+}
+
+.carb-result-card span {
+  color: #6d746d;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.carb-result-card strong {
+  color: #17603f;
+
+  font-size: 30px;
+  line-height: 1;
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   PDF VIEWER
+   ========================================================= */
+
+.pdf-viewer {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 300;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #eefbdd;
+}
+
+.pdf-viewer-header {
+  flex: 0 0 auto;
+
+  min-height: 62px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 9px 13px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e1e6de;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pdf-back {
+  flex: 0 0 auto;
+
+  border: 0;
+  background: transparent;
+
+  color: #17603f;
+
+  padding: 9px 5px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.pdf-viewer-title {
+  flex: 1;
+
+  overflow: hidden;
+
+  padding: 0 10px;
+
+  color: #173f2c;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  text-align: center;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pdf-viewer-content {
+  flex: 1;
+
+  min-height: 0;
+
+  width: 100%;
+
+  background: #dfead6;
+}
+
+.pdf-viewer-content iframe {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  border: 0;
+
+  background: #ffffff;
+}
+
+/* =========================================================
    BOTTOM NAVIGATION
-   ----------------------------------------- */
+   ========================================================= */
 
 .bottom-nav {
   position: fixed;
+
   left: 50%;
   bottom: 0;
 
@@ -284,14 +908,15 @@ body {
 
   width: min(100%, 480px);
 
-  background: #ffffff;
+  display: grid;
 
-  border-radius: 27px 27px 0 0;
+  grid-template-columns: repeat(4, 1fr);
 
   padding: 9px 7px 10px;
 
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  background: #ffffff;
+
+  border-radius: 27px 27px 0 0;
 
   box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
 
@@ -299,8 +924,7 @@ body {
 }
 
 .nav-item {
-  border: 0;
-  background: transparent;
+  min-height: 61px;
 
   display: flex;
   flex-direction: column;
@@ -309,25 +933,26 @@ body {
 
   gap: 4px;
 
+  border: 0;
+  background: transparent;
+
   color: #777777;
 
   font-size: 11px;
   font-weight: 600;
 
   cursor: pointer;
-
-  min-height: 61px;
 }
 
 .nav-icon {
   width: 43px;
   height: 43px;
 
-  border-radius: 50%;
-
   display: flex;
   align-items: center;
   justify-content: center;
+
+  border-radius: 50%;
 
   background: #cbd8b9;
   color: #ffffff;
@@ -343,43 +968,48 @@ body {
 
 .nav-item.active .nav-icon {
   background: #17603f;
+
   transform: translateY(-2px);
-}
-
-/* -----------------------------------------
-   TOUCH / BUTTON FEEDBACK
-   ----------------------------------------- */
-
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button:active {
-  transform: scale(0.98);
 }
 
 .nav-item:active {
   transform: none;
 }
 
-/* -----------------------------------------
-   MOBILE ONLY
-   ----------------------------------------- */
+/* =========================================================
+   PDF VIEWER STATE
+   ========================================================= */
+
+body.pdf-viewer-open {
+  overflow: hidden;
+}
+
+/* =========================================================
+   RESPONSIVE — DESKTOP
+   ========================================================= */
 
 @media (min-width: 481px) {
   body {
     background: #dfead6;
   }
 
+  .login-screen {
+    background: #dfead6;
+  }
+
   .app {
-    background: #eefbdd;
     min-height: 100vh;
+
+    background: #eefbdd;
+
+    box-shadow:
+      0 0 30px rgba(0, 0, 0, 0.04);
   }
 }
 
-/* -----------------------------------------
+/* =========================================================
    SMALL PHONES
-   ----------------------------------------- */
+   ========================================================= */
 
 @media (max-width: 360px) {
 
@@ -396,11 +1026,31 @@ button:active {
     font-size: 15px;
   }
 
-  .pdf-grid {
-    gap: 10px 9px;
+  .streak-card {
+    padding-left: 15px;
+    padding-right: 15px;
   }
 
-  .pdf-card p {
+  .streak-left strong {
+    font-size: 16px;
+  }
+
+  .streak-message {
+    font-size: 12px;
+  }
+
+  .content-section,
+  .tracker-section,
+  .tracker-form-card {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .pdf-grid {
+    gap: 11px 9px;
+  }
+
+  .pdf-title {
     font-size: 12px;
   }
 
@@ -412,8 +1062,44 @@ button:active {
     font-size: 11px;
   }
 
+  .tracker-icon {
+    width: 50px;
+    height: 50px;
+
+    flex-basis: 50px;
+
+    font-size: 22px;
+  }
+
   .nav-icon {
     width: 40px;
     height: 40px;
+  }
+
+  .nav-item {
+    font-size: 10px;
+  }
+
+  .section-title-row {
+    align-items: flex-start;
+  }
+
+  .secondary-btn {
+    font-size: 10px;
+    padding: 7px 9px;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY / TOUCH
+   ========================================================= */
+
+@media (hover: hover) {
+  .tracker-card:hover {
+    background: #edf4e5;
+  }
+
+  .pdf-card:hover .pdf-cover-wrapper {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
