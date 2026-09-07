@@ -67,19 +67,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* =======================================================
      PREVIEW MODE
-     Open with ?preview=true to inspect the app UI
-     without connecting to Supabase.
      ======================================================= */
 
   if (IS_PREVIEW) {
     console.log("MPD Preview Mode.");
 
     currentUser = {
-      id: "preview-user",
+      uid: "preview-user",
       email: "preview@aman-diabetes.local",
-      user_metadata: {
-        full_name: "Akai"
-      }
+      displayName: "Akai"
     };
 
     updateUserUI(currentUser);
@@ -95,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (pdfContainer) {
       renderPdfMessage(
         pdfContainer,
-        "Preview Mode — materi PDF akan tampil saat Supabase aktif."
+        "Preview Mode — materi PDF akan tampil saat Firebase aktif."
       );
     }
 
@@ -107,84 +103,46 @@ document.addEventListener("DOMContentLoaded", async () => {
      NORMAL PRODUCTION MODE
      ======================================================= */
 
-  initializeSupabase();
+  initializeAuth();
 
-  if (supabaseClient) {
-    await initializeAuth();
-  }
+completeMagicLinkLogin();
 
-  loadPdfLibrary();
+loadPdfLibrary();
 
-  console.log("MPD App ready.");
+console.log("MPD App ready.");
 });
 
 
 /* =========================================================
-   4. SUPABASE
+   4. FIREBASE AUTHENTICATION
    ========================================================= */
 
-function initializeSupabase() {
-  if (!window.supabase) {
-    console.error("Supabase library tidak ditemukan.");
-    return;
-  }
+function initializeAuth() {
 
-  try {
-    supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
+  firebaseAuth.onAuthStateChanged(
+    async (user) => {
 
-    console.log("Supabase initialized.");
-  } catch (error) {
-    console.error("Supabase initialization error:", error);
-  }
-}
+      currentUser = user;
 
-
-/* =========================================================
-   5. AUTHENTICATION
-   ========================================================= */
-
-async function initializeAuth() {
-  if (!supabaseClient) return;
-
-  try {
-    const {
-      data: { session }
-    } = await supabaseClient.auth.getSession();
-
-    if (session) {
-      currentUser = session.user;
       updateUserUI(currentUser);
-    } else {
-      updateUserUI(null);
-    }
 
-    supabaseClient.auth.onAuthStateChange(
-      async (_event, session) => {
-        currentUser = session ? session.user : null;
-
-        updateUserUI(currentUser);
-
-        if (currentUser) {
-          await loadBloodSugarRecords();
-          await loadWeightRecords();
-        }
+      if (currentUser) {
+        await loadBloodSugarRecords();
+        await loadWeightRecords();
       }
-    );
 
-  } catch (error) {
-    console.error("Auth initialization error:", error);
-  }
+    }
+  );
+
 }
 
 
 /* =========================================================
-   6. MAGIC LINK LOGIN
+   5. MAGIC LINK LOGIN
    ========================================================= */
 
 function setupMagicLinkForm() {
+
   const form =
     document.querySelector("#login-form") ||
     document.querySelector("#magic-link-form") ||
@@ -192,75 +150,150 @@ function setupMagicLinkForm() {
 
   if (!form) return;
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  form.addEventListener(
+    "submit",
+    async (event) => {
 
-    if (!supabaseClient) {
-      setLoginMessage("Supabase belum terhubung.");
-      return;
-    }
+      event.preventDefault();
 
-    const emailInput =
-      form.querySelector("#email") ||
-      form.querySelector('input[type="email"]');
+      const emailInput =
+        form.querySelector("#email") ||
+        form.querySelector('input[type="email"]');
 
-    if (!emailInput) {
-      setLoginMessage("Kolom email tidak ditemukan.");
-      return;
-    }
+      if (!emailInput) {
+        setLoginMessage("Kolom email tidak ditemukan.");
+        return;
+      }
 
-    const email = emailInput.value.trim();
+      const email =
+        emailInput.value.trim();
 
-    if (!email) {
-      setLoginMessage("Masukkan email kamu.");
-      return;
-    }
-
-    setLoginMessage("Mengirim link login...");
-
-    try {
-      const redirectUrl = window.location.origin + window.location.pathname;
-
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email: email,
-        options: {
-          emailRedirectTo: redirectUrl
-        }
-      });
-
-      if (error) {
-        console.error(error);
-        setLoginMessage(error.message);
+      if (!email) {
+        setLoginMessage("Masukkan email kamu.");
         return;
       }
 
       setLoginMessage(
-        "Link login sudah dikirim ke email kamu. Cek inbox."
+        "Mengirim link login..."
       );
 
-      emailInput.value = "";
+      try {
 
-    } catch (error) {
-      console.error(error);
-      setLoginMessage(
-        "Terjadi kesalahan. Coba lagi."
-      );
+        const actionCodeSettings = {
+          url:
+            window.location.origin +
+            window.location.pathname,
+
+          handleCodeInApp: true
+        };
+
+        await firebaseAuth.sendSignInLinkToEmail(
+          email,
+          actionCodeSettings
+        );
+
+        window.localStorage.setItem(
+          "mpdEmailForSignIn",
+          email
+        );
+
+        setLoginMessage(
+          "Link login sudah dikirim ke email kamu. Cek inbox."
+        );
+
+        emailInput.value = "";
+
+      } catch (error) {
+
+        console.error(
+          "Firebase Magic Link error:",
+          error
+        );
+
+        setLoginMessage(
+          error.message ||
+          "Terjadi kesalahan. Coba lagi."
+        );
+
+      }
+
     }
-  });
+  );
+
 }
 
 
-function setLoginMessage(message) {
-  const messageElement =
-    document.querySelector("#login-message") ||
-    document.querySelector("#auth-message") ||
-    document.querySelector('[data-login-message]');
+/* =========================================================
+   6. COMPLETE MAGIC LINK LOGIN
+   ========================================================= */
 
-  if (messageElement) {
-    messageElement.textContent = message;
+async function completeMagicLinkLogin() {
+
+  if (
+    !firebaseAuth.isSignInWithEmailLink(
+      window.location.href
+    )
+  ) {
+    return;
   }
-}
 
+  let email =
+    window.localStorage.getItem(
+      "mpdEmailForSignIn"
+    );
+
+  if (!email) {
+
+    email =
+      window.prompt(
+        "Masukkan kembali email kamu:"
+      );
+
+  }
+
+  if (!email) {
+    setLoginMessage(
+      "Email diperlukan untuk menyelesaikan login."
+    );
+    return;
+  }
+
+  try {
+
+    setLoginMessage(
+      "Menyelesaikan login..."
+    );
+
+    await firebaseAuth.signInWithEmailLink(
+      email,
+      window.location.href
+    );
+
+    window.localStorage.removeItem(
+      "mpdEmailForSignIn"
+    );
+
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Firebase Magic Link completion error:",
+      error
+    );
+
+    setLoginMessage(
+      error.message ||
+      "Link login tidak valid atau sudah kedaluwarsa."
+    );
+
+  }
+
+}
 
 /* =========================================================
    7. USER UI
