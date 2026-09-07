@@ -4,18 +4,7 @@
    ========================================================= */
 
 /* =========================================================
-   1. SUPABASE CONFIG
-   ========================================================= */
-
-const SUPABASE_URL = "https://ayfuhshqghhwdvdkfdqk.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_-XiY7ZuOg6Cpw79I1e0wXQ_49KvqHkK";
-
-let supabaseClient = null;
-
-/* =========================================================
-   1A. FIREBASE CONFIG
+   1. FIREBASE CONFIG
    ========================================================= */
 
 const firebaseConfig = {
@@ -105,11 +94,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   initializeAuth();
 
-completeMagicLinkLogin();
+  completeMagicLinkLogin();
 
-loadPdfLibrary();
-
-console.log("MPD App ready.");
+  console.log("MPD App ready.");
 });
 
 
@@ -127,6 +114,7 @@ function initializeAuth() {
       updateUserUI(currentUser);
 
       if (currentUser) {
+        await loadPdfLibrary();
         await loadBloodSugarRecords();
         await loadWeightRecords();
       }
@@ -392,10 +380,8 @@ function setupLogout() {
 
   logoutButtons.forEach((button) => {
     button.addEventListener("click", async () => {
-      if (!supabaseClient) return;
-
       try {
-        await supabaseClient.auth.signOut();
+        await firebaseAuth.signOut();
 
         currentUser = null;
 
@@ -522,10 +508,10 @@ async function loadPdfLibrary() {
     return;
   }
 
-  if (!supabaseClient) {
+  if (!currentUser) {
     renderPdfMessage(
       container,
-      "Supabase belum terhubung."
+      "Silakan login terlebih dahulu."
     );
     return;
   }
@@ -536,28 +522,15 @@ async function loadPdfLibrary() {
   );
 
   try {
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("pdfs")
-      .select("*")
-      .order("sort_order", {
-        ascending: true
-      });
+    const snapshot = await firebaseDb
+      .collection("pdfs")
+      .orderBy("sort_order", "asc")
+      .get();
 
-    if (error) {
-      console.error("PDF query error:", error);
-
-      renderPdfMessage(
-        container,
-        "Gagal memuat materi."
-      );
-
-      return;
-    }
-
-    pdfLibrary = data || [];
+    pdfLibrary = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
     renderPdfLibrary(
       container,
@@ -565,11 +538,11 @@ async function loadPdfLibrary() {
     );
 
   } catch (error) {
-    console.error(error);
+    console.error("PDF query error:", error);
 
     renderPdfMessage(
       container,
-      "Terjadi kesalahan saat memuat materi."
+      "Gagal memuat materi."
     );
   }
 }
@@ -796,7 +769,7 @@ function setupBloodSugarTracker() {
     }
 
     const payload = {
-      user_id: currentUser.id,
+      user_id: currentUser.uid,
       recorded_at: recordedAt,
       blood_sugar: bloodSugar,
       measurement_type:
@@ -810,19 +783,9 @@ function setupBloodSugarTracker() {
     };
 
     try {
-      const {
-        error
-      } = await supabaseClient
-        .from("blood_sugar_tracker")
-        .insert(payload);
-
-      if (error) {
-        console.error(error);
-        alert(
-          "Gagal menyimpan data gula darah."
-        );
-        return;
-      }
+      await firebaseDb
+        .collection("blood_sugar_tracker")
+        .add(payload);
 
       form.reset();
 
@@ -831,10 +794,10 @@ function setupBloodSugarTracker() {
       alert("Data gula darah berhasil disimpan.");
 
     } catch (error) {
-      console.error(error);
+      console.error("Blood sugar save error:", error);
 
       alert(
-        "Terjadi kesalahan saat menyimpan."
+        "Gagal menyimpan data gula darah."
       );
     }
   });
@@ -856,7 +819,7 @@ function setupBloodSugarTracker() {
 
 
 async function loadBloodSugarRecords() {
-  if (!supabaseClient || !currentUser) return;
+  if (!firebaseDb || !currentUser) return;
 
   const sixMonthsAgo =
     new Date();
@@ -866,38 +829,42 @@ async function loadBloodSugarRecords() {
   );
 
   try {
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("blood_sugar_tracker")
-      .select("*")
-      .eq("user_id", currentUser.id)
-      .gte(
-        "recorded_at",
-        sixMonthsAgo.toISOString()
-      )
-      .order("recorded_at", {
-        ascending: false
-      });
-
-    if (error) {
-      console.error(
-        "Blood sugar load error:",
-        error
-      );
-      return;
-    }
+    const snapshot = await firebaseDb
+      .collection("blood_sugar_tracker")
+      .where("user_id", "==", currentUser.uid)
+      .orderBy("recorded_at", "desc")
+      .get();
 
     bloodSugarRecords =
-      data || [];
+      snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter((record) => {
+          const date = new Date(record.recorded_at);
+
+          return (
+            !Number.isNaN(date.getTime()) &&
+            date >= sixMonthsAgo
+          );
+        });
 
     renderBloodSugarRecords(
       bloodSugarRecords
     );
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Blood sugar load error:",
+      error
+    );
+
+    bloodSugarRecords = [];
+
+    renderBloodSugarRecords(
+      bloodSugarRecords
+    );
   }
 }
 
@@ -1422,7 +1389,7 @@ function setupWeightTracker() {
         : dateOnlyToTimestamp(getTodayDate());
 
     const payload = {
-      user_id: currentUser.id,
+      user_id: currentUser.uid,
       recorded_at: recordedAt,
       weight: weight,
       notes:
@@ -1432,21 +1399,9 @@ function setupWeightTracker() {
     };
 
     try {
-      const {
-        error
-      } = await supabaseClient
-        .from("weight_tracker")
-        .insert(payload);
-
-      if (error) {
-        console.error(error);
-
-        alert(
-          "Gagal menyimpan berat badan."
-        );
-
-        return;
-      }
+      await firebaseDb
+        .collection("weight_tracker")
+        .add(payload);
 
       form.reset();
 
@@ -1457,10 +1412,10 @@ function setupWeightTracker() {
       );
 
     } catch (error) {
-      console.error(error);
+      console.error("Weight save error:", error);
 
       alert(
-        "Terjadi kesalahan saat menyimpan."
+        "Gagal menyimpan berat badan."
       );
     }
   });
@@ -1468,31 +1423,20 @@ function setupWeightTracker() {
 
 
 async function loadWeightRecords() {
-  if (!supabaseClient || !currentUser) return;
+  if (!firebaseDb || !currentUser) return;
 
   try {
-    const {
-      data,
-      error
-    } = await supabaseClient
-      .from("weight_tracker")
-      .select("*")
-      .eq("user_id", currentUser.id)
-      .order("recorded_at", {
-        ascending: true
-      });
-
-    if (error) {
-      console.error(
-        "Weight load error:",
-        error
-      );
-
-      return;
-    }
+    const snapshot = await firebaseDb
+      .collection("weight_tracker")
+      .where("user_id", "==", currentUser.uid)
+      .orderBy("recorded_at", "asc")
+      .get();
 
     weightRecords =
-      data || [];
+      snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
     renderWeightRecords(
       weightRecords
@@ -1501,7 +1445,18 @@ async function loadWeightRecords() {
     renderWeightChart();
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Weight load error:",
+      error
+    );
+
+    weightRecords = [];
+
+    renderWeightRecords(
+      weightRecords
+    );
+
+    renderWeightChart();
   }
 }
 
@@ -1807,27 +1762,31 @@ async function setupCarbCalculator() {
 async function loadCarbFoods() {
   carbFoods = [];
 
-  if (!supabaseClient) {
-    console.warn("Carb foods: Supabase belum aktif.");
+  if (!firebaseDb) {
+    console.warn("Carb foods: Firestore belum aktif.");
     return;
   }
 
   try {
-    const { data, error } =
-      await supabaseClient
-        .from("carb_foods")
-        .select("id,name,category,carbs_per_100g,serving_size,serving_unit")
-        .order("name", { ascending: true });
+    const snapshot = await firebaseDb
+      .collection("carb_foods")
+      .orderBy("name", "asc")
+      .get();
 
-    if (error) {
-      console.error("Carb foods load error:", error);
-      return;
-    }
+    carbFoods = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-    carbFoods = data || [];
-    console.log(`Carb foods loaded: ${carbFoods.length}`);
+    console.log(
+      `Carb foods loaded: ${carbFoods.length}`
+    );
+
   } catch (error) {
-    console.error("Carb foods error:", error);
+    console.error(
+      "Carb foods load error:",
+      error
+    );
   }
 }
 
