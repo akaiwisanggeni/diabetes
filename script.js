@@ -1525,7 +1525,15 @@ function renderWeightRecords(records) {
    15. CARBOHYDRATE CALCULATOR
    ========================================================= */
 
-function setupCarbCalculator() {
+/* =========================================================
+   15. CARBOHYDRATE CALCULATOR
+   ========================================================= */
+
+let carbFoods = [];
+let selectedCarbFood = null;
+
+
+async function setupCarbCalculator() {
   const form =
     document.querySelector("#carb-calculator-form") ||
     document.querySelector("#carb-form") ||
@@ -1533,69 +1541,273 @@ function setupCarbCalculator() {
 
   if (!form) return;
 
+  /* Build the database-powered UI without changing index.html. */
+  const amountInput =
+    form.querySelector("#carb-amount") ||
+    form.querySelector('[name="amount"]');
+
+  const oldCarbInput =
+    form.querySelector("#carb-per-serving") ||
+    form.querySelector('[name="carb_per_serving"]');
+
+  if (amountInput) {
+    amountInput.outerHTML = `
+      <input
+        id="carb-amount"
+        type="number"
+        name="amount"
+        min="0"
+        step="1"
+        inputmode="decimal"
+        placeholder="Contoh: 100"
+      >
+    `;
+  }
+
+  if (oldCarbInput) {
+    const wrapper = oldCarbInput.closest(".input-with-unit");
+    if (wrapper) {
+      wrapper.outerHTML = `
+        <div
+          id="carb-selected-info"
+          class="carb-selected-info"
+          style="
+            border:1px solid rgba(23,105,73,.15);
+            border-radius:12px;
+            padding:12px 14px;
+            background:#f7fbf8;
+            margin-bottom:12px;
+          "
+        >
+          <div style="font-size:13px;color:#777;">Karbohidrat per 100 g</div>
+          <strong id="carb-per-100g-display" style="font-size:18px;">—</strong>
+        </div>
+      `;
+    }
+  }
+
+  const firstLabel = form.querySelector('label[for="carb-amount"]');
+  if (firstLabel) firstLabel.textContent = "Jumlah (gram)";
+
+  const oldCarbLabel = form.querySelector('label[for="carb-per-serving"]');
+  if (oldCarbLabel) oldCarbLabel.remove();
+
+  /* Insert food search before the amount field. */
+  if (!form.querySelector("#carb-food-search")) {
+    const searchBlock = document.createElement("div");
+    searchBlock.className = "carb-food-picker";
+    searchBlock.style.marginBottom = "16px";
+    searchBlock.innerHTML = `
+      <label for="carb-food-search">Pilih Makanan</label>
+
+      <input
+        id="carb-food-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Cari makanan, misalnya: ay"
+      >
+
+      <div
+        id="carb-food-results"
+        role="listbox"
+        aria-label="Hasil pencarian makanan"
+        style="
+          display:none;
+          max-height:230px;
+          overflow-y:auto;
+          margin-top:8px;
+          border:1px solid #e1e8e3;
+          border-radius:12px;
+          background:#fff;
+          box-shadow:0 8px 20px rgba(0,0,0,.08);
+        "
+      ></div>
+
+      <div
+        id="carb-food-selected"
+        style="
+          display:none;
+          margin-top:8px;
+          padding:10px 12px;
+          border-radius:10px;
+          background:#eef8f1;
+          font-size:14px;
+        "
+      ></div>
+    `;
+
+    const amountLabel = form.querySelector('label[for="carb-amount"]');
+    if (amountLabel) {
+      form.insertBefore(searchBlock, amountLabel);
+    } else {
+      form.prepend(searchBlock);
+    }
+  }
+
+  const searchInput = form.querySelector("#carb-food-search");
+  const results = form.querySelector("#carb-food-results");
+  const selected = form.querySelector("#carb-food-selected");
+  const amount = form.querySelector("#carb-amount");
+  const carbDisplay = form.querySelector("#carb-per-100g-display");
+
+  const renderFoodResults = (query = "") => {
+    if (!results) return;
+
+    const q = query.trim().toLocaleLowerCase("id-ID");
+
+    const matches = carbFoods.filter((food) =>
+      !q || food.name.toLocaleLowerCase("id-ID").includes(q)
+    );
+
+    results.innerHTML = "";
+
+    if (!matches.length) {
+      results.innerHTML = `
+        <div style="padding:14px;color:#777;">
+          Makanan tidak ditemukan.
+        </div>
+      `;
+    } else {
+      matches.forEach((food) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.setAttribute("role", "option");
+        item.style.cssText = `
+          display:block;
+          width:100%;
+          border:0;
+          border-bottom:1px solid #eef1ef;
+          background:#fff;
+          padding:11px 13px;
+          text-align:left;
+          cursor:pointer;
+        `;
+        item.innerHTML = `
+          <strong style="display:block;font-size:14px;">
+            ${escapeHtml(food.name)}
+          </strong>
+          <span style="font-size:12px;color:#777;">
+            ${escapeHtml(food.category)} · ${formatNumber(food.carbs_per_100g)} g karbo / 100 g
+          </span>
+        `;
+
+        item.addEventListener("click", () => {
+          selectedCarbFood = food;
+
+          if (searchInput) searchInput.value = food.name;
+          if (results) results.style.display = "none";
+
+          if (selected) {
+            selected.style.display = "block";
+            selected.textContent =
+              `${food.name} · ${formatNumber(food.carbs_per_100g)} g karbohidrat / 100 g`;
+          }
+
+          if (carbDisplay) {
+            carbDisplay.textContent =
+              `${formatNumber(food.carbs_per_100g)} g`;
+          }
+
+          calculateCarbs(form);
+        });
+
+        results.appendChild(item);
+      });
+    }
+
+    results.style.display = "block";
+  };
+
+  searchInput?.addEventListener("input", () => {
+    /* Substring search: "ay" finds every food containing "ay". */
+    renderFoodResults(searchInput.value);
+  });
+
+  searchInput?.addEventListener("focus", () => {
+    renderFoodResults(searchInput.value);
+  });
+
+  amount?.addEventListener("input", () => calculateCarbs(form));
+  amount?.addEventListener("change", () => calculateCarbs(form));
+
+  document.addEventListener("click", (event) => {
+    if (
+      results &&
+      searchInput &&
+      !searchInput.contains(event.target) &&
+      !results.contains(event.target)
+    ) {
+      results.style.display = "none";
+    }
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-
     calculateCarbs(form);
   });
 
+  await loadCarbFoods();
 
-  /* Automatic calculation */
+  if (carbFoods.length) {
+    renderFoodResults("");
+  }
+}
 
-  const inputs =
-    form.querySelectorAll(
-      "input, select"
-    );
 
-  inputs.forEach((input) => {
-    input.addEventListener(
-      "input",
-      () => calculateCarbs(form)
-    );
+async function loadCarbFoods() {
+  carbFoods = [];
 
-    input.addEventListener(
-      "change",
-      () => calculateCarbs(form)
-    );
-  });
+  if (!supabaseClient) {
+    console.warn("Carb foods: Supabase belum aktif.");
+    return;
+  }
+
+  try {
+    const { data, error } =
+      await supabaseClient
+        .from("carb_foods")
+        .select("id,name,category,carbs_per_100g,serving_size,serving_unit")
+        .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Carb foods load error:", error);
+      return;
+    }
+
+    carbFoods = data || [];
+    console.log(`Carb foods loaded: ${carbFoods.length}`);
+  } catch (error) {
+    console.error("Carb foods error:", error);
+  }
 }
 
 
 function calculateCarbs(form) {
   const amountInput =
     form.querySelector("#carb-amount") ||
-    form.querySelector('[name="amount"]') ||
-    form.querySelector('[name="portion"]');
-
-  const carbPerServingInput =
-    form.querySelector("#carb-per-serving") ||
-    form.querySelector('[name="carb_per_serving"]');
+    form.querySelector('[name="amount"]');
 
   const result =
     document.querySelector("#carb-result") ||
     form.querySelector("#carb-result") ||
     document.querySelector('[data-carb-result]');
 
-  if (!amountInput || !carbPerServingInput || !result) {
-    return;
-  }
+  if (!amountInput || !result) return;
 
-  const amount =
-    Number(amountInput.value);
-
-  const carbPerServing =
-    Number(carbPerServingInput.value);
+  const amount = Number(amountInput.value);
 
   if (
+    !selectedCarbFood ||
     Number.isNaN(amount) ||
-    Number.isNaN(carbPerServing)
+    amount < 0
   ) {
     result.textContent = "0 g";
     return;
   }
 
   const total =
-    amount * carbPerServing;
+    (amount / 100) *
+    Number(selectedCarbFood.carbs_per_100g);
 
   result.textContent =
     `${formatNumber(total)} g`;
