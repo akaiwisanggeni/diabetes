@@ -29,10 +29,12 @@ let weightRecords = [];
    3. INITIALIZE APP
    ========================================================= */
 
+const IS_PREVIEW =
+  new URLSearchParams(window.location.search).get("preview") === "true";
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("MPD App starting...");
-
-  initializeSupabase();
 
   setupNavigation();
   setupLogout();
@@ -42,6 +44,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupBloodSugarTracker();
   setupWeightTracker();
   setupCarbCalculator();
+
+  /* =======================================================
+     PREVIEW MODE
+     Open with ?preview=true to inspect the app UI
+     without connecting to Supabase.
+     ======================================================= */
+
+  if (IS_PREVIEW) {
+    console.log("MPD Preview Mode.");
+
+    currentUser = {
+      id: "preview-user",
+      email: "preview@aman-diabetes.local",
+      user_metadata: {
+        full_name: "Akai"
+      }
+    };
+
+    updateUserUI(currentUser);
+    showPage("home");
+
+    const pdfContainer =
+      document.querySelector("#pdf-library") ||
+      document.querySelector("#pdf-grid") ||
+      document.querySelector(".pdf-library") ||
+      document.querySelector(".pdf-grid") ||
+      document.querySelector('[data-pdf-library]');
+
+    if (pdfContainer) {
+      renderPdfMessage(
+        pdfContainer,
+        "Preview Mode — materi PDF akan tampil saat Supabase aktif."
+      );
+    }
+
+    console.log("MPD Preview ready.");
+    return;
+  }
+
+  /* =======================================================
+     NORMAL PRODUCTION MODE
+     ======================================================= */
+
+  initializeSupabase();
 
   if (supabaseClient) {
     await initializeAuth();
