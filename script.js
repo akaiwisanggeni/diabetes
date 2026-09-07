@@ -175,15 +175,6 @@ function setupMagicLinkForm() {
 
   if (!form) return;
 
-  // Tracker hanya membutuhkan tanggal, bukan jam.
-  const dateLabel =
-    form.querySelector(`label[for="blood-sugar-date"]`);
-  const dateInputElement =
-    form.querySelector("#blood-sugar-date");
-
-  if (dateLabel) dateLabel.textContent = "Tanggal";
-  if (dateInputElement) dateInputElement.type = "date";
-
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -703,9 +694,9 @@ function setupBloodSugarTracker() {
 
   // Tracker hanya membutuhkan tanggal, bukan jam.
   const dateLabel =
-    form.querySelector(`label[for="weight-date"]`);
+    form.querySelector(`label[for="blood-sugar-date"]`);
   const dateInputElement =
-    form.querySelector("#weight-date");
+    form.querySelector("#blood-sugar-date");
 
   if (dateLabel) dateLabel.textContent = "Tanggal";
   if (dateInputElement) dateInputElement.type = "date";
@@ -1331,6 +1322,15 @@ function setupWeightTracker() {
     document.querySelector('[data-weight-form]');
 
   if (!form) return;
+
+  // Tracker hanya membutuhkan tanggal, bukan jam.
+  const dateLabel =
+    form.querySelector(`label[for="weight-date"]`);
+  const dateInputElement =
+    form.querySelector("#weight-date");
+
+  if (dateLabel) dateLabel.textContent = "Tanggal";
+  if (dateInputElement) dateInputElement.type = "date";
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
