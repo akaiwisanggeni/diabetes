@@ -7,10 +7,10 @@
    1. SUPABASE CONFIG
    ========================================================= */
 
-const SUPABASE_URL = "https://evawbbteyufmnsgerrmv.supabase.co";
+const SUPABASE_URL = "https://ayfuhshqghhwdvdkfdqk.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_Gw64bLFzcW9lOe8nAfAqZA_rmKHOnoB";
+  "sb_publishable_-XiY7ZuOg6Cpw79I1e0wXQ_49KvqHkK";
 
 let supabaseClient = null;
 
