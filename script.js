@@ -31,6 +31,7 @@ let bloodSugarRecords = [];
 let weightRecords = [];
 let selectedWeightChartDays = 7;
 let selectedBloodSugarChartDays = 7;
+let visibleBloodSugarProgressCount = 10;
 
 
 /* =========================================================
@@ -870,9 +871,6 @@ async function loadBloodSugarRecords() {
         );
 
     renderBloodSugarChart();
-    renderBloodSugarRecords(
-      bloodSugarRecords
-    );
 
   } catch (error) {
     console.error(
@@ -882,9 +880,7 @@ async function loadBloodSugarRecords() {
 
     bloodSugarRecords = [];
 
-    renderBloodSugarRecords(
-      bloodSugarRecords
-    );
+    renderBloodSugarChart();
   }
 }
 
@@ -899,8 +895,8 @@ function ensureBloodSugarChartUI() {
 
   if (document.querySelector('#mpd-blood-sugar-chart-card')) return;
 
-  const historySection = page.querySelector('.tracker-history');
-  if (!historySection) return;
+  const formSection = page.querySelector('.tracker-form-card');
+  if (!formSection) return;
 
   const style = document.createElement('style');
   style.id = 'mpd-blood-sugar-chart-style';
@@ -913,11 +909,19 @@ function ensureBloodSugarChartUI() {
       box-shadow: 0 6px 20px rgba(0,0,0,.05);
     }
 
+    #mpd-blood-sugar-chart-card .mpd-chart-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
     #mpd-blood-sugar-chart-card .mpd-chart-title {
       font-size: 17px;
       font-weight: 800;
       color: #1f5f4a;
-      margin-bottom: 4px;
+      margin: 0;
     }
 
     #mpd-blood-sugar-chart-card .mpd-chart-subtitle {
@@ -927,11 +931,23 @@ function ensureBloodSugarChartUI() {
       margin-bottom: 12px;
     }
 
+    #mpd-blood-sugar-chart-card .mpd-blood-sugar-csv-btn {
+      flex: 0 0 auto;
+      border: 1px solid #d7ded8;
+      background: #ffffff;
+      color: #1f5f4a;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     #mpd-blood-sugar-chart-card .mpd-blood-sugar-periods {
       display: flex;
       gap: 7px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     #mpd-blood-sugar-chart-card .mpd-blood-sugar-period-btn {
@@ -949,6 +965,12 @@ function ensureBloodSugarChartUI() {
       background: #679343;
       border-color: #679343;
       color: #ffffff;
+    }
+
+    #mpd-blood-sugar-progress-meta {
+      font-size: 11px;
+      color: #7a827c;
+      margin: 0 0 10px;
     }
 
     #mpd-blood-sugar-progress-list {
@@ -986,16 +1008,30 @@ function ensureBloodSugarChartUI() {
       color: #6d756f;
     }
 
-    .mpd-blood-sugar-progress-type {
-      grid-column: 1 / -1;
-      font-size: 11px;
-      color: #6d756f;
-    }
-
+    .mpd-blood-sugar-progress-type,
+    .mpd-blood-sugar-progress-note,
     .mpd-blood-sugar-progress-change {
       grid-column: 1 / -1;
       font-size: 11px;
+      line-height: 1.45;
       color: #6d756f;
+    }
+
+    .mpd-blood-sugar-progress-note {
+      color: #4f5d54;
+    }
+
+    .mpd-blood-sugar-progress-more {
+      width: 100%;
+      margin-top: 2px;
+      border: 1px solid #d7ded8;
+      background: #ffffff;
+      color: #1f5f4a;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     .mpd-blood-sugar-progress-empty {
@@ -1008,15 +1044,35 @@ function ensureBloodSugarChartUI() {
       border-radius: 14px;
       background: #fafcf9;
     }
+
+    @media (max-width: 420px) {
+      #mpd-blood-sugar-chart-card .mpd-chart-header {
+        align-items: center;
+      }
+
+      #mpd-blood-sugar-chart-card .mpd-blood-sugar-csv-btn {
+        padding: 7px 9px;
+      }
+    }
   `;
   document.head.appendChild(style);
 
   const card = document.createElement('section');
   card.id = 'mpd-blood-sugar-chart-card';
   card.innerHTML = `
-    <div class="mpd-chart-title">Progress Gula Darah</div>
+    <div class="mpd-chart-header">
+      <div class="mpd-chart-title">Progress Gula Darah</div>
+      <button
+        type="button"
+        id="download-blood-sugar-csv"
+        class="mpd-blood-sugar-csv-btn"
+      >
+        Download CSV
+      </button>
+    </div>
+
     <div class="mpd-chart-subtitle">
-      Pengukuran terbaru dalam periode yang kamu pilih
+      Pengukuran dalam periode yang kamu pilih
     </div>
 
     <div
@@ -1031,10 +1087,11 @@ function ensureBloodSugarChartUI() {
       <button type="button" data-period="180" class="mpd-blood-sugar-period-btn">6 Bulan</button>
     </div>
 
+    <div id="mpd-blood-sugar-progress-meta"></div>
     <div id="mpd-blood-sugar-progress-list"></div>
   `;
 
-  historySection.parentNode.insertBefore(card, historySection);
+  formSection.insertAdjacentElement('afterend', card);
 }
 
 
@@ -1052,6 +1109,8 @@ function setupBloodSugarChartPeriods() {
       selectedBloodSugarChartDays =
         Number(button.dataset.period) || 7;
 
+      visibleBloodSugarProgressCount = 10;
+
       buttons.forEach((item) => {
         item.classList.toggle('active', item === button);
       });
@@ -1065,6 +1124,9 @@ function setupBloodSugarChartPeriods() {
 function renderBloodSugarChart() {
   const container =
     document.querySelector('#mpd-blood-sugar-progress-list');
+
+  const meta =
+    document.querySelector('#mpd-blood-sugar-progress-meta');
 
   if (!container) return;
 
@@ -1087,6 +1149,12 @@ function renderBloodSugarChart() {
         getRecordDate(b.recorded_at) - getRecordDate(a.recorded_at)
       );
 
+  if (meta) {
+    meta.textContent = progressData.length
+      ? `Menampilkan ${Math.min(visibleBloodSugarProgressCount, progressData.length)} dari ${progressData.length} pengukuran`
+      : '';
+  }
+
   if (!progressData.length) {
     container.innerHTML = `
       <div class="mpd-blood-sugar-progress-empty">
@@ -1096,7 +1164,12 @@ function renderBloodSugarChart() {
     return;
   }
 
-  container.innerHTML = progressData
+  const visibleData = progressData.slice(
+    0,
+    visibleBloodSugarProgressCount
+  );
+
+  container.innerHTML = visibleData
     .map((record, index) => {
       const value = Number(record.blood_sugar);
       const previous = progressData[index + 1];
@@ -1115,6 +1188,14 @@ function renderBloodSugarChart() {
           </div>
         `;
       }
+
+      const noteHtml = record.notes
+        ? `
+          <div class="mpd-blood-sugar-progress-note">
+            Catatan: ${escapeHtml(record.notes)}
+          </div>
+        `
+        : '';
 
       return `
         <div class="mpd-blood-sugar-progress-item">
@@ -1137,76 +1218,27 @@ function renderBloodSugarChart() {
               : ''
           }
 
+          ${noteHtml}
           ${changeHtml}
         </div>
       `;
     })
     .join('');
-}
 
+  if (visibleBloodSugarProgressCount < progressData.length) {
+    const remaining = progressData.length - visibleBloodSugarProgressCount;
+    const moreButton = document.createElement('button');
+    moreButton.type = 'button';
+    moreButton.className = 'mpd-blood-sugar-progress-more';
+    moreButton.textContent = `Tampilkan ${Math.min(10, remaining)} data lagi`;
 
-function renderBloodSugarRecords(records) {
-  const container =
-    document.querySelector("#blood-sugar-list") ||
-    document.querySelector("#blood-sugar-table") ||
-    document.querySelector('[data-blood-sugar-list]');
+    moreButton.addEventListener('click', () => {
+      visibleBloodSugarProgressCount += 10;
+      renderBloodSugarChart();
+    });
 
-  if (!container) return;
-
-  if (!records.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        Belum ada data gula darah.
-      </div>
-    `;
-
-    return;
+    container.appendChild(moreButton);
   }
-
-  container.innerHTML = records
-    .map((record) => {
-      const date =
-        formatDate(record.recorded_at);
-
-      const value =
-        record.blood_sugar ?? "-";
-
-      const type =
-        record.measurement_type || "";
-
-      const notes =
-        record.notes || "";
-
-      return `
-        <div class="tracker-row">
-
-          <div class="tracker-date">
-            ${escapeHtml(date)}
-          </div>
-
-          <div class="tracker-value">
-            ${escapeHtml(String(value))}
-            <span>mg/dL</span>
-          </div>
-
-          <div class="tracker-type">
-            ${escapeHtml(type)}
-          </div>
-
-          ${
-            notes
-              ? `
-                <div class="tracker-notes">
-                  ${escapeHtml(notes)}
-                </div>
-              `
-              : ""
-          }
-
-        </div>
-      `;
-    })
-    .join("");
 }
 
 
