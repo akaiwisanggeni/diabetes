@@ -175,6 +175,15 @@ function setupMagicLinkForm() {
 
   if (!form) return;
 
+  // Tracker hanya membutuhkan tanggal, bukan jam.
+  const dateLabel =
+    form.querySelector(`label[for="blood-sugar-date"]`);
+  const dateInputElement =
+    form.querySelector("#blood-sugar-date");
+
+  if (dateLabel) dateLabel.textContent = "Tanggal";
+  if (dateInputElement) dateInputElement.type = "date";
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -692,6 +701,15 @@ function setupBloodSugarTracker() {
 
   if (!form) return;
 
+  // Tracker hanya membutuhkan tanggal, bukan jam.
+  const dateLabel =
+    form.querySelector(`label[for="weight-date"]`);
+  const dateInputElement =
+    form.querySelector("#weight-date");
+
+  if (dateLabel) dateLabel.textContent = "Tanggal";
+  if (dateInputElement) dateInputElement.type = "date";
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -725,8 +743,8 @@ function setupBloodSugarTracker() {
 
     const recordedAt =
       dateInput && dateInput.value
-        ? new Date(dateInput.value).toISOString()
-        : new Date().toISOString();
+        ? dateOnlyToTimestamp(dateInput.value)
+        : dateOnlyToTimestamp(getTodayDate());
 
     const bloodSugar =
       Number(sugarInput.value);
@@ -1350,8 +1368,8 @@ function setupWeightTracker() {
 
     const recordedAt =
       dateInput && dateInput.value
-        ? new Date(dateInput.value).toISOString()
-        : new Date().toISOString();
+        ? dateOnlyToTimestamp(dateInput.value)
+        : dateOnlyToTimestamp(getTodayDate());
 
     const payload = {
       user_id: currentUser.id,
@@ -1587,6 +1605,30 @@ function calculateCarbs(form) {
 /* =========================================================
    16. DATE / NUMBER HELPERS
    ========================================================= */
+
+function getTodayDate() {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+
+function dateOnlyToTimestamp(dateValue) {
+  if (!dateValue) return new Date().toISOString();
+
+  // Simpan pada tengah hari lokal agar tanggal tidak bergeser
+  // ke hari sebelumnya karena konversi timezone.
+  const date = new Date(`${dateValue}T12:00:00`);
+
+  return Number.isNaN(date.getTime())
+    ? new Date().toISOString()
+    : date.toISOString();
+}
+
 
 function formatDate(dateString) {
   if (!dateString) return "-";
