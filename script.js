@@ -33,6 +33,22 @@ let selectedWeightChartDays = 7;
 
 
 /* =========================================================
+   2A. LOGIN MESSAGE
+   ========================================================= */
+
+function setLoginMessage(message) {
+  const element =
+    document.querySelector("#login-message") ||
+    document.querySelector(".login-message") ||
+    document.querySelector('[data-login-message]');
+
+  if (element) {
+    element.textContent = message || "";
+  }
+}
+
+
+/* =========================================================
    3. INITIALIZE APP
    ========================================================= */
 
@@ -115,6 +131,7 @@ function initializeAuth() {
 
       if (currentUser) {
         await loadPdfLibrary();
+        await loadCarbFoods();
         await loadBloodSugarRecords();
         await loadWeightRecords();
       }
@@ -351,14 +368,8 @@ function updateUserUI(user) {
 function getUserName(user) {
   if (!user) return "Guest";
 
-  if (user.user_metadata) {
-    if (user.user_metadata.full_name) {
-      return user.user_metadata.full_name;
-    }
-
-    if (user.user_metadata.name) {
-      return user.user_metadata.name;
-    }
+  if (user.displayName) {
+    return user.displayName;
   }
 
   if (user.email) {
@@ -1751,10 +1762,12 @@ async function setupCarbCalculator() {
     calculateCarbs(form);
   });
 
-  await loadCarbFoods();
+  if (currentUser) {
+    await loadCarbFoods();
 
-  if (carbFoods.length) {
-    renderFoodResults("");
+    if (carbFoods.length) {
+      renderFoodResults("");
+    }
   }
 }
 
