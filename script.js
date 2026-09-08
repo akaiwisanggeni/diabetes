@@ -74,6 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   ensureWeightProgressUI();
   setupWeightProgressPeriods();
   setupWeightCSVButton();
+  setupTrackerEditUI();
   setupCarbCalculator();
 
   /* =======================================================
@@ -1222,6 +1223,11 @@ function renderBloodSugarChart() {
 
           ${noteHtml}
           ${changeHtml}
+
+          <div class="mpd-tracker-actions">
+            <button type="button" class="mpd-tracker-edit-btn" data-tracker-action="edit" data-tracker-type="blood-sugar" data-record-id="${escapeHtml(record.id)}">Edit</button>
+            <button type="button" class="mpd-tracker-delete-btn" data-tracker-action="delete" data-tracker-type="blood-sugar" data-record-id="${escapeHtml(record.id)}">Hapus</button>
+          </div>
         </div>
       `;
     })
@@ -1672,6 +1678,11 @@ function renderWeightProgress() {
 
           ${noteHtml}
           ${changeHtml}
+
+          <div class="mpd-tracker-actions">
+            <button type="button" class="mpd-tracker-edit-btn" data-tracker-action="edit" data-tracker-type="weight" data-record-id="${escapeHtml(record.id)}">Edit</button>
+            <button type="button" class="mpd-tracker-delete-btn" data-tracker-action="delete" data-tracker-type="weight" data-record-id="${escapeHtml(record.id)}">Hapus</button>
+          </div>
         </div>
       `;
     })
@@ -1884,6 +1895,343 @@ function renderWeightRecords(records) {
   // Kept as a compatibility wrapper for any existing calls.
   weightRecords = Array.isArray(records) ? records : [];
   renderWeightProgress();
+}
+
+
+
+/* =========================================================
+   14A. TRACKER EDIT / DELETE
+   ========================================================= */
+
+function setupTrackerEditUI() {
+  if (document.querySelector('#mpd-tracker-edit-modal')) return;
+
+  const style = document.createElement('style');
+  style.id = 'mpd-tracker-edit-style';
+  style.textContent = `
+    #mpd-tracker-edit-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(20, 35, 28, .38);
+      padding: 16px;
+    }
+
+    #mpd-tracker-edit-modal.is-open {
+      display: flex;
+    }
+
+    .mpd-tracker-edit-sheet {
+      width: 100%;
+      max-width: 430px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    }
+
+    .mpd-tracker-edit-title {
+      margin: 0 0 16px;
+      font-size: 19px;
+      font-weight: 800;
+      color: #1f5f4a;
+    }
+
+    .mpd-tracker-edit-sheet label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #355247;
+    }
+
+    .mpd-tracker-edit-sheet input,
+    .mpd-tracker-edit-sheet select,
+    .mpd-tracker-edit-sheet textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d7ded8;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font: inherit;
+      background: #fafcf9;
+      color: #26352e;
+    }
+
+    .mpd-tracker-edit-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .mpd-tracker-edit-actions button {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mpd-tracker-edit-cancel {
+      background: #eef2ee;
+      color: #4d5b53;
+    }
+
+    .mpd-tracker-edit-save {
+      background: #146342;
+      color: #ffffff;
+    }
+
+    .mpd-tracker-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 5px;
+      padding-top: 8px;
+      border-top: 1px solid #edf0eb;
+    }
+
+    .mpd-tracker-actions button {
+      border: 0;
+      background: transparent;
+      padding: 3px 2px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mpd-tracker-edit-btn {
+      color: #1f5f4a;
+    }
+
+    .mpd-tracker-delete-btn {
+      color: #a34d45;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const modal = document.createElement('div');
+  modal.id = 'mpd-tracker-edit-modal';
+  modal.innerHTML = `
+    <div class="mpd-tracker-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="mpd-tracker-edit-title">
+      <h2 id="mpd-tracker-edit-title" class="mpd-tracker-edit-title">Edit Catatan</h2>
+      <form id="mpd-tracker-edit-form">
+        <input type="hidden" id="mpd-edit-type">
+        <input type="hidden" id="mpd-edit-id">
+
+        <label for="mpd-edit-date">Tanggal</label>
+        <input id="mpd-edit-date" type="date" required>
+
+        <div id="mpd-edit-blood-fields">
+          <label for="mpd-edit-blood-value">Gula Darah</label>
+          <input id="mpd-edit-blood-value" type="number" min="0" step="0.1" required>
+
+          <label for="mpd-edit-measurement-type">Waktu Pengukuran</label>
+          <select id="mpd-edit-measurement-type">
+            <option value="">Pilih waktu</option>
+            <option value="Sebelum makan">Sebelum makan</option>
+            <option value="Sesudah makan">Sesudah makan</option>
+            <option value="Pagi">Pagi</option>
+            <option value="Siang">Siang</option>
+            <option value="Malam">Malam</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+
+        <div id="mpd-edit-weight-fields">
+          <label for="mpd-edit-weight-value">Berat Badan</label>
+          <input id="mpd-edit-weight-value" type="number" min="0" step="0.1">
+        </div>
+
+        <label for="mpd-edit-notes">Catatan</label>
+        <textarea id="mpd-edit-notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
+
+        <div class="mpd-tracker-edit-actions">
+          <button type="button" class="mpd-tracker-edit-cancel">Batal</button>
+          <button type="submit" class="mpd-tracker-edit-save">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const close = () => modal.classList.remove('is-open');
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) close();
+  });
+
+  modal.querySelector('.mpd-tracker-edit-cancel').addEventListener('click', close);
+
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-tracker-action]');
+    if (!button) return;
+
+    const type = button.dataset.trackerType;
+    const id = button.dataset.recordId;
+    if (!type || !id || !currentUser) return;
+
+    if (button.dataset.trackerAction === 'edit') {
+      openTrackerEditModal(type, id);
+    }
+
+    if (button.dataset.trackerAction === 'delete') {
+      await deleteTrackerRecord(type, id);
+    }
+  });
+
+  modal.querySelector('#mpd-tracker-edit-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    await saveTrackerEdit(modal);
+  });
+}
+
+function getTrackerRecord(type, id) {
+  const records = type === 'blood-sugar' ? bloodSugarRecords : weightRecords;
+  return records.find((record) => record.id === id) || null;
+}
+
+function dateForInput(record) {
+  const date = getRecordDate(record?.recorded_at);
+  if (!date) return getTodayDate();
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function openTrackerEditModal(type, id) {
+  const modal = document.querySelector('#mpd-tracker-edit-modal');
+  const record = getTrackerRecord(type, id);
+  if (!modal || !record) return;
+
+  modal.querySelector('#mpd-edit-type').value = type;
+  modal.querySelector('#mpd-edit-id').value = id;
+  modal.querySelector('#mpd-edit-date').value = dateForInput(record);
+  modal.querySelector('#mpd-edit-notes').value = record.notes || '';
+
+  const bloodFields = modal.querySelector('#mpd-edit-blood-fields');
+  const weightFields = modal.querySelector('#mpd-edit-weight-fields');
+  const bloodValue = modal.querySelector('#mpd-edit-blood-value');
+  const weightValue = modal.querySelector('#mpd-edit-weight-value');
+  const measurementType = modal.querySelector('#mpd-edit-measurement-type');
+
+  const isBlood = type === 'blood-sugar';
+  bloodFields.style.display = isBlood ? '' : 'none';
+  weightFields.style.display = isBlood ? 'none' : '';
+  bloodValue.required = isBlood;
+  weightValue.required = !isBlood;
+
+  if (isBlood) {
+    bloodValue.value = record.blood_sugar ?? '';
+    measurementType.value = record.measurement_type || '';
+  } else {
+    weightValue.value = record.weight ?? '';
+  }
+
+  modal.querySelector('#mpd-tracker-edit-title').textContent =
+    isBlood ? 'Edit Catatan Gula Darah' : 'Edit Catatan Berat Badan';
+
+  modal.classList.add('is-open');
+}
+
+async function saveTrackerEdit(modal) {
+  if (!firebaseDb || !currentUser) return;
+
+  const type = modal.querySelector('#mpd-edit-type').value;
+  const id = modal.querySelector('#mpd-edit-id').value;
+  const date = modal.querySelector('#mpd-edit-date').value;
+  const notes = modal.querySelector('#mpd-edit-notes').value.trim();
+
+  if (!id || !date) {
+    alert('Lengkapi data yang diperlukan.');
+    return;
+  }
+
+  const collectionName = type === 'blood-sugar'
+    ? 'blood_sugar_tracker'
+    : 'weight_tracker';
+
+  const payload = {
+    recorded_at: dateOnlyToTimestamp(date),
+    notes: notes || null
+  };
+
+  if (type === 'blood-sugar') {
+    const value = Number(modal.querySelector('#mpd-edit-blood-value').value);
+    if (!Number.isFinite(value) || value < 0) {
+      alert('Nilai gula darah tidak valid.');
+      return;
+    }
+    payload.blood_sugar = value;
+    payload.measurement_type = modal.querySelector('#mpd-edit-measurement-type').value || null;
+  } else {
+    const value = Number(modal.querySelector('#mpd-edit-weight-value').value);
+    if (!Number.isFinite(value) || value < 0) {
+      alert('Berat badan tidak valid.');
+      return;
+    }
+    payload.weight = value;
+  }
+
+  try {
+    await firebaseDb.collection(collectionName).doc(id).update(payload);
+
+    modal.classList.remove('is-open');
+
+    if (type === 'blood-sugar') {
+      await loadBloodSugarRecords();
+    } else {
+      await loadWeightRecords();
+    }
+
+    alert('Perubahan berhasil disimpan.');
+  } catch (error) {
+    console.error('Tracker update error:', error);
+    alert('Gagal menyimpan perubahan.');
+  }
+}
+
+async function deleteTrackerRecord(type, id) {
+  if (!firebaseDb || !currentUser) return;
+
+  const record = getTrackerRecord(type, id);
+  if (!record) return;
+
+  const label = type === 'blood-sugar'
+    ? `${record.blood_sugar ?? '-'} mg/dL`
+    : `${record.weight ?? '-'} kg`;
+
+  const confirmed = window.confirm(
+    `Hapus catatan ${label}?\n\nData yang dihapus tidak dapat dikembalikan.`
+  );
+
+  if (!confirmed) return;
+
+  const collectionName = type === 'blood-sugar'
+    ? 'blood_sugar_tracker'
+    : 'weight_tracker';
+
+  try {
+    await firebaseDb.collection(collectionName).doc(id).delete();
+
+    if (type === 'blood-sugar') {
+      await loadBloodSugarRecords();
+    } else {
+      await loadWeightRecords();
+    }
+  } catch (error) {
+    console.error('Tracker delete error:', error);
+    alert('Gagal menghapus catatan.');
+  }
 }
 
 
