@@ -2397,9 +2397,21 @@ async function setupCarbCalculator() {
 
     const q = query.trim().toLocaleLowerCase("id-ID");
 
-    const matches = carbFoods.filter((food) =>
-      !q || food.name.toLocaleLowerCase("id-ID").includes(q)
-    );
+    const matches = carbFoods
+      .filter((food) =>
+        !q || food.name.toLocaleLowerCase("id-ID").includes(q)
+      )
+      .sort((a, b) => {
+        if (!q) return a.name.localeCompare(b.name, "id-ID");
+
+        const aName = a.name.toLocaleLowerCase("id-ID");
+        const bName = b.name.toLocaleLowerCase("id-ID");
+        const aStarts = aName.startsWith(q) ? 0 : 1;
+        const bStarts = bName.startsWith(q) ? 0 : 1;
+
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return aName.localeCompare(bName, "id-ID");
+      });
 
     results.innerHTML = "";
 
