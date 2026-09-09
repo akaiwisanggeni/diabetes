@@ -1,0 +1,1092 @@
+/* =========================================================
+   AMAN DIABETES — /demo
+   Desain 1: "Klinis-Tenang"
+   File ini BERDIRI SENDIRI, tidak mewarisi apa pun dari
+   style.css. Semua selector yang dipakai index.html/preview.html
+   /demo.html dan JS (script.js, carb-calculator.js) didefinisikan
+   ulang di sini secara lengkap.
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #F3F8F7;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+  background: #F3F8F7;
+  color: #0F2A2E;
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   APP CONTAINER
+   ========================================================= */
+
+.app-screen {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+
+  margin: 0 auto;
+
+  padding: 22px 15px 105px;
+
+  background: #F3F8F7;
+}
+
+.page {
+  width: 100%;
+}
+
+.tracker-page {
+  padding-bottom: 20px;
+}
+
+/* =========================================================
+   HOME HEADER
+   ========================================================= */
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin-bottom: 22px;
+}
+
+.top-header h1 {
+  color: #0F2A2E;
+
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+
+  margin-bottom: 8px;
+}
+
+.top-header p {
+  color: #5C7A78;
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.logout-btn {
+  flex-shrink: 0;
+
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
+
+  background: #E8F3F1;
+  color: #2B7A78;
+
+  padding: 8px 14px;
+
+  font-size: 12.5px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   STREAK
+   ========================================================= */
+
+.streak-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 62px;
+
+  padding: 14px 18px;
+
+  margin-bottom: 18px;
+
+  background: #0F2A2E;
+  border-radius: 16px;
+}
+
+.streak-left {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.streak-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.streak-left strong {
+  color: #FFFFFF;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.streak-message {
+  color: #4ADE9E;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   GENERAL SECTION
+   ========================================================= */
+
+.content-section,
+.tracker-section {
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+  border-radius: 16px;
+
+  padding: 18px 16px;
+
+  margin-bottom: 16px;
+}
+
+.content-section h2,
+.tracker-section h2 {
+  color: #0F2A2E;
+
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+
+  margin-bottom: 15px;
+
+  padding-left: 10px;
+  border-left: 3px solid #2B7A78;
+}
+
+.tracker-section {
+  padding-bottom: 15px;
+}
+
+/* =========================================================
+   PDF LIBRARY
+   ========================================================= */
+
+.pdf-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 14px 11px;
+}
+
+.pdf-card {
+  width: 100%;
+  min-width: 0;
+
+  display: block;
+
+  border: 0;
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.pdf-cover-wrapper {
+  width: 100%;
+
+  aspect-ratio: 21 / 26;
+
+  overflow: hidden;
+
+  border-radius: 10px;
+  border: 1px solid #E1EBE9;
+
+  background: #E8F3F1;
+
+  margin-bottom: 8px;
+}
+
+.pdf-cover {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+.pdf-title {
+  color: #0F2A2E;
+
+  font-size: 12.5px;
+  line-height: 1.35;
+  font-weight: 600;
+
+  padding: 0 2px;
+}
+
+.pdf-message {
+  grid-column: 1 / -1;
+
+  padding: 25px 10px;
+
+  color: #7A9E9B;
+
+  text-align: center;
+
+  font-size: 13px;
+  border: 1px dashed #B8CDCB;
+  border-radius: 12px;
+}
+
+/* =========================================================
+   TRACKER CARDS
+   ========================================================= */
+
+.tracker-card {
+  width: 100%;
+  min-height: 84px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 13px;
+
+  margin-bottom: 9px;
+
+  border: 1px solid #E1EBE9;
+  border-radius: 14px;
+
+  background: #FFFFFF;
+  color: #0F2A2E;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.tracker-card:last-child {
+  margin-bottom: 0;
+}
+
+.tracker-card:active {
+  transform: scale(0.985);
+}
+
+.tracker-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #E8F3F1;
+
+  font-size: 19px;
+}
+
+/* Tint tiap tracker icon beda warna, sesuai urutan tanpa ubah HTML */
+.tracker-card:nth-of-type(1) .tracker-icon { background: #FDECEC; }
+.tracker-card:nth-of-type(2) .tracker-icon { background: #E8F3F1; }
+.tracker-card:nth-of-type(3) .tracker-icon { background: #FFF4E3; }
+
+.tracker-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tracker-info h3 {
+  color: #0F2A2E;
+
+  font-size: 13.5px;
+  line-height: 1.25;
+  font-weight: 700;
+
+  margin-bottom: 4px;
+}
+
+.tracker-info p {
+  color: #7A9E9B;
+
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.tracker-arrow {
+  flex: 0 0 auto;
+
+  color: #B8CDCB;
+
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
+  margin-bottom: 18px;
+}
+
+.page-header h1 {
+  color: #0F2A2E;
+
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
+
+  background: #FFFFFF;
+  color: #0F2A2E;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.back-button:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+/* =========================================================
+   TRACKER FORM
+   ========================================================= */
+
+.tracker-form-card {
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+  border-radius: 16px;
+
+  padding: 18px 16px;
+
+  margin-bottom: 16px;
+}
+
+.tracker-form-card h2,
+.tracker-history h2 {
+  color: #0F2A2E;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  margin-bottom: 15px;
+}
+
+.tracker-form-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.tracker-form-card label {
+  color: #2B7A78;
+
+  font-size: 12.5px;
+  font-weight: 600;
+
+  margin-bottom: 6px;
+}
+
+.tracker-form-card input,
+.tracker-form-card select,
+.tracker-form-card textarea {
+  width: 100%;
+
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
+
+  background: #F8FBFA;
+  color: #0F2A2E;
+
+  padding: 11px 12px;
+
+  font-size: 14px;
+
+  outline: none;
+
+  margin-bottom: 14px;
+}
+
+.tracker-form-card input:focus,
+.tracker-form-card select:focus,
+.tracker-form-card textarea:focus {
+  border-color: #2B7A78;
+  background: #FFFFFF;
+}
+
+.tracker-form-card textarea {
+  resize: vertical;
+
+  min-height: 80px;
+}
+
+.input-with-unit {
+  position: relative;
+
+  width: 100%;
+}
+
+.input-with-unit input {
+  padding-right: 64px;
+}
+
+.input-with-unit span {
+  position: absolute;
+
+  right: 13px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: #7A9E9B;
+
+  font-size: 12.5px;
+  font-weight: 600;
+
+  pointer-events: none;
+}
+
+.primary-btn {
+  width: 100%;
+
+  border: 0;
+  border-radius: 12px;
+
+  padding: 13px 16px;
+
+  background: #2B7A78;
+  color: #FFFFFF;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #1F5F5D;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   TRACKER HISTORY (baris/tabel riwayat lama, jika terpakai)
+   ========================================================= */
+
+.tracker-history {
+  width: 100%;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 8px;
+}
+
+.tracker-period {
+  color: #7A9E9B;
+
+  font-size: 11.5px;
+  line-height: 1.4;
+
+  margin-bottom: 12px;
+}
+
+.secondary-btn {
+  flex-shrink: 0;
+
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
+
+  background: #FFFFFF;
+  color: #2B7A78;
+
+  padding: 8px 11px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.empty-state {
+  padding: 22px 15px;
+
+  background: #F8FBFA;
+  border: 1px dashed #B8CDCB;
+
+  border-radius: 12px;
+
+  color: #7A9E9B;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.tracker-row {
+  width: 100%;
+
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+
+  border-radius: 12px;
+
+  padding: 13px 14px;
+
+  margin-bottom: 8px;
+}
+
+.tracker-date {
+  color: #7A9E9B;
+
+  font-size: 11px;
+  line-height: 1.3;
+
+  margin-bottom: 4px;
+}
+
+.tracker-value {
+  color: #0F2A2E;
+
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  margin-bottom: 4px;
+}
+
+.tracker-value span {
+  color: #7A9E9B;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tracker-type {
+  color: #2B7A78;
+
+  font-size: 11.5px;
+  font-weight: 700;
+
+  margin-bottom: 3px;
+}
+
+.tracker-notes {
+  color: #5C7A78;
+
+  font-size: 11.5px;
+  line-height: 1.4;
+
+  margin-top: 6px;
+
+  padding-top: 6px;
+
+  border-top: 1px solid #E1EBE9;
+}
+
+/* =========================================================
+   CARB CALCULATOR RESULT
+   ========================================================= */
+
+.carb-result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  min-height: 100px;
+
+  margin-top: 5px;
+
+  padding: 18px;
+
+  border-radius: 14px;
+  border: 1px solid #E1EBE9;
+
+  background: #E8F3F1;
+
+  text-align: center;
+}
+
+.carb-result-card span {
+  color: #5C7A78;
+
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.carb-result-card strong {
+  color: #2B7A78;
+
+  font-size: 28px;
+  line-height: 1;
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   PDF VIEWER
+   ========================================================= */
+
+.pdf-viewer {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 300;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #F3F8F7;
+}
+
+.pdf-viewer-header {
+  flex: 0 0 auto;
+
+  min-height: 58px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 9px 13px;
+
+  background: #FFFFFF;
+
+  border-bottom: 1px solid #E1EBE9;
+}
+
+.pdf-back {
+  flex: 0 0 auto;
+
+  border: 0;
+  background: transparent;
+
+  color: #2B7A78;
+
+  padding: 9px 5px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.pdf-viewer-title {
+  flex: 1;
+
+  overflow: hidden;
+
+  padding: 0 10px;
+
+  color: #0F2A2E;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  text-align: center;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pdf-viewer-content {
+  flex: 1;
+
+  min-height: 0;
+
+  width: 100%;
+
+  background: #E1EBE9;
+}
+
+.pdf-viewer-content iframe {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  border: 0;
+
+  background: #FFFFFF;
+}
+
+/* =========================================================
+   BOTTOM NAVIGATION — dasar gelap, ikon SVG putih
+   ========================================================= */
+
+.bottom-nav {
+  position: fixed;
+
+  left: 50%;
+  bottom: 0;
+
+  transform: translateX(-50%);
+
+  width: min(100%, 480px);
+
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  padding: 12px 7px 18px;
+
+  background: #0F2A2E;
+
+  border-radius: 22px 22px 0 0;
+
+  z-index: 100;
+}
+
+.nav-item {
+  min-height: 54px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 5px;
+
+  border: 0;
+  background: transparent;
+
+  color: rgba(255, 255, 255, 0.55);
+
+  font-size: 10.5px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #FFFFFF;
+  opacity: 0.55;
+
+  transition: opacity 0.2s ease;
+}
+
+.nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-item.active {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
+}
+
+.nav-item:active {
+  transform: none;
+}
+
+/* =========================================================
+   PDF VIEWER STATE
+   ========================================================= */
+
+body.pdf-viewer-open {
+  overflow: hidden;
+}
+
+/* =========================================================
+   RESPONSIVE — DESKTOP
+   ========================================================= */
+
+@media (min-width: 481px) {
+  body {
+    background: #E1EBE9;
+  }
+
+  .app {
+    min-height: 100vh;
+
+    background: #F3F8F7;
+
+    box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .app {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .top-header h1 {
+    font-size: 25px;
+  }
+
+  .top-header p {
+    font-size: 13.5px;
+  }
+
+  .content-section,
+  .tracker-section,
+  .tracker-form-card {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .pdf-grid {
+    gap: 10px 8px;
+  }
+
+  .pdf-title {
+    font-size: 11.5px;
+  }
+
+  .tracker-info h3 {
+    font-size: 12.5px;
+  }
+
+  .tracker-info p {
+    font-size: 10.5px;
+  }
+
+  .tracker-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-basis: 38px;
+
+    font-size: 17px;
+  }
+
+  .nav-item {
+    font-size: 9.5px;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY / TOUCH
+   ========================================================= */
+
+@media (hover: hover) {
+  .tracker-card:hover {
+    border-color: #B8CDCB;
+  }
+
+  .pdf-card:hover .pdf-cover-wrapper {
+    border-color: #B8CDCB;
+  }
+
+  .secondary-btn:hover,
+  .logout-btn:hover {
+    background: #DFF0EC;
+  }
+}
+
+/* =========================================================
+   OVERRIDE WARNA UNTUK ELEMEN YANG DI-GENERATE JS
+   ---------------------------------------------------------
+   script.js dan carb-calculator.js menyuntikkan <style> mereka
+   sendiri saat runtime (chart gula darah, chart berat badan,
+   modal edit, kalkulator karbo multi-baris). File JS itu TIDAK
+   diubah sama sekali — override di bawah ini HANYA mengganti
+   warna/aksen lewat CSS baru, ditandai !important karena
+   <style> bawaan JS disisipkan belakangan di <head> sehingga
+   menang duluan tanpa override eksplisit.
+   ========================================================= */
+
+/* Chart Gula Darah */
+#mpd-blood-sugar-chart-card,
+#mpd-weight-progress-card {
+  border: 1px solid #E1EBE9 !important;
+  box-shadow: none !important;
+}
+
+#mpd-blood-sugar-chart-card .mpd-chart-title,
+#mpd-weight-progress-card .mpd-progress-title {
+  color: #0F2A2E !important;
+}
+
+#mpd-blood-sugar-chart-card .mpd-blood-sugar-csv-btn,
+#mpd-weight-progress-card .mpd-weight-csv-btn {
+  color: #2B7A78 !important;
+  border-color: #E1EBE9 !important;
+}
+
+.mpd-blood-sugar-period-btn,
+.mpd-weight-period-btn {
+  background: #F3F8F7 !important;
+  border-color: #E1EBE9 !important;
+  color: #5C7A78 !important;
+}
+
+.mpd-blood-sugar-period-btn.active,
+.mpd-weight-period-btn.active {
+  background: #2B7A78 !important;
+  border-color: #2B7A78 !important;
+  color: #FFFFFF !important;
+}
+
+.mpd-blood-sugar-progress-item,
+.mpd-weight-progress-item {
+  border-color: #E1EBE9 !important;
+  background: #F8FBFA !important;
+}
+
+.mpd-blood-sugar-progress-value,
+.mpd-weight-progress-value {
+  color: #0F2A2E !important;
+}
+
+.mpd-blood-sugar-progress-more,
+.mpd-weight-progress-more {
+  border-color: #E1EBE9 !important;
+  color: #2B7A78 !important;
+}
+
+/* Modal Edit Tracker */
+.mpd-tracker-edit-sheet {
+  border-radius: 18px !important;
+}
+
+.mpd-tracker-edit-title {
+  color: #0F2A2E !important;
+}
+
+.mpd-tracker-edit-sheet label {
+  color: #2B7A78 !important;
+}
+
+.mpd-tracker-edit-sheet input,
+.mpd-tracker-edit-sheet select,
+.mpd-tracker-edit-sheet textarea {
+  border-color: #E1EBE9 !important;
+  background: #F8FBFA !important;
+}
+
+.mpd-tracker-edit-cancel {
+  background: #E1EBE9 !important;
+  color: #0F2A2E !important;
+}
+
+.mpd-tracker-edit-save {
+  background: #2B7A78 !important;
+  color: #FFFFFF !important;
+}
+
+.mpd-tracker-edit-btn {
+  color: #2B7A78 !important;
+}
+
+.mpd-tracker-delete-btn {
+  color: #C24545 !important;
+}
+
+/* Kalkulator Karbohidrat (multi-baris) */
+.mpd-carb-row {
+  border-color: #E1EBE9 !important;
+  background: #F8FBFA !important;
+}
+
+.mpd-carb-row-head {
+  color: #0F2A2E !important;
+}
+
+.mpd-carb-remove {
+  color: #C24545 !important;
+}
+
+.mpd-carb-results {
+  border-color: #E1EBE9 !important;
+}
+
+.mpd-carb-unit {
+  border-color: #E1EBE9 !important;
+  background: #E8F3F1 !important;
+  color: #2B7A78 !important;
+}
+
+.mpd-carb-item-total-row strong {
+  color: #2B7A78 !important;
+}
