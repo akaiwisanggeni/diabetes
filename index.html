@@ -5,6 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Aman Diabetes</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* First-login name onboarding */
+    #name-onboarding {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 42, 46, 0.38);
+    }
+
+    .name-onboarding-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 26px 22px 22px;
+      border: 1px solid #E1EBE9;
+      border-radius: 18px;
+      background: #FFFFFF;
+      box-shadow: 0 18px 50px rgba(15, 42, 46, 0.16);
+    }
+
+    .name-onboarding-card h2 {
+      margin: 0 0 8px;
+      color: #0F2A2E;
+      font-size: 22px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .name-onboarding-card p {
+      margin: 0 0 20px;
+      color: #5C7A78;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .name-onboarding-card label {
+      display: block;
+      margin-bottom: 7px;
+      color: #2B7A78;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .name-onboarding-card input {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      padding: 12px 13px;
+      border: 1px solid #E1EBE9;
+      border-radius: 10px;
+      background: #F8FBFA;
+      color: #0F2A2E;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .name-onboarding-card input:focus {
+      border-color: #2B7A78;
+      background: #FFFFFF;
+    }
+
+    .name-onboarding-card button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 16px;
+      background: #2B7A78;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .name-onboarding-card button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    #name-onboarding-message {
+      min-height: 18px;
+      margin: 9px 0 0;
+      color: #B44A4A;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
   <div id="login-screen" class="login-screen">
@@ -99,10 +189,24 @@
     </div>
   </div>
 
+  <div id="name-onboarding" role="dialog" aria-modal="true" aria-labelledby="name-onboarding-title">
+    <div class="name-onboarding-card">
+      <h2 id="name-onboarding-title">Kenalan dulu 👋</h2>
+      <p>Supaya pengalamanmu di Aman Diabetes terasa lebih personal, siapa namamu?</p>
+      <form id="name-onboarding-form">
+        <label for="name-onboarding-input">Nama kamu</label>
+        <input id="name-onboarding-input" type="text" maxlength="60" autocomplete="name" placeholder="Masukkan nama kamu" required>
+        <button type="submit">Lanjut ke Aman Diabetes</button>
+        <p id="name-onboarding-message" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js"></script>
   <script src="script.js"></script>
+  <script src="name-onboarding.js"></script>
   <script src="carb-calculator.js"></script>
 </body>
 </html>
