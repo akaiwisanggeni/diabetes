@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Aman Diabetes — Demo UI</title>
   <link rel="stylesheet" href="demo-style.css">
+  <style>
+    /* Demo-only: tampilkan cover dengan proporsi A4 tanpa crop */
+    .pdf-cover-wrapper {
+      aspect-ratio: 210 / 297;
+    }
+
+    .pdf-cover {
+      object-fit: contain;
+    }
+  </style>
 </head>
 <body>
   <div id="app-screen" class="app-screen">
