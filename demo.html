@@ -3,177 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Aman Diabetes — Demo</title>
+  <title>Panduan Diabetes — Demo UI</title>
   <link rel="stylesheet" href="demo-style.css">
   <style>
-    /* =========================================================
-       AMAN DIABETES — /demo HOME REDESIGN
-       Visual reference: attached UI
-       Data cards use the latest user update from Firebase.
-       ========================================================= */
-    :root{
-      --navy:#0b3034;
-      --navy-2:#103b40;
-      --teal:#2f8c8b;
-      --teal-soft:#e8f4f2;
-      --mint:#f2f8f7;
-      --line:#dce9e7;
-      --text:#0b3034;
-      --muted:#62827f;
-      --green:#35d99a;
-      --white:#fff;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:#edf4f3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;color:var(--text)}
-    button,input,select,textarea{font:inherit}
-    body{overflow-x:hidden}
-    .app-screen{min-height:100vh;background:#edf4f3}
-    .app{position:relative;width:100%;max-width:480px;min-height:100vh;margin:0 auto;padding:0 0 88px;background:var(--mint);box-shadow:0 0 0 1px rgba(11,48,52,.04)}
-
-    .demo-statusbar{height:34px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:12px;font-weight:700;letter-spacing:.2px}
-    .demo-status-right{display:flex;align-items:center;gap:12px}
-    .battery{width:20px;height:9px;border:1.5px solid #fff;border-radius:2px;position:relative}
-    .battery:after{content:"";position:absolute;right:-3px;top:2px;width:2px;height:4px;background:#fff;border-radius:0 1px 1px 0}
-    .battery i{display:block;width:72%;height:100%;background:#fff}
-
-    .appbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
-    .appbar-title{font-size:17px;font-weight:600;color:#4e7472}
-    .appbar-menu{border:0;background:transparent;color:#aac1bf;font-size:24px;line-height:1;padding:0 2px;cursor:pointer}
-
-    .page{width:100%}
-    #home{padding:29px 24px 18px}
-    .home-greeting{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:28px}
-    .home-greeting h1{margin:0 0 9px;font-size:32px;line-height:1.05;font-weight:800;letter-spacing:-.7px;color:#08333b}
-    .home-greeting p{margin:0;color:#5e7f7c;font-size:15px;line-height:1.55;max-width:285px}
-    .logout-btn{border:0;border-radius:13px;background:var(--teal-soft);color:#287e7e;padding:10px 17px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:2px}
-
-    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:21px}
-    .summary-card{min-height:111px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 15px 13px;box-shadow:0 1px 2px rgba(11,48,52,.02)}
-    .summary-top{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:10px}
-    .summary-label{font-size:12px;font-weight:800;letter-spacing:.3px;color:#5e8582}
-    .summary-date{font-size:11.5px;color:#809996;white-space:nowrap}
-    .summary-value{font-size:27px;line-height:1;font-weight:800;color:#0a3137;letter-spacing:-.5px;margin-bottom:7px}
-    .summary-value span{font-size:14px;font-weight:600;color:#71908d;letter-spacing:0}
-    .summary-status{font-size:11.5px;font-weight:700;color:#3c8580;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .summary-status.down{color:#348c82}
-
-    .streak-card{min-height:91px;margin:0 0 24px;padding:16px 18px;border-radius:19px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff}
-    .streak-left{display:flex;align-items:center;gap:15px}
-    .streak-icon{font-size:31px;line-height:1;filter:saturate(1.1)}
-    .streak-copy strong{display:block;font-size:25px;line-height:1;font-weight:800;letter-spacing:-.4px}
-    .streak-copy small{display:block;margin-top:5px;color:#8bb0ad;font-size:12px;font-weight:600}
-    .streak-message{color:var(--green);font-size:13px;font-weight:800}
-
-    .content-section{background:#fff;border:1px solid var(--line);border-radius:19px;padding:18px 15px 16px;margin-bottom:18px}
-    .content-section h2{margin:0 0 15px;padding-left:10px;border-left:3px solid var(--teal);font-size:16px;line-height:1;font-weight:800;color:#123a3e;letter-spacing:.2px}
-    .pdf-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 13px}
-    .pdf-card{width:100%;border:0;background:transparent;text-align:left;padding:0;cursor:pointer}
-    .pdf-cover-wrapper{aspect-ratio:21/26;width:100%;overflow:hidden;border-radius:13px;border:1px solid #e1ebea;background:#eef5f3;margin-bottom:8px}
-    .pdf-cover{display:block;width:100%;height:100%;object-fit:cover}
-    .pdf-title{padding:0 2px;min-height:2.75em;color:#173d40;font-size:12px;line-height:1.35;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left}
-    .pdf-message{grid-column:1/-1;padding:24px 10px;border:1px dashed #b7cfcb;border-radius:12px;text-align:center;color:#71918e;font-size:13px}
-
-    .bottom-nav{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:72px;background:var(--navy);display:grid;grid-template-columns:repeat(4,1fr);border-radius:20px 20px 0 0;box-shadow:0 -5px 18px rgba(8,43,47,.12);padding:5px 5px 6px}
-    .nav-item{border:0;background:transparent;color:#91afad;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-size:11px;font-weight:700}
-    .nav-icon{height:25px;display:flex;align-items:center;justify-content:center}
-    .nav-icon svg{width:23px;height:23px}
-    .nav-item.active{color:#fff}
-    .nav-item.active span{color:#ffd93d}
-    .nav-item.active .nav-icon{color:#fff}
-
-    .tracker-page{padding:25px 24px 30px}
-    .page-header{position:relative;display:flex;align-items:center;justify-content:center;min-height:42px;margin-bottom:18px}
-    .page-header h1{margin:0;font-size:20px;color:var(--text);font-weight:800}
-    .back-button{position:absolute;left:0;top:50%;transform:translateY(-50%);width:38px;height:38px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);font-size:24px;cursor:pointer}
-    .tracker-form-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 16px}
-    .tracker-form-card h2{margin:0 0 16px;font-size:16px}
-    .tracker-form-card form{display:flex;flex-direction:column}
-    .tracker-form-card label{margin:0 0 6px;color:#347d7a;font-size:12px;font-weight:700}
-    .tracker-form-card input,.tracker-form-card select,.tracker-form-card textarea{width:100%;border:1px solid var(--line);border-radius:11px;background:#f8fbfa;color:var(--text);padding:11px 12px;margin:0 0 14px;outline:0;font-size:14px}
-    .input-with-unit{position:relative}.input-with-unit input{padding-right:60px}.input-with-unit span{position:absolute;right:13px;top:13px;color:#71918e;font-size:12px;font-weight:700;pointer-events:none}
-    .primary-btn{border:0;border-radius:12px;background:var(--teal);color:#fff;padding:13px;font-size:14px;font-weight:800;cursor:pointer}
-    .carb-result-card{margin-top:6px;min-height:100px;border-radius:14px;background:var(--teal-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#5b7f7c}.carb-result-card strong{font-size:28px;color:var(--teal)}
-    .pdf-viewer{position:fixed;z-index:40;inset:0;background:#fff}.pdf-viewer-header{height:58px;display:flex;align-items:center;border-bottom:1px solid var(--line);padding:0 14px;gap:10px}.pdf-back{border:0;background:transparent;color:var(--teal);font-weight:700;cursor:pointer}.pdf-viewer-title{margin:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pdf-viewer-content{height:calc(100vh - 58px)}.pdf-viewer-content iframe{width:100%;height:100%;border:0}
-
-    @media(max-width:360px){#home,.tracker-page{padding-left:17px;padding-right:17px}.home-greeting h1{font-size:28px}.summary-grid{gap:9px}.summary-card{padding-left:12px;padding-right:12px}.summary-value{font-size:24px}.streak-copy strong{font-size:22px}}
+    /* Demo-only: tampilkan cover dengan proporsi A4 tanpa crop */
+    .pdf-cover-wrapper { aspect-ratio: 210 / 297; }
+    .pdf-cover { object-fit: contain; }
+    /* Demo-only: judul ebook rata tengah */
+    .pdf-title { text-align: center; }
   </style>
 </head>
 <body>
   <div id="app-screen" class="app-screen">
     <div class="app">
-      <div class="demo-statusbar"><span>9:41</span><span class="demo-status-right"><span>56%</span><span class="battery"><i></i></span></span></div>
-      <div class="appbar"><span class="appbar-title">Aman Diabetes</span><button class="appbar-menu" type="button" aria-label="Menu">⋮</button></div>
-
       <main id="home" data-page-content="home" class="page">
-        <header class="home-greeting">
-          <div>
-            <h1>Hi, <span id="user-name">Akai</span></h1>
-            <p id="greeting-message">Gula darah pagi ini stabil. Terus jaga pola makan siang ini.</p>
-          </div>
-          <button id="logout-btn" class="logout-btn" type="button">Keluar</button>
-        </header>
-
-        <section class="summary-grid" aria-label="Ringkasan kesehatan">
-          <article class="summary-card">
-            <div class="summary-top"><span class="summary-label">GULA DARAH</span><span class="summary-date" id="blood-sugar-date-display">07/09/26</span></div>
-            <div class="summary-value"><span id="blood-sugar-value-display">98</span> <span>mg/dL</span></div>
-            <div class="summary-status" id="blood-sugar-status-display">Normal — puasa</div>
-          </article>
-          <article class="summary-card">
-            <div class="summary-top"><span class="summary-label">BERAT BADAN</span><span class="summary-date" id="weight-date-display">07/09/26</span></div>
-            <div class="summary-value"><span id="weight-value-display">72.4</span> <span>kg</span></div>
-            <div class="summary-status down" id="weight-status-display">↓ 0.3 kg minggu ini</div>
-          </article>
-        </section>
-
-        <section class="streak-card">
-          <div class="streak-left"><span class="streak-icon">🔥</span><div class="streak-copy"><strong><span id="streak-count">2</span> Hari</strong><small>Berturut-turut mencatat</small></div></div>
-          <span class="streak-message">Lanjutkan</span>
-        </section>
-
-        <section class="content-section">
-          <h2>MPD LIBRARY</h2>
-          <div id="pdf-grid" class="pdf-grid"></div>
+        <header class="top-header"><div><h1>Hi, <span id="user-name">Akai</span></h1><p>Semangat jaga pola makan dan hidup<br>sehat hari ini!</p></div><button id="logout-btn" class="logout-btn">Logout</button></header>
+        <section class="streak-card"><div class="streak-left"><span class="streak-icon">🔥</span><strong><span id="streak-count">2</span> Day Streak</strong></div><span class="streak-message">Keep it up!</span></section>
+        <section class="content-section"><h2>MPD LIBRARY</h2><div id="pdf-grid" class="pdf-grid"></div></section>
+        <section class="tracker-section"><h2>TRACKER</h2>
+          <button type="button" class="tracker-card" data-page="blood-sugar"><div class="tracker-icon">🩸</div><div class="tracker-info"><h3>TRACKER GULA DARAH</h3><p>Catat dan pantau kadar gula darahmu secara berkala.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="weight"><div class="tracker-icon">⚖️</div><div class="tracker-info"><h3>TRACKER BERAT BADAN</h3><p>Pantau perubahan berat badan dan progresmu.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="carb-calculator"><div class="tracker-icon">🧮</div><div class="tracker-info"><h3>KALKULATOR KARBOHIDRAT</h3><p>Hitung jumlah karbohidrat makananmu.</p></div><span class="tracker-arrow">›</span></button>
         </section>
       </main>
-
-      <main id="blood-sugar" data-page-content="blood-sugar" class="page tracker-page" style="display:none">
-        <header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Tracker Gula Darah</h1></header>
-        <section class="tracker-form-card"><h2>Tambah Catatan</h2><form id="blood-sugar-form">
-          <label for="blood-sugar-date">Tanggal &amp; Waktu</label><input id="blood-sugar-date" type="datetime-local" name="recorded_at">
-          <label for="blood-sugar-value">Gula Darah</label><div class="input-with-unit"><input id="blood-sugar-value" type="number" name="blood_sugar" min="0" step="0.1" placeholder="Contoh: 120" required><span>mg/dL</span></div>
-          <label for="measurement-type">Waktu Pengukuran</label><select id="measurement-type" name="measurement_type"><option value="">Pilih waktu</option><option value="Sebelum makan">Sebelum makan</option><option value="Sesudah makan">Sesudah makan</option><option value="Pagi">Pagi</option><option value="Siang">Siang</option><option value="Malam">Malam</option><option value="Lainnya">Lainnya</option></select>
-          <label for="blood-sugar-notes">Catatan</label><textarea id="blood-sugar-notes" name="notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
-          <button type="submit" class="primary-btn">Simpan Data</button>
-        </form></section>
-      </main>
-
-      <main id="weight" data-page-content="weight" class="page tracker-page" style="display:none">
-        <header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Tracker Berat Badan</h1></header>
-        <section class="tracker-form-card"><h2>Tambah Catatan</h2><form id="weight-form">
-          <label for="weight-date">Tanggal &amp; Waktu</label><input id="weight-date" type="datetime-local" name="recorded_at">
-          <label for="weight-value">Berat Badan</label><div class="input-with-unit"><input id="weight-value" type="number" name="weight" min="0" step="0.1" placeholder="Contoh: 65.5" required><span>kg</span></div>
-          <label for="weight-notes">Catatan</label><textarea id="weight-notes" name="notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
-          <button type="submit" class="primary-btn">Simpan Data</button>
-        </form></section>
-      </main>
-
-      <main id="carb-calculator" data-page-content="carb-calculator" class="page tracker-page" style="display:none">
-        <header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Kalkulator Karbohidrat</h1></header>
-        <section class="tracker-form-card"><h2>Hitung Karbohidrat</h2><form id="carb-calculator-form"></form><div class="carb-result-card"><span>Total Karbohidrat</span><strong id="carb-result">0 g</strong></div></section>
-      </main>
-
-      <div id="pdf-viewer" class="pdf-viewer" data-pdf-viewer style="display:none"><header class="pdf-viewer-header"><button type="button" id="pdf-back" class="pdf-back">‹ Kembali</button><h1 id="pdf-viewer-title" class="pdf-viewer-title">Materi</h1></header><div class="pdf-viewer-content"><iframe id="pdf-frame" title="PDF Viewer" data-pdf-frame></iframe></div></div>
-
-      <nav class="bottom-nav">
-        <button type="button" class="nav-item active" data-page="home"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></div><span>Home</span></button>
-        <button type="button" class="nav-item" data-page="blood-sugar"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg></div><span>Gula Darah</span></button>
-        <button type="button" class="nav-item" data-page="weight"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M4 7h6M14 7h6"/><path d="M7 7 4 13a3 3 0 0 0 6 0L7 7Z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6Z"/></svg></div><span>BB Tracker</span></button>
-        <button type="button" class="nav-item" data-page="carb-calculator"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg></div><span>Karbo Calc</span></button>
-      </nav>
+      <main id="blood-sugar" data-page-content="blood-sugar" class="page tracker-page" style="display: none;"><header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Tracker Gula Darah</h1></header><section class="tracker-form-card"><h2>Tambah Catatan</h2><form id="blood-sugar-form"><label for="blood-sugar-date">Tanggal &amp; Waktu</label><input id="blood-sugar-date" type="datetime-local" name="recorded_at"><label for="blood-sugar-value">Gula Darah</label><div class="input-with-unit"><input id="blood-sugar-value" type="number" name="blood_sugar" min="0" step="0.1" placeholder="Contoh: 120" required><span>mg/dL</span></div><label for="measurement-type">Waktu Pengukuran</label><select id="measurement-type" name="measurement_type"><option value="">Pilih waktu</option><option value="Sebelum makan">Sebelum makan</option><option value="Sesudah makan">Sesudah makan</option><option value="Pagi">Pagi</option><option value="Siang">Siang</option><option value="Malam">Malam</option><option value="Lainnya">Lainnya</option></select><label for="blood-sugar-notes">Catatan</label><textarea id="blood-sugar-notes" name="notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea><button type="submit" class="primary-btn">Simpan Data</button></form></section></main>
+      <main id="weight" data-page-content="weight" class="page tracker-page" style="display: none;"><header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Tracker Berat Badan</h1></header><section class="tracker-form-card"><h2>Tambah Catatan</h2><form id="weight-form"><label for="weight-date">Tanggal &amp; Waktu</label><input id="weight-date" type="datetime-local" name="recorded_at"><label for="weight-value">Berat Badan</label><div class="input-with-unit"><input id="weight-value" type="number" name="weight" min="0" step="0.1" placeholder="Contoh: 65.5" required><span>kg</span></div><label for="weight-notes">Catatan</label><textarea id="weight-notes" type="text" name="notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea><button type="submit" class="primary-btn">Simpan Data</button></form></section></main>
+      <main id="carb-calculator" data-page-content="carb-calculator" class="page tracker-page" style="display: none;"><header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Kalkulator Karbohidrat</h1></header><section class="tracker-form-card"><h2>Hitung Karbohidrat</h2><form id="carb-calculator-form"></form><div class="carb-result-card"><span>Total Karbohidrat</span><strong id="carb-result">0 g</strong></div></section></main>
+      <div id="pdf-viewer" class="pdf-viewer" data-pdf-viewer style="display: none;"><header class="pdf-viewer-header"><button type="button" id="pdf-back" class="pdf-back">‹ Kembali</button><h1 id="pdf-viewer-title" class="pdf-viewer-title">Materi</h1></header><div class="pdf-viewer-content"><iframe id="pdf-frame" title="PDF Viewer" data-pdf-frame></iframe></div></div>
+      <nav class="bottom-nav"><button type="button" class="nav-item active" data-page="home"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></div><span>Home</span></button><button type="button" class="nav-item" data-page="blood-sugar"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg></div><span>Gula Darah</span></button><button type="button" class="nav-item" data-page="weight"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M4 7h6M14 7h6"/><path d="M7 7 4 13a3 3 0 0 0 6 0L7 7Z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6Z"/></svg></div><span>BB Tracker</span></button><button type="button" class="nav-item" data-page="carb-calculator"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg></div><span>Karbo Calc</span></button></nav>
     </div>
   </div>
-
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js"></script>
@@ -182,90 +41,19 @@
   <script src="streak.js"></script>
   <script>
     const previewPdfs = [
-      ['Mengenal Diabetes','01-Mengenal-Diabetes.pdf','01-Mengenal-Diabetes.webp'],
-      ['Panduan Aktivitas Harian untuk Diabetes','02-Panduan-Aktivitas-Harian-untuk-Diabetes.pdf','02-Panduan-Aktivitas-Harian-untuk-Diabetes.webp'],
-      ['30 Menu Ramah Diabetes','03-30-Menu-Ramah-Diabetes.pdf','03-30-Menu-Ramah-Diabetes.webp'],
-      ['Panduan Porsi Makan untuk Diabetes','05-Panduan-Porsi-Makan-untuk-Diabetes.pdf','05-Panduan-Porsi-Makan-untuk-Diabetes.webp'],
-      ['Panduan Pengganti Karbohidrat','06-Panduan-Pengganti-Karbohidrat.pdf','06-Panduan-Pengganti-Karbohidrat.webp'],
-      ['Daftar Belanja Ramah Diabetes','07-Daftar-Belanja-Ramah-Diabetes.pdf','07-Daftar-Belanja-Ramah-Diabetes.webp'],
-      ['Panduan Meal Plan Diabetes','08-Panduan-Meal-Plan-Diabetes.pdf','08-Panduan-Meal-Plan-Diabetes.webp'],
-      ['Panduan Cemilan Ramah Diabetes','09-Panduan-Cemilan-Ramah-Diabetes.pdf','09-Panduan-Cemilan-Ramah-Diabetes.webp']
+      ['01', 'Mengenal Diabetes', '01-Mengenal-Diabetes.pdf', '01-Mengenal-Diabetes.webp'],
+      ['02', 'Panduan Aktivitas Harian untuk Diabetes', '02-Panduan-Aktivitas-Harian-untuk-Diabetes.pdf', '02-Panduan-Aktivitas-Harian-untuk-Diabetes.webp'],
+      ['03', '30 Menu Ramah Diabetes', '03-30-Menu-Ramah-Diabetes.pdf', '03-30-Menu-Ramah-Diabetes.webp'],
+      ['04', 'Cheat Sheet Makanan Ramah Diabetes', '04-Cheat-Sheet-Makanan-Ramah-Diabetes.pdf', '04-Cheat-Sheet-Makanan-Ramah-Diabetes.webp'],
+      ['05', 'Panduan Porsi Makan untuk Diabetes', '05-Panduan-Porsi-Makan-untuk-Diabetes.pdf', '05-Panduan-Porsi-Makan-untuk-Diabetes.webp'],
+      ['06', 'Panduan Pengganti Karbohidrat', '06-Panduan-Pengganti-Karbohidrat.pdf', '06-Panduan-Pengganti-Karbohidrat.webp'],
+      ['07', 'Daftar Belanja Ramah Diabetes', '07-Daftar-Belanja-Ramah-Diabetes.pdf', '07-Daftar-Belanja-Ramah-Diabetes.webp'],
+      ['08', 'Panduan Meal Plan Diabetes', '08-Panduan-Meal-Plan-Diabetes.pdf', '08-Panduan-Meal-Plan-Diabetes.webp'],
+      ['09', 'Panduan Cemilan Ramah Diabetes', '09-Panduan-Cemilan-Ramah-Diabetes.pdf', '09-Panduan-Cemilan-Ramah-Diabetes.webp'],
+      ['10', 'Panduan Minuman dan Gula Ramah Diabetes', '10-Panduan-Minuman-dan-Gula-Ramah-Diabetes.pdf', '10-Panduan-Minuman-dan-Gula-Ramah-Diabetes.webp']
     ];
-
-    function renderDemoLibrary(){
-      const container=document.querySelector('#pdf-grid');
-      if(!container)return;
-      if(container.dataset.firebaseRendered==='true')return;
-      container.innerHTML='';
-      previewPdfs.forEach(([title,pdfFile,coverFile])=>{
-        const card=document.createElement('button');
-        card.type='button'; card.className='pdf-card';
-        card.innerHTML=`<div class="pdf-cover-wrapper"><img class="pdf-cover" src="assets/covers/${coverFile}" alt="${title}" loading="lazy"></div><div class="pdf-title">${title}</div>`;
-        card.addEventListener('click',()=>openPdfViewer({title,pdf_url:`assets/pdfs/${pdfFile}`}));
-        container.appendChild(card);
-      });
-    }
-
-    function formatDemoDate(value){
-      if(!value)return '—';
-      let d;
-      if(value.toDate)d=value.toDate(); else if(value.seconds)d=new Date(value.seconds*1000); else d=new Date(value);
-      if(Number.isNaN(d.getTime()))return '—';
-      return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(-2);
-    }
-
-    function latestRecord(records){
-      return (records||[]).slice().sort((a,b)=>{
-        const ad=a.recorded_at?.toDate?a.recorded_at.toDate():new Date(a.recorded_at||0);
-        const bd=b.recorded_at?.toDate?b.recorded_at.toDate():new Date(b.recorded_at||0);
-        return bd-ad;
-      })[0]||null;
-    }
-
-    async function updateHomeSummary(user){
-      if(!user)return;
-      try{
-        const [sugarSnap,weightSnap]=await Promise.all([
-          firebase.firestore().collection('blood_sugar_tracker').where('user_id','==',user.uid).get(),
-          firebase.firestore().collection('weight_tracker').where('user_id','==',user.uid).get()
-        ]);
-        const sugars=sugarSnap.docs.map(d=>({id:d.id,...d.data()}));
-        const weights=weightSnap.docs.map(d=>({id:d.id,...d.data()}));
-        const sugar=latestRecord(sugars), weight=latestRecord(weights);
-        if(sugar){
-          document.querySelector('#blood-sugar-value-display').textContent=Number(sugar.blood_sugar).toLocaleString('id-ID',{maximumFractionDigits:1});
-          document.querySelector('#blood-sugar-date-display').textContent=formatDemoDate(sugar.recorded_at);
-          const type=(sugar.measurement_type||'puasa').toLowerCase();
-          const label=type==='pagi'?'puasa':type;
-          document.querySelector('#blood-sugar-status-display').textContent='Normal — '+label;
-        }
-        if(weight){
-          document.querySelector('#weight-value-display').textContent=Number(weight.weight).toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1});
-          document.querySelector('#weight-date-display').textContent=formatDemoDate(weight.recorded_at);
-          const sorted=weights.slice().sort((a,b)=>{
-            const ad=a.recorded_at?.toDate?a.recorded_at.toDate():new Date(a.recorded_at||0); const bd=b.recorded_at?.toDate?b.recorded_at.toDate():new Date(b.recorded_at||0); return bd-ad;
-          });
-          const latest=Number(weight.weight); const weekAgo=Date.now()-7*86400000;
-          const previous=sorted.find(r=>{const d=r.recorded_at?.toDate?r.recorded_at.toDate():new Date(r.recorded_at||0); return d.getTime()<weekAgo;});
-          if(previous){
-            const diff=latest-Number(previous.weight);
-            const sign=diff<0?'↓':diff>0?'↑':'—';
-            document.querySelector('#weight-status-display').textContent=sign+' '+Math.abs(diff).toFixed(1)+' kg minggu ini';
-          }
-        }
-      }catch(error){console.warn('Demo home summary:',error)}
-    }
-
-    document.addEventListener('DOMContentLoaded',()=>{
-      renderDemoLibrary();
-      if(typeof StreakEngine!=='undefined'){
-        const streak=StreakEngine.recordActivity();
-        const count=document.querySelector('#streak-count'); if(count)count.textContent=streak.count;
-      }
-      if(window.firebase){
-        firebase.auth().onAuthStateChanged(user=>{ if(user) updateHomeSummary(user); });
-      }
-    });
+    function renderPreviewLibrary() { const container = document.querySelector('#pdf-grid'); if (!container) return; container.innerHTML = ''; previewPdfs.forEach(([num,title,pdfFile,coverFile]) => { const card=document.createElement('button'); card.type='button'; card.className='pdf-card'; card.innerHTML=`<div class="pdf-cover-wrapper"><img class="pdf-cover" src="assets/covers/${coverFile}" alt="${title}" loading="lazy"></div><div class="pdf-title">${title}</div>`; card.addEventListener('click',()=>{openPdfViewer({title,pdf_url:`assets/pdfs/${pdfFile}`});}); container.appendChild(card); }); }
+    document.addEventListener('DOMContentLoaded',()=>{renderPreviewLibrary();if(typeof StreakEngine!=='undefined'){const streak=StreakEngine.recordActivity();const count=document.querySelector('#streak-count');if(count)count.textContent=streak.count;}['#blood-sugar-form','#weight-form'].forEach((selector)=>{const form=document.querySelector(selector);if(!form)return;form.addEventListener('submit',(event)=>{event.preventDefault();event.stopImmediatePropagation();alert('Mode preview: data tidak disimpan.');},true);});});
   </script>
 </body>
 </html>
