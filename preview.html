@@ -2,13 +2,18 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, user-scalable=no">
   <title>Aman Diabetes — Preview</title>
   <link rel="stylesheet" href="style.css">
   <style>
     .preview-badge{margin:0 0 18px;padding:10px 14px;border-radius:12px;background:#eef7f1;color:#26734d;font-size:12px;font-weight:700;text-align:center}
-    .pdf-card{cursor:pointer}
     .preview-note{font-size:12px;color:#777;margin:-8px 0 18px}
+    .pdf-card{cursor:pointer}
+    .pdf-cover{background-size:cover;background-position:center;overflow:hidden}
+    .streak-card{cursor:default}
+    .streak-test{margin-top:12px;padding:12px;border:1px dashed #cfd8d2;border-radius:12px;background:#fff;font-size:12px;color:#555}
+    .streak-test strong{color:#26734d}
+    .streak-test button{margin-top:8px;border:0;background:transparent;color:#26734d;font-weight:700;cursor:pointer;padding:0}
   </style>
 </head>
 <body>
@@ -24,8 +29,8 @@
         </header>
 
         <section class="streak-card">
-          <div class="streak-left"><span class="streak-icon">🔥</span><strong>2 Day Streak</strong></div>
-          <span class="streak-message">Keep it up!</span>
+          <div class="streak-left"><span class="streak-icon">🔥</span><strong><span id="streak-count">1</span> Day Streak</strong></div>
+          <span id="streak-message" class="streak-message">Keep it up!</span>
         </section>
 
         <section class="content-section">
@@ -93,26 +98,27 @@
     </div>
   </div>
 
+<script src="streak.js"></script>
 <script>
 const PDFs = [
-  ['01','Mengenal Diabetes','01-Mengenal-Diabetes.pdf'],
-  ['02','Panduan Aktivitas Harian untuk Diabetes','02-Panduan-Aktivitas-Harian-untuk-Diabetes.pdf'],
-  ['03','30 Menu Ramah Diabetes','03-30-Menu-Ramah-Diabetes.pdf'],
-  ['04','Cheat Sheet Makanan Ramah Diabetes','04-Cheat-Sheet-Makanan-Ramah-Diabetes.pdf'],
-  ['05','Panduan Porsi Makan untuk Diabetes','05-Panduan-Porsi-Makan-untuk-Diabetes.pdf'],
-  ['06','Panduan Pengganti Karbohidrat','06-Panduan-Pengganti-Karbohidrat.pdf'],
-  ['07','Daftar Belanja Ramah Diabetes','07-Daftar-Belanja-Ramah-Diabetes.pdf'],
-  ['08','Panduan Meal Plan Diabetes','08-Panduan-Meal-Plan-Diabetes.pdf'],
-  ['09','Panduan Cemilan Ramah Diabetes','09-Panduan-Cemilan-Ramah-Diabetes.pdf'],
-  ['10','Panduan Minuman dan Gula Ramah Diabetes','10-Panduan-Minuman-dan-Gula-Ramah-Diabetes.pdf']
+  ['01','Mengenal Diabetes','01-Mengenal-Diabetes.pdf','01-Mengenal-Diabetes.webp'],
+  ['02','Panduan Aktivitas Harian untuk Diabetes','02-Panduan-Aktivitas-Harian-untuk-Diabetes.pdf','02-Panduan-Aktivitas-Harian-untuk-Diabetes.webp'],
+  ['03','30 Menu Ramah Diabetes','03-30-Menu-Ramah-Diabetes.pdf','03-30-Menu-Ramah-Diabetes.webp'],
+  ['04','Cheat Sheet Makanan Ramah Diabetes','04-Cheat-Sheet-Makanan-Ramah-Diabetes.pdf','04-Cheat-Sheet-Makanan-Ramah-Diabetes.webp'],
+  ['05','Panduan Porsi Makan untuk Diabetes','05-Panduan-Porsi-Makan-untuk-Diabetes.pdf','05-Panduan-Porsi-Makan-untuk-Diabetes.webp'],
+  ['06','Panduan Pengganti Karbohidrat','06-Panduan-Pengganti-Karbohidrat.pdf','06-Panduan-Pengganti-Karbohidrat.webp'],
+  ['07','Daftar Belanja Ramah Diabetes','07-Daftar-Belanja-Ramah-Diabetes.pdf','07-Daftar-Belanja-Ramah-Diabetes.webp'],
+  ['08','Panduan Meal Plan Diabetes','08-Panduan-Meal-Plan-Diabetes.pdf','08-Panduan-Meal-Plan-Diabetes.webp'],
+  ['09','Panduan Cemilan Ramah Diabetes','09-Panduan-Cemilan-Ramah-Diabetes.pdf','09-Panduan-Cemilan-Ramah-Diabetes.webp'],
+  ['10','Panduan Minuman dan Gula Ramah Diabetes','10-Panduan-Minuman-dan-Gula-Ramah-Diabetes.pdf','10-Panduan-Minuman-dan-Gula-Ramah-Diabetes.webp']
 ];
 
 const grid = document.getElementById('pdf-grid');
-PDFs.forEach(([num,title,file]) => {
+PDFs.forEach(([num,title,file,cover]) => {
   const card=document.createElement('button');
   card.type='button';
   card.className='pdf-card';
-  card.innerHTML='<div class="pdf-cover"><span>'+num+'</span></div><div class="pdf-info"><h3>'+title+'</h3><p>BUKA MATERI ›</p></div>';
+  card.innerHTML='<div class="pdf-cover" style="background-image:url(\'assets/covers/'+cover+'\')"><span>'+num+'</span></div><div class="pdf-info"><h3>'+title+'</h3><p>BUKA MATERI ›</p></div>';
   card.onclick=()=>openPdf(title,'assets/pdfs/'+file);
   grid.appendChild(card);
 });
@@ -125,8 +131,8 @@ function showPage(page){
 }
 
 document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>showPage(el.dataset.page)));
-
 document.getElementById('pdf-back').onclick=()=>showPage('home');
+
 function openPdf(title,url){
   document.querySelectorAll('[data-page-content]').forEach(el=>el.style.display='none');
   document.getElementById('pdf-viewer').style.display='block';
@@ -136,10 +142,23 @@ function openPdf(title,url){
   window.scrollTo(0,0);
 }
 
-const carbItems=[['Nasi putih','0'],['Nasi merah','0'],['Kentang rebus','0']];
+const carbItems=[['Nasi putih'],['Nasi merah'],['Kentang rebus']];
 const carb=document.getElementById('carb-items');
 carbItems.forEach(([name])=>{carb.insertAdjacentHTML('beforeend','<label>'+name+'</label><div class="input-with-unit"><input class="carb-input" type="number" min="0" step="0.1" value="0"><span>g</span></div>')});
 function calculateCarbs(){const total=[...document.querySelectorAll('.carb-input')].reduce((s,x)=>s+(parseFloat(x.value)||0),0);document.getElementById('carb-result').textContent=total.toFixed(1)+' g';}
+
+// Preview memakai streak engine yang sama dengan aplikasi utama nantinya.
+const streak = StreakEngine.load();
+const streakResult = streak.recordActivity();
+document.getElementById('streak-count').textContent = streakResult.count;
+document.getElementById('streak-message').textContent = streakResult.count === 1 ? 'Great start!' : 'Keep it up!';
+
+// Tombol kecil untuk menguji reset/login tanpa mengubah data aplikasi utama.
+const test=document.createElement('div');
+test.className='streak-test';
+test.innerHTML='<strong>Streak Preview</strong><br>Login hari ini dihitung sebagai aktivitas. Login ulang di hari yang sama tidak menambah streak.<br><button type="button" id="reset-streak-test">Reset simulasi streak</button>';
+document.querySelector('.streak-card').after(test);
+document.getElementById('reset-streak-test').onclick=()=>{StreakEngine.reset();location.reload();};
 </script>
 </body>
 </html>
