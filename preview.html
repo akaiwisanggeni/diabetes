@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aman Diabetes — Preview</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .preview-badge{margin:0 0 18px;padding:10px 14px;border-radius:12px;background:#eef7f1;color:#26734d;font-size:12px;font-weight:700;text-align:center}
+    .pdf-card{cursor:pointer}
+    .preview-note{font-size:12px;color:#777;margin:-8px 0 18px}
+  </style>
+</head>
+<body>
+  <div id="app-screen" class="app-screen">
+    <div class="app">
+      <main id="home" data-page-content="home" class="page">
+        <header class="top-header">
+          <div>
+            <h1>Hi, <span>Akai</span></h1>
+            <p>Semangat jaga pola makan dan hidup<br>sehat hari ini!</p>
+          </div>
+          <span class="preview-badge">PREVIEW MODE</span>
+        </header>
+
+        <section class="streak-card">
+          <div class="streak-left"><span class="streak-icon">🔥</span><strong>2 Day Streak</strong></div>
+          <span class="streak-message">Keep it up!</span>
+        </section>
+
+        <section class="content-section">
+          <h2>MPD LIBRARY</h2>
+          <p class="preview-note">Semua materi tersedia untuk direview tanpa login.</p>
+          <div id="pdf-grid" class="pdf-grid"></div>
+        </section>
+
+        <section class="tracker-section">
+          <h2>TRACKER</h2>
+          <button type="button" class="tracker-card" data-page="blood-sugar"><div class="tracker-icon">🩸</div><div class="tracker-info"><h3>TRACKER GULA DARAH</h3><p>Catat dan pantau kadar gula darahmu secara berkala.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="weight"><div class="tracker-icon">⚖️</div><div class="tracker-info"><h3>TRACKER BERAT BADAN</h3><p>Pantau perubahan berat badan dan progresmu.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="carb-calculator"><div class="tracker-icon">🧮</div><div class="tracker-info"><h3>KALKULATOR KARBOHIDRAT</h3><p>Hitung jumlah karbohidrat makananmu.</p></div><span class="tracker-arrow">›</span></button>
+        </section>
+      </main>
+
+      <main id="blood-sugar" data-page-content="blood-sugar" class="page tracker-page" style="display:none">
+        <header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Tracker Gula Darah</h1></header>
+        <section class="tracker-form-card">
+          <h2>Tambah Catatan</h2>
+          <form onsubmit="return false">
+            <label>Tanggal &amp; Waktu</label><input type="datetime-local">
+            <label>Gula Darah</label><div class="input-with-unit"><input type="number" min="0" step="0.1" placeholder="Contoh: 120"><span>mg/dL</span></div>
+            <label>Waktu Pengukuran</label><select><option>Pilih waktu</option><option>Sebelum makan</option><option>Sesudah makan</option><option>Pagi</option><option>Siang</option><option>Malam</option><option>Lainnya</option></select>
+            <label>Catatan</label><textarea rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
+            <button type="button" class="primary-btn" onclick="alert('Mode preview: data tidak disimpan.')">Simpan Data</button>
+          </form>
+        </section>
+      </main>
+
+      <main id="weight" data-page-content="weight" class="page tracker-page" style="display:none">
+        <header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Tracker Berat Badan</h1></header>
+        <section class="tracker-form-card">
+          <h2>Tambah Catatan</h2>
+          <form onsubmit="return false">
+            <label>Tanggal &amp; Waktu</label><input type="datetime-local">
+            <label>Berat Badan</label><div class="input-with-unit"><input type="number" min="0" step="0.1" placeholder="Contoh: 65.5"><span>kg</span></div>
+            <label>Catatan</label><textarea rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
+            <button type="button" class="primary-btn" onclick="alert('Mode preview: data tidak disimpan.')">Simpan Data</button>
+          </form>
+        </section>
+      </main>
+
+      <main id="carb-calculator" data-page-content="carb-calculator" class="page tracker-page" style="display:none">
+        <header class="page-header"><button type="button" class="back-button" data-page="home">‹</button><h1>Kalkulator Karbohidrat</h1></header>
+        <section class="tracker-form-card">
+          <h2>Hitung Karbohidrat</h2>
+          <div id="carb-items"></div>
+          <button type="button" class="primary-btn" onclick="calculateCarbs()">Hitung</button>
+          <div class="carb-result-card"><span>Total Karbohidrat</span><strong id="carb-result">0 g</strong></div>
+        </section>
+      </main>
+
+      <div id="pdf-viewer" class="pdf-viewer" style="display:none">
+        <header class="pdf-viewer-header"><button type="button" id="pdf-back" class="pdf-back">‹ Kembali</button><h1 id="pdf-viewer-title" class="pdf-viewer-title">Materi</h1></header>
+        <div class="pdf-viewer-content"><iframe id="pdf-frame" title="PDF Viewer"></iframe></div>
+      </div>
+
+      <nav class="bottom-nav">
+        <button type="button" class="nav-item active" data-page="home"><div class="nav-icon">⌂</div><span>Home</span></button>
+        <button type="button" class="nav-item" data-page="blood-sugar"><div class="nav-icon">🩸</div><span>Gula Darah</span></button>
+        <button type="button" class="nav-item" data-page="weight"><div class="nav-icon">⚖️</div><span>BB Tracker</span></button>
+        <button type="button" class="nav-item" data-page="carb-calculator"><div class="nav-icon">🧮</div><span>Karbo Calc</span></button>
+      </nav>
+    </div>
+  </div>
+
+<script>
+const PDFs = [
+  ['01','Mengenal Diabetes','01-Mengenal-Diabetes.pdf'],
+  ['02','Panduan Aktivitas Harian untuk Diabetes','02-Panduan-Aktivitas-Harian-untuk-Diabetes.pdf'],
+  ['03','30 Menu Ramah Diabetes','03-30-Menu-Ramah-Diabetes.pdf'],
+  ['04','Cheat Sheet Makanan Ramah Diabetes','04-Cheat-Sheet-Makanan-Ramah-Diabetes.pdf'],
+  ['05','Panduan Porsi Makan untuk Diabetes','05-Panduan-Porsi-Makan-untuk-Diabetes.pdf'],
+  ['06','Panduan Pengganti Karbohidrat','06-Panduan-Pengganti-Karbohidrat.pdf'],
+  ['07','Daftar Belanja Ramah Diabetes','07-Daftar-Belanja-Ramah-Diabetes.pdf'],
+  ['08','Panduan Meal Plan Diabetes','08-Panduan-Meal-Plan-Diabetes.pdf'],
+  ['09','Panduan Cemilan Ramah Diabetes','09-Panduan-Cemilan-Ramah-Diabetes.pdf'],
+  ['10','Panduan Minuman dan Gula Ramah Diabetes','10-Panduan-Minuman-dan-Gula-Ramah-Diabetes.pdf']
+];
+
+const grid = document.getElementById('pdf-grid');
+PDFs.forEach(([num,title,file]) => {
+  const card=document.createElement('button');
+  card.type='button';
+  card.className='pdf-card';
+  card.innerHTML='<div class="pdf-cover"><span>'+num+'</span></div><div class="pdf-info"><h3>'+title+'</h3><p>BUKA MATERI ›</p></div>';
+  card.onclick=()=>openPdf(title,'assets/pdfs/'+file);
+  grid.appendChild(card);
+});
+
+function showPage(page){
+  document.querySelectorAll('[data-page-content]').forEach(el=>el.style.display=el.id===page?'block':'none');
+  document.getElementById('pdf-viewer').style.display='none';
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  window.scrollTo(0,0);
+}
+
+document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>showPage(el.dataset.page)));
+
+document.getElementById('pdf-back').onclick=()=>showPage('home');
+function openPdf(title,url){
+  document.querySelectorAll('[data-page-content]').forEach(el=>el.style.display='none');
+  document.getElementById('pdf-viewer').style.display='block';
+  document.getElementById('pdf-viewer-title').textContent=title;
+  document.getElementById('pdf-frame').src=url;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  window.scrollTo(0,0);
+}
+
+const carbItems=[['Nasi putih','0'],['Nasi merah','0'],['Kentang rebus','0']];
+const carb=document.getElementById('carb-items');
+carbItems.forEach(([name])=>{carb.insertAdjacentHTML('beforeend','<label>'+name+'</label><div class="input-with-unit"><input class="carb-input" type="number" min="0" step="0.1" value="0"><span>g</span></div>')});
+function calculateCarbs(){const total=[...document.querySelectorAll('.carb-input')].reduce((s,x)=>s+(parseFloat(x.value)||0),0);document.getElementById('carb-result').textContent=total.toFixed(1)+' g';}
+</script>
+</body>
+</html>
