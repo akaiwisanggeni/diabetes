@@ -14,6 +14,11 @@
     .pdf-cover {
       object-fit: contain;
     }
+
+    /* Demo-only: judul ebook rata tengah */
+    .pdf-title {
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -67,7 +72,7 @@
             <label for="weight-date">Tanggal &amp; Waktu</label><input id="weight-date" type="datetime-local" name="recorded_at">
             <label for="weight-value">Berat Badan</label>
             <div class="input-with-unit"><input id="weight-value" type="number" name="weight" min="0" step="0.1" placeholder="Contoh: 65.5" required><span>kg</span></div>
-            <label for="weight-notes">Catatan</label><textarea id="weight-notes" name="notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
+            <label for="weight-notes">Catatan</label><textarea id="weight-notes" type="text" name="notes" rows="3" placeholder="Tambahkan catatan jika perlu"></textarea>
             <button type="submit" class="primary-btn">Simpan Data</button>
           </form>
         </section>
@@ -116,8 +121,6 @@
   <script src="streak.js"></script>
 
   <script>
-    // Preview-only PDF library: same card structure as the production app,
-    // but uses the local PDF/cover assets so Firebase is not required.
     const previewPdfs = [
       ['01', 'Mengenal Diabetes', '01-Mengenal-Diabetes.pdf', '01-Mengenal-Diabetes.webp'],
       ['02', 'Panduan Aktivitas Harian untuk Diabetes', '02-Panduan-Aktivitas-Harian-untuk-Diabetes.pdf', '02-Panduan-Aktivitas-Harian-untuk-Diabetes.webp'],
@@ -134,9 +137,7 @@
     function renderPreviewLibrary() {
       const container = document.querySelector('#pdf-grid');
       if (!container) return;
-
       container.innerHTML = '';
-
       previewPdfs.forEach(([num, title, pdfFile, coverFile]) => {
         const card = document.createElement('button');
         card.type = 'button';
@@ -147,29 +148,20 @@
           </div>
           <div class="pdf-title">${title}</div>
         `;
-
         card.addEventListener('click', () => {
-          openPdfViewer({
-            title,
-            pdf_url: `assets/pdfs/${pdfFile}`
-          });
+          openPdfViewer({ title, pdf_url: `assets/pdfs/${pdfFile}` });
         });
-
         container.appendChild(card);
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       renderPreviewLibrary();
-
       if (typeof StreakEngine !== 'undefined') {
         const streak = StreakEngine.recordActivity();
         const count = document.querySelector('#streak-count');
         if (count) count.textContent = streak.count;
       }
-
-      // Preview is read-only: stop tracker forms before the production
-      // Firebase submit handlers can write anything.
       ['#blood-sugar-form', '#weight-form'].forEach((selector) => {
         const form = document.querySelector(selector);
         if (!form) return;
