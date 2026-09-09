@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Aman Diabetes — Preview</title>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -11,9 +11,6 @@
     .pdf-card{cursor:pointer}
     .pdf-cover{background-size:cover;background-position:center;overflow:hidden}
     .streak-card{cursor:default}
-    .streak-test{margin-top:12px;padding:12px;border:1px dashed #cfd8d2;border-radius:12px;background:#fff;font-size:12px;color:#555}
-    .streak-test strong{color:#26734d}
-    .streak-test button{margin-top:8px;border:0;background:transparent;color:#26734d;font-weight:700;cursor:pointer;padding:0}
   </style>
 </head>
 <body>
@@ -147,18 +144,10 @@ const carb=document.getElementById('carb-items');
 carbItems.forEach(([name])=>{carb.insertAdjacentHTML('beforeend','<label>'+name+'</label><div class="input-with-unit"><input class="carb-input" type="number" min="0" step="0.1" value="0"><span>g</span></div>')});
 function calculateCarbs(){const total=[...document.querySelectorAll('.carb-input')].reduce((s,x)=>s+(parseFloat(x.value)||0),0);document.getElementById('carb-result').textContent=total.toFixed(1)+' g';}
 
-// Preview memakai streak engine yang sama dengan aplikasi utama nantinya.
-const streak = StreakEngine.load();
-const streakResult = streak.recordActivity();
+// Login/access ke preview dianggap sebagai aktivitas untuk hari ini.
+const streakResult = StreakEngine.recordActivity();
 document.getElementById('streak-count').textContent = streakResult.count;
 document.getElementById('streak-message').textContent = streakResult.count === 1 ? 'Great start!' : 'Keep it up!';
-
-// Tombol kecil untuk menguji reset/login tanpa mengubah data aplikasi utama.
-const test=document.createElement('div');
-test.className='streak-test';
-test.innerHTML='<strong>Streak Preview</strong><br>Login hari ini dihitung sebagai aktivitas. Login ulang di hari yang sama tidak menambah streak.<br><button type="button" id="reset-streak-test">Reset simulasi streak</button>';
-document.querySelector('.streak-card').after(test);
-document.getElementById('reset-streak-test').onclick=()=>{StreakEngine.reset();location.reload();};
 </script>
 </body>
 </html>
