@@ -254,6 +254,16 @@ button {
   font-weight: 600;
 
   padding: 0 2px;
+
+  /* Reserve tinggi tetap untuk 2 baris, supaya semua card
+     (judul pendek maupun panjang) punya tinggi sama persis
+     dan baris grid selalu sejajar rapi. */
+  min-height: 2.75em;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .pdf-message {
