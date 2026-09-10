@@ -100,9 +100,9 @@ button {
 }
 
 .summary-card-label {
-  color: #7A9E9B;
+  color: #0F2A2E;
 
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -115,9 +115,9 @@ button {
 .summary-card-date {
   flex: 0 0 auto;
 
-  color: #B8CDCB;
+  color: #0F2A2E;
 
-  font-size: 10.5px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
@@ -132,10 +132,10 @@ button {
 }
 
 .summary-card-unit {
-  color: #7A9E9B;
+  color: #2B7A78;
 
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
 
   margin-left: 3px;
 }
@@ -143,7 +143,7 @@ button {
 .summary-card-sub {
   color: #2B7A78;
 
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 700;
 
   white-space: nowrap;
@@ -615,7 +615,7 @@ button {
 
   padding: 13px 16px;
 
-  background: #2B7A78;
+  background: #0F2A2E;
   color: #FFFFFF;
 
   font-size: 14px;
@@ -627,7 +627,7 @@ button {
 }
 
 .primary-btn:hover {
-  background: #1F5F5D;
+  background: #1B3F44;
 }
 
 .primary-btn:active {
@@ -1114,8 +1114,8 @@ body.pdf-viewer-open {
 
 .mpd-blood-sugar-period-btn.active,
 .mpd-weight-period-btn.active {
-  background: #2B7A78 !important;
-  border-color: #2B7A78 !important;
+  background: #0F2A2E !important;
+  border-color: #0F2A2E !important;
   color: #FFFFFF !important;
 }
 
@@ -1128,6 +1128,33 @@ body.pdf-viewer-open {
 .mpd-blood-sugar-progress-value,
 .mpd-weight-progress-value {
   color: #0F2A2E !important;
+}
+
+/* Tanggal, waktu pengukuran, catatan, dan selisih:
+   dibesarkan dan digelapkan (sama seperti warna footer)
+   supaya lebih mudah dibaca. */
+.mpd-blood-sugar-progress-date,
+.mpd-weight-progress-date {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+}
+
+.mpd-blood-sugar-progress-type {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+}
+
+.mpd-blood-sugar-progress-note,
+.mpd-weight-progress-note {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+}
+
+.mpd-blood-sugar-progress-change,
+.mpd-weight-progress-change {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
 }
 
 .mpd-blood-sugar-progress-more,
@@ -1172,6 +1199,11 @@ body.pdf-viewer-open {
 
 .mpd-tracker-delete-btn {
   color: #C24545 !important;
+}
+
+.mpd-tracker-actions button {
+  font-size: 13.5px !important;
+  padding: 6px 4px !important;
 }
 
 /* Kalkulator Karbohidrat (multi-baris) */
