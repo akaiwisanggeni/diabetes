@@ -66,6 +66,146 @@ button {
 }
 
 /* =========================================================
+   BRAND BAR (top app bar)
+   ========================================================= */
+
+.brand-bar {
+  width: 100%;
+
+  background: #FFFFFF;
+  border-bottom: 1px solid #E1EBE9;
+}
+
+.brand-bar-inner {
+  max-width: 480px;
+
+  margin: 0 auto;
+
+  padding: 14px 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-name {
+  color: #0F2A2E;
+
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.brand-menu-btn {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border: 0;
+  background: transparent;
+
+  color: #5C7A78;
+
+  cursor: pointer;
+}
+
+.brand-menu-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* =========================================================
+   SUMMARY CARDS (ringkasan gula darah / berat badan)
+   ========================================================= */
+
+.summary-cards {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 11px;
+
+  margin-bottom: 18px;
+}
+
+.summary-card {
+  min-width: 0;
+
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+  border-radius: 16px;
+
+  padding: 14px 14px 13px;
+}
+
+.summary-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 6px;
+
+  margin-bottom: 11px;
+}
+
+.summary-card-label {
+  color: #7A9E9B;
+
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-card-date {
+  flex: 0 0 auto;
+
+  color: #B8CDCB;
+
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.summary-card-value {
+  color: #0F2A2E;
+
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 800;
+
+  margin-bottom: 7px;
+}
+
+.summary-card-unit {
+  color: #7A9E9B;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  margin-left: 3px;
+}
+
+.summary-card-sub {
+  color: #2B7A78;
+
+  font-size: 11.5px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================
    HOME HEADER
    ========================================================= */
 
@@ -898,6 +1038,12 @@ body.pdf-viewer-open {
 
     box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
   }
+
+  .brand-bar-inner {
+    max-width: 480px;
+
+    box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
+  }
 }
 
 /* =========================================================
@@ -927,6 +1073,18 @@ body.pdf-viewer-open {
 
   .pdf-grid {
     gap: 10px 8px;
+  }
+
+  .summary-cards {
+    gap: 8px;
+  }
+
+  .summary-card {
+    padding: 12px 11px 11px;
+  }
+
+  .summary-card-value {
+    font-size: 22px;
   }
 
   .pdf-title {
