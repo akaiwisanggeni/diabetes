@@ -66,60 +66,6 @@ button {
 }
 
 /* =========================================================
-   BRAND BAR (top app bar)
-   ========================================================= */
-
-.brand-bar {
-  width: 100%;
-
-  background: #FFFFFF;
-  border-bottom: 1px solid #E1EBE9;
-}
-
-.brand-bar-inner {
-  max-width: 480px;
-
-  margin: 0 auto;
-
-  padding: 14px 15px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.brand-name {
-  color: #0F2A2E;
-
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
-
-.brand-menu-btn {
-  width: 32px;
-  height: 32px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex: 0 0 auto;
-
-  border: 0;
-  background: transparent;
-
-  color: #5C7A78;
-
-  cursor: pointer;
-}
-
-.brand-menu-btn svg {
-  width: 19px;
-  height: 19px;
-}
-
-/* =========================================================
    SUMMARY CARDS (ringkasan gula darah / berat badan)
    ========================================================= */
 
@@ -365,7 +311,8 @@ button {
 .pdf-cover-wrapper {
   width: 100%;
 
-  aspect-ratio: 21 / 26;
+  /* Rasio A4 asli supaya cover tidak terpotong. */
+  aspect-ratio: 210 / 297;
 
   overflow: hidden;
 
@@ -383,7 +330,7 @@ button {
 
   display: block;
 
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .pdf-title {
@@ -392,6 +339,8 @@ button {
   font-size: 12.5px;
   line-height: 1.35;
   font-weight: 600;
+
+  text-align: center;
 
   padding: 0 2px;
 
@@ -468,15 +417,15 @@ button {
 
   border-radius: 11px;
 
-  background: #E8F3F1;
-
-  font-size: 19px;
+  /* Samakan dengan warna dasar bottom-nav (footer). */
+  background: #0F2A2E;
+  color: #FFFFFF;
 }
 
-/* Tint tiap tracker icon beda warna, sesuai urutan tanpa ubah HTML */
-.tracker-card:nth-of-type(1) .tracker-icon { background: #FDECEC; }
-.tracker-card:nth-of-type(2) .tracker-icon { background: #E8F3F1; }
-.tracker-card:nth-of-type(3) .tracker-icon { background: #FFF4E3; }
+.tracker-icon svg {
+  width: 21px;
+  height: 21px;
+}
 
 .tracker-info {
   flex: 1;
@@ -1035,12 +984,6 @@ body.pdf-viewer-open {
     min-height: 100vh;
 
     background: #F3F8F7;
-
-    box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
-  }
-
-  .brand-bar-inner {
-    max-width: 480px;
 
     box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
   }
