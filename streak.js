@@ -98,3 +98,207 @@
     calendarDayDifference
   };
 })(window);
+
+/* =========================================================
+   MPD HOME INTEGRATION
+   =========================================================
+   This integration is kept here so the shared streak engine can be
+   loaded by index.html without duplicating the existing app logic.
+   ========================================================= */
+(function (global) {
+  'use strict';
+
+  function setSummaryValue(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    // Preserve the existing unit <span> by changing only the leading text node.
+    const firstTextNode = Array.from(element.childNodes).find(
+      (node) => node.nodeType === Node.TEXT_NODE
+    );
+
+    if (firstTextNode) {
+      firstTextNode.nodeValue = String(value);
+    } else {
+      element.insertBefore(
+        document.createTextNode(String(value)),
+        element.firstChild
+      );
+    }
+  }
+
+  function clearSummaryValue(elementId) {
+    setSummaryValue(elementId, '—');
+  }
+
+  function updateStreakUI(state) {
+    const element = document.getElementById('streak-count');
+    if (!element) return;
+    element.textContent = String(state && Number.isInteger(state.count) ? state.count : 0);
+  }
+
+  function updateBloodSugarSummary() {
+    const dateElement = document.getElementById('summary-blood-sugar-date');
+    const subElement = document.getElementById('summary-blood-sugar-sub');
+
+    const records = Array.isArray(global.bloodSugarRecords)
+      ? global.bloodSugarRecords
+      : [];
+
+    if (!records.length) {
+      if (dateElement) dateElement.textContent = 'Belum ada catatan';
+      clearSummaryValue('summary-blood-sugar-value');
+      if (subElement) subElement.textContent = 'Belum ada catatan';
+      return;
+    }
+
+    const latest = records[0];
+    if (dateElement) dateElement.textContent = global.formatDate(latest.recorded_at);
+    setSummaryValue(
+      'summary-blood-sugar-value',
+      latest.blood_sugar == null ? '—' : latest.blood_sugar
+    );
+
+    // Medical thresholds are intentionally not hardcoded until confirmed.
+    if (subElement) subElement.textContent = 'Terakhir dicatat';
+  }
+
+  function updateWeightSummary() {
+    const dateElement = document.getElementById('summary-weight-date');
+    const subElement = document.getElementById('summary-weight-sub');
+
+    const records = Array.isArray(global.weightRecords)
+      ? global.weightRecords
+      : [];
+
+    if (!records.length) {
+      if (dateElement) dateElement.textContent = 'Belum ada catatan';
+      clearSummaryValue('summary-weight-value');
+      if (subElement) subElement.textContent = 'Belum ada catatan';
+      return;
+    }
+
+    const latest = records[0];
+    const latestDate = global.getRecordDate(latest.recorded_at);
+
+    if (dateElement) dateElement.textContent = global.formatDate(latest.recorded_at);
+    setSummaryValue(
+      'summary-weight-value',
+      latest.weight == null ? '—' : latest.weight
+    );
+
+    if (!subElement) return;
+
+    if (!latestDate) {
+      subElement.textContent = '';
+      return;
+    }
+
+    const targetDate = new Date(latestDate);
+    targetDate.setDate(targetDate.getDate() - 7);
+
+    let comparison = null;
+    let smallestDistance = Infinity;
+
+    records.slice(1).forEach((record) => {
+      const recordDate = global.getRecordDate(record.recorded_at);
+      if (!recordDate || recordDate >= latestDate) return;
+
+      const distance = Math.abs(recordDate.getTime() - targetDate.getTime());
+      if (distance <= 7 * 86400000 && distance < smallestDistance) {
+        smallestDistance = distance;
+        comparison = record;
+      }
+    });
+
+    if (!comparison) {
+      subElement.textContent = records.length === 1 ? 'Data pertama' : '';
+      return;
+    }
+
+    const latestValue = Number(latest.weight);
+    const previousValue = Number(comparison.weight);
+
+    if (!Number.isFinite(latestValue) || !Number.isFinite(previousValue)) {
+      subElement.textContent = '';
+      return;
+    }
+
+    const difference = latestValue - previousValue;
+    const amount = Math.abs(difference);
+
+    if (difference > 0) {
+      subElement.textContent = `↑ ${global.formatNumber(amount)} kg minggu ini`;
+    } else if (difference < 0) {
+      subElement.textContent = `↓ ${global.formatNumber(amount)} kg minggu ini`;
+    } else {
+      subElement.textContent = '→ 0 kg minggu ini';
+    }
+  }
+
+  function updateHomeSummary() {
+    updateBloodSugarSummary();
+    updateWeightSummary();
+  }
+
+  function installLoadHooks() {
+    if (typeof global.loadBloodSugarRecords === 'function' && !global.__mpdBloodSugarSummaryHooked) {
+      const original = global.loadBloodSugarRecords;
+      global.loadBloodSugarRecords = async function () {
+        await original.apply(this, arguments);
+        updateHomeSummary();
+      };
+      global.__mpdBloodSugarSummaryHooked = true;
+    }
+
+    if (typeof global.loadWeightRecords === 'function' && !global.__mpdWeightSummaryHooked) {
+      const original = global.loadWeightRecords;
+      global.loadWeightRecords = async function () {
+        await original.apply(this, arguments);
+        updateHomeSummary();
+      };
+      global.__mpdWeightSummaryHooked = true;
+    }
+  }
+
+  function initializeHomeIntegration() {
+    installLoadHooks();
+
+    if (typeof global.firebaseAuth === 'undefined' || !global.firebaseAuth) {
+      updateStreakUI(global.StreakEngine.load());
+      updateHomeSummary();
+      return;
+    }
+
+    global.firebaseAuth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        updateStreakUI({ count: 0 });
+        return;
+      }
+
+      const state = global.StreakEngine.recordActivity();
+      updateStreakUI(state);
+
+      // The main auth listener in script.js loads these arrays. Awaiting the
+      // same loaders here guarantees the summary reflects the latest records.
+      try {
+        if (typeof global.loadBloodSugarRecords === 'function') {
+          await global.loadBloodSugarRecords();
+        }
+        if (typeof global.loadWeightRecords === 'function') {
+          await global.loadWeightRecords();
+        }
+      } catch (error) {
+        console.error('Home summary load error:', error);
+      }
+
+      updateHomeSummary();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeHomeIntegration, { once: true });
+  } else {
+    initializeHomeIntegration();
+  }
+})(window);
