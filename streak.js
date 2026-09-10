@@ -102,10 +102,12 @@
 /* =========================================================
    MPD HOME INTEGRATION
    =========================================================
-   This integration is kept here so the shared streak engine can be
-   loaded by index.html without duplicating the existing app logic.
+   The existing app state/functions are declared in script.js, which is
+   loaded before this file in index.html. Classic scripts share the same
+   global lexical environment, so we intentionally use those existing
+   bindings directly instead of duplicating Firebase state.
    ========================================================= */
-(function (global) {
+(function () {
   'use strict';
 
   function setSummaryValue(elementId, value) {
@@ -140,10 +142,7 @@
   function updateBloodSugarSummary() {
     const dateElement = document.getElementById('summary-blood-sugar-date');
     const subElement = document.getElementById('summary-blood-sugar-sub');
-
-    const records = Array.isArray(global.bloodSugarRecords)
-      ? global.bloodSugarRecords
-      : [];
+    const records = Array.isArray(bloodSugarRecords) ? bloodSugarRecords : [];
 
     if (!records.length) {
       if (dateElement) dateElement.textContent = 'Belum ada catatan';
@@ -153,7 +152,7 @@
     }
 
     const latest = records[0];
-    if (dateElement) dateElement.textContent = global.formatDate(latest.recorded_at);
+    if (dateElement) dateElement.textContent = formatDate(latest.recorded_at);
     setSummaryValue(
       'summary-blood-sugar-value',
       latest.blood_sugar == null ? '—' : latest.blood_sugar
@@ -166,10 +165,7 @@
   function updateWeightSummary() {
     const dateElement = document.getElementById('summary-weight-date');
     const subElement = document.getElementById('summary-weight-sub');
-
-    const records = Array.isArray(global.weightRecords)
-      ? global.weightRecords
-      : [];
+    const records = Array.isArray(weightRecords) ? weightRecords : [];
 
     if (!records.length) {
       if (dateElement) dateElement.textContent = 'Belum ada catatan';
@@ -179,9 +175,9 @@
     }
 
     const latest = records[0];
-    const latestDate = global.getRecordDate(latest.recorded_at);
+    const latestDate = getRecordDate(latest.recorded_at);
 
-    if (dateElement) dateElement.textContent = global.formatDate(latest.recorded_at);
+    if (dateElement) dateElement.textContent = formatDate(latest.recorded_at);
     setSummaryValue(
       'summary-weight-value',
       latest.weight == null ? '—' : latest.weight
@@ -201,7 +197,7 @@
     let smallestDistance = Infinity;
 
     records.slice(1).forEach((record) => {
-      const recordDate = global.getRecordDate(record.recorded_at);
+      const recordDate = getRecordDate(record.recorded_at);
       if (!recordDate || recordDate >= latestDate) return;
 
       const distance = Math.abs(recordDate.getTime() - targetDate.getTime());
@@ -228,9 +224,9 @@
     const amount = Math.abs(difference);
 
     if (difference > 0) {
-      subElement.textContent = `↑ ${global.formatNumber(amount)} kg minggu ini`;
+      subElement.textContent = `↑ ${formatNumber(amount)} kg minggu ini`;
     } else if (difference < 0) {
-      subElement.textContent = `↓ ${global.formatNumber(amount)} kg minggu ini`;
+      subElement.textContent = `↓ ${formatNumber(amount)} kg minggu ini`;
     } else {
       subElement.textContent = '→ 0 kg minggu ini';
     }
@@ -242,52 +238,44 @@
   }
 
   function installLoadHooks() {
-    if (typeof global.loadBloodSugarRecords === 'function' && !global.__mpdBloodSugarSummaryHooked) {
-      const original = global.loadBloodSugarRecords;
-      global.loadBloodSugarRecords = async function () {
+    if (typeof loadBloodSugarRecords === 'function' && !window.__mpdBloodSugarSummaryHooked) {
+      const original = loadBloodSugarRecords;
+      window.loadBloodSugarRecords = async function () {
         await original.apply(this, arguments);
         updateHomeSummary();
       };
-      global.__mpdBloodSugarSummaryHooked = true;
+      window.__mpdBloodSugarSummaryHooked = true;
     }
 
-    if (typeof global.loadWeightRecords === 'function' && !global.__mpdWeightSummaryHooked) {
-      const original = global.loadWeightRecords;
-      global.loadWeightRecords = async function () {
+    if (typeof loadWeightRecords === 'function' && !window.__mpdWeightSummaryHooked) {
+      const original = loadWeightRecords;
+      window.loadWeightRecords = async function () {
         await original.apply(this, arguments);
         updateHomeSummary();
       };
-      global.__mpdWeightSummaryHooked = true;
+      window.__mpdWeightSummaryHooked = true;
     }
   }
 
   function initializeHomeIntegration() {
     installLoadHooks();
 
-    if (typeof global.firebaseAuth === 'undefined' || !global.firebaseAuth) {
-      updateStreakUI(global.StreakEngine.load());
-      updateHomeSummary();
-      return;
-    }
+    updateStreakUI(StreakEngine.load());
 
-    global.firebaseAuth.onAuthStateChanged(async (user) => {
+    firebaseAuth.onAuthStateChanged(async (user) => {
       if (!user) {
         updateStreakUI({ count: 0 });
         return;
       }
 
-      const state = global.StreakEngine.recordActivity();
+      const state = StreakEngine.recordActivity();
       updateStreakUI(state);
 
-      // The main auth listener in script.js loads these arrays. Awaiting the
-      // same loaders here guarantees the summary reflects the latest records.
+      // The main auth listener in script.js also loads these arrays. Awaiting
+      // the existing loaders here guarantees the summary reflects the latest records.
       try {
-        if (typeof global.loadBloodSugarRecords === 'function') {
-          await global.loadBloodSugarRecords();
-        }
-        if (typeof global.loadWeightRecords === 'function') {
-          await global.loadWeightRecords();
-        }
+        await loadBloodSugarRecords();
+        await loadWeightRecords();
       } catch (error) {
         console.error('Home summary load error:', error);
       }
@@ -301,4 +289,4 @@
   } else {
     initializeHomeIntegration();
   }
-})(window);
+})();
