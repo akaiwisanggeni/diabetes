@@ -1,10 +1,10 @@
 /* =========================================================
-   AMAN DIABETES — /demo
-   Desain 1: "Klinis-Tenang"
-   File ini BERDIRI SENDIRI, tidak mewarisi apa pun dari
-   style.css. Semua selector yang dipakai index.html/preview.html
-   /demo.html dan JS (script.js, carb-calculator.js) didefinisikan
-   ulang di sini secara lengkap.
+   PANDUAN DIABETES — /demo
+   Desain: "Klinis-Tenang"
+   Dipakai khusus oleh demo.html (mockup/preview, bisa dihapus
+   kapan saja). Isinya sama dengan style.css produksi, tapi
+   file terpisah — kalau revisi desain lagi di sini, salin
+   ulang hasilnya ke style.css supaya index.html ikut update.
    ========================================================= */
 
 * {

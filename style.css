@@ -1,6 +1,12 @@
 /* =========================================================
-   MPD — MEAL PLAN DIABETES
-   Complete Mobile UI
+   PANDUAN DIABETES — STYLESHEET UTAMA (index.html)
+   Desain: "Klinis-Tenang"
+   Ini adalah stylesheet produksi yang dipakai index.html.
+   Sumbernya sama dengan demo-style.css (hasil redesign di
+   /demo), tapi sekarang jadi file terpisah — perubahan di
+   salah satu file TIDAK otomatis kepakai di file satunya.
+   Kalau mau revisi desain lagi lewat /demo, jangan lupa
+   salin ulang hasilnya ke sini juga.
    ========================================================= */
 
 * {
@@ -10,14 +16,14 @@
 }
 
 html {
-  background: #dfead6;
+  background: #F3F8F7;
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #dfead6;
-  color: #173f2c;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+  background: #F3F8F7;
+  color: #0F2A2E;
   min-height: 100vh;
 }
 
@@ -115,33 +121,6 @@ button {
   background: #ffffff;
 }
 
-.primary-btn {
-  width: 100%;
-
-  border: 0;
-  border-radius: 14px;
-
-  padding: 13px 16px;
-
-  background: #17603f;
-  color: #ffffff;
-
-  font-size: 14px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.2s ease;
-}
-
-.primary-btn:hover {
-  background: #124d33;
-}
-
-.primary-btn:active {
-  transform: scale(0.98);
-}
-
 .login-message {
   min-height: 20px;
 
@@ -171,12 +150,8 @@ button {
 
   padding: 22px 15px 105px;
 
-  background: #eefbdd;
+  background: #F3F8F7;
 }
-
-/* =========================================================
-   GENERAL PAGE
-   ========================================================= */
 
 .page {
   width: 100%;
@@ -184,6 +159,92 @@ button {
 
 .tracker-page {
   padding-bottom: 20px;
+}
+
+/* =========================================================
+   SUMMARY CARDS (ringkasan gula darah / berat badan)
+   ========================================================= */
+
+.summary-cards {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 11px;
+
+  margin-bottom: 18px;
+}
+
+.summary-card {
+  min-width: 0;
+
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+  border-radius: 16px;
+
+  padding: 14px 14px 13px;
+}
+
+.summary-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 6px;
+
+  margin-bottom: 11px;
+}
+
+.summary-card-label {
+  color: #0F2A2E;
+
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-card-date {
+  flex: 0 0 auto;
+
+  color: #0F2A2E;
+
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.summary-card-value {
+  color: #0F2A2E;
+
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 800;
+
+  margin-bottom: 7px;
+}
+
+.summary-card-unit {
+  color: #2B7A78;
+
+  font-size: 13.5px;
+  font-weight: 700;
+
+  margin-left: 3px;
+}
+
+.summary-card-sub {
+  color: #2B7A78;
+
+  font-size: 12.5px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* =========================================================
@@ -201,34 +262,35 @@ button {
 }
 
 .top-header h1 {
-  color: #111111;
+  color: #0F2A2E;
 
-  font-size: 32px;
-  line-height: 1.1;
+  font-size: 28px;
+  line-height: 1.15;
   font-weight: 800;
+  letter-spacing: -0.3px;
 
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .top-header p {
-  color: #6e746d;
+  color: #5C7A78;
 
-  font-size: 17px;
-  line-height: 1.45;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .logout-btn {
   flex-shrink: 0;
 
-  border: 1px solid #dddddd;
-  border-radius: 12px;
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
 
-  background: #ffffff;
-  color: #444444;
+  background: #E8F3F1;
+  color: #2B7A78;
 
-  padding: 9px 15px;
+  padding: 8px 14px;
 
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
 
   cursor: pointer;
@@ -249,38 +311,37 @@ button {
 
   min-height: 62px;
 
-  padding: 12px 18px;
+  padding: 14px 18px;
 
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 
-  background: #ffffff;
-  border-radius: 30px;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+  background: #0F2A2E;
+  border-radius: 16px;
 }
 
 .streak-left {
   display: flex;
   align-items: center;
 
-  gap: 9px;
+  gap: 10px;
 }
 
 .streak-icon {
-  font-size: 31px;
+  font-size: 26px;
   line-height: 1;
 }
 
 .streak-left strong {
-  color: #202020;
+  color: #FFFFFF;
 
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .streak-message {
-  color: #315f47;
+  color: #4ADE9E;
 
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -290,32 +351,31 @@ button {
 
 .content-section,
 .tracker-section {
-  background: #ffffff;
-  border-radius: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+  border-radius: 16px;
 
-  padding: 20px 17px;
+  padding: 18px 16px;
 
-  margin-bottom: 18px;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+  margin-bottom: 16px;
 }
 
 .content-section h2,
 .tracker-section h2 {
-  color: #215b42;
+  color: #0F2A2E;
 
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
 
-  margin-bottom: 17px;
+  margin-bottom: 15px;
+
+  padding-left: 10px;
+  border-left: 3px solid #2B7A78;
 }
 
 .tracker-section {
-  padding-bottom: 17px;
-}
-
-.tracker-section h2 {
-  margin-bottom: 12px;
+  padding-bottom: 15px;
 }
 
 /* =========================================================
@@ -327,7 +387,7 @@ button {
 
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  gap: 15px 11px;
+  gap: 14px 11px;
 }
 
 .pdf-card {
@@ -347,17 +407,17 @@ button {
 .pdf-cover-wrapper {
   width: 100%;
 
-  aspect-ratio: 21 / 26;
+  /* Rasio A4 asli supaya cover tidak terpotong. */
+  aspect-ratio: 210 / 297;
 
   overflow: hidden;
 
-  border-radius: 13px;
+  border-radius: 10px;
+  border: 1px solid #E1EBE9;
 
-  background: #dfead6;
+  background: #E8F3F1;
 
   margin-bottom: 8px;
-
-  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.05);
 }
 
 .pdf-cover {
@@ -366,17 +426,29 @@ button {
 
   display: block;
 
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .pdf-title {
-  color: #292929;
+  color: #0F2A2E;
 
-  font-size: 13px;
-  line-height: 1.3;
-  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.35;
+  font-weight: 600;
+
+  text-align: center;
 
   padding: 0 2px;
+
+  /* Reserve tinggi tetap untuk 2 baris, supaya semua card
+     (judul pendek maupun panjang) punya tinggi sama persis
+     dan baris grid selalu sejajar rapi. */
+  min-height: 2.75em;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .pdf-message {
@@ -384,11 +456,13 @@ button {
 
   padding: 25px 10px;
 
-  color: #6d746d;
+  color: #7A9E9B;
 
   text-align: center;
 
-  font-size: 14px;
+  font-size: 13px;
+  border: 1px dashed #B8CDCB;
+  border-radius: 12px;
 }
 
 /* =========================================================
@@ -397,7 +471,7 @@ button {
 
 .tracker-card {
   width: 100%;
-  min-height: 91px;
+  min-height: 84px;
 
   display: flex;
   align-items: center;
@@ -406,13 +480,13 @@ button {
 
   padding: 13px;
 
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 
-  border: 0;
-  border-radius: 19px;
+  border: 1px solid #E1EBE9;
+  border-radius: 14px;
 
-  background: #f5f8ef;
-  color: #173f2c;
+  background: #FFFFFF;
+  color: #0F2A2E;
 
   text-align: left;
 
@@ -428,21 +502,25 @@ button {
 }
 
 .tracker-icon {
-  width: 55px;
-  height: 55px;
+  width: 42px;
+  height: 42px;
 
-  flex: 0 0 55px;
+  flex: 0 0 42px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
+  border-radius: 11px;
 
-  background: #17603f;
-  color: #ffffff;
+  /* Samakan dengan warna dasar bottom-nav (footer). */
+  background: #0F2A2E;
+  color: #FFFFFF;
+}
 
-  font-size: 25px;
+.tracker-icon svg {
+  width: 21px;
+  height: 21px;
 }
 
 .tracker-info {
@@ -451,28 +529,28 @@ button {
 }
 
 .tracker-info h3 {
-  color: #1c543b;
+  color: #0F2A2E;
 
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.25;
-  font-weight: 800;
+  font-weight: 700;
 
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .tracker-info p {
-  color: #6d746d;
+  color: #7A9E9B;
 
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.35;
 }
 
 .tracker-arrow {
   flex: 0 0 auto;
 
-  color: #6d746d;
+  color: #B8CDCB;
 
-  font-size: 25px;
+  font-size: 22px;
   line-height: 1;
 }
 
@@ -487,17 +565,17 @@ button {
   align-items: center;
   justify-content: center;
 
-  min-height: 48px;
+  min-height: 44px;
 
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .page-header h1 {
-  color: #173f2c;
+  color: #0F2A2E;
 
-  font-size: 22px;
+  font-size: 19px;
   line-height: 1.2;
-  font-weight: 800;
+  font-weight: 700;
 
   text-align: center;
 }
@@ -509,21 +587,19 @@ button {
 
   transform: translateY(-50%);
 
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
 
-  border: 0;
-  border-radius: 50%;
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
 
-  background: #ffffff;
-  color: #173f2c;
+  background: #FFFFFF;
+  color: #0F2A2E;
 
-  font-size: 30px;
+  font-size: 22px;
   line-height: 1;
 
   cursor: pointer;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .back-button:active {
@@ -535,24 +611,23 @@ button {
    ========================================================= */
 
 .tracker-form-card {
-  background: #ffffff;
-  border-radius: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
+  border-radius: 16px;
 
-  padding: 20px 17px;
+  padding: 18px 16px;
 
-  margin-bottom: 18px;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+  margin-bottom: 16px;
 }
 
 .tracker-form-card h2,
 .tracker-history h2 {
-  color: #215b42;
+  color: #0F2A2E;
 
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
 
-  margin-bottom: 17px;
+  margin-bottom: 15px;
 }
 
 .tracker-form-card form {
@@ -561,12 +636,12 @@ button {
 }
 
 .tracker-form-card label {
-  color: #315f47;
+  color: #2B7A78;
 
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 600;
 
-  margin-bottom: 7px;
+  margin-bottom: 6px;
 }
 
 .tracker-form-card input,
@@ -574,32 +649,32 @@ button {
 .tracker-form-card textarea {
   width: 100%;
 
-  border: 1px solid #d8ded3;
-  border-radius: 12px;
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
 
-  background: #fafcf8;
-  color: #173f2c;
+  background: #F8FBFA;
+  color: #0F2A2E;
 
-  padding: 12px 13px;
+  padding: 11px 12px;
 
   font-size: 14px;
 
   outline: none;
 
-  margin-bottom: 15px;
+  margin-bottom: 14px;
 }
 
 .tracker-form-card input:focus,
 .tracker-form-card select:focus,
 .tracker-form-card textarea:focus {
-  border-color: #17603f;
-  background: #ffffff;
+  border-color: #2B7A78;
+  background: #FFFFFF;
 }
 
 .tracker-form-card textarea {
   resize: vertical;
 
-  min-height: 82px;
+  min-height: 80px;
 }
 
 .input-with-unit {
@@ -609,7 +684,7 @@ button {
 }
 
 .input-with-unit input {
-  padding-right: 68px;
+  padding-right: 64px;
 }
 
 .input-with-unit span {
@@ -620,24 +695,47 @@ button {
 
   transform: translateY(-50%);
 
-  color: #6d746d;
+  color: #7A9E9B;
 
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
 
   pointer-events: none;
 }
 
+.primary-btn {
+  width: 100%;
+
+  border: 0;
+  border-radius: 12px;
+
+  padding: 13px 16px;
+
+  background: #0F2A2E;
+  color: #FFFFFF;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #1B3F44;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
 /* =========================================================
-   TRACKER HISTORY
+   TRACKER HISTORY (baris/tabel riwayat lama, jika terpakai)
    ========================================================= */
 
 .tracker-history {
   width: 100%;
-}
-
-.tracker-history > h2 {
-  margin-bottom: 12px;
 }
 
 .section-title-row {
@@ -650,14 +748,10 @@ button {
   margin-bottom: 8px;
 }
 
-.section-title-row h2 {
-  margin-bottom: 0;
-}
-
 .tracker-period {
-  color: #777777;
+  color: #7A9E9B;
 
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.4;
 
   margin-bottom: 12px;
@@ -666,11 +760,11 @@ button {
 .secondary-btn {
   flex-shrink: 0;
 
-  border: 1px solid #cfd8c8;
-  border-radius: 11px;
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
 
-  background: #ffffff;
-  color: #215b42;
+  background: #FFFFFF;
+  color: #2B7A78;
 
   padding: 8px 11px;
 
@@ -680,92 +774,84 @@ button {
   cursor: pointer;
 }
 
-.secondary-btn:active {
-  transform: scale(0.97);
-}
-
 .empty-state {
-  padding: 24px 15px;
+  padding: 22px 15px;
 
-  background: #ffffff;
+  background: #F8FBFA;
+  border: 1px dashed #B8CDCB;
 
-  border-radius: 18px;
+  border-radius: 12px;
 
-  color: #777777;
+  color: #7A9E9B;
 
   font-size: 13px;
 
   text-align: center;
 }
 
-/* =========================================================
-   TRACKER ROW
-   ========================================================= */
-
 .tracker-row {
   width: 100%;
 
-  background: #ffffff;
+  background: #FFFFFF;
+  border: 1px solid #E1EBE9;
 
-  border-radius: 17px;
+  border-radius: 12px;
 
-  padding: 14px 15px;
+  padding: 13px 14px;
 
-  margin-bottom: 9px;
-
-  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.035);
+  margin-bottom: 8px;
 }
 
 .tracker-date {
-  color: #777777;
+  color: #7A9E9B;
 
   font-size: 11px;
   line-height: 1.3;
 
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .tracker-value {
-  color: #173f2c;
+  color: #0F2A2E;
 
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1.2;
-  font-weight: 800;
+  font-weight: 700;
 
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .tracker-value span {
-  color: #777777;
+  color: #7A9E9B;
 
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
 .tracker-type {
-  color: #315f47;
+  color: #2B7A78;
 
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
 
   margin-bottom: 3px;
 }
 
 .tracker-notes {
-  color: #6d746d;
+  color: #5C7A78;
 
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.4;
 
   margin-top: 6px;
 
-  padding-top: 7px;
+  padding-top: 6px;
 
-  border-top: 1px solid #edf0eb;
+  border-top: 1px solid #E1EBE9;
 }
 
 /* =========================================================
-   CARBOHYDRATE RESULT
+   CARB CALCULATOR RESULT
    ========================================================= */
 
 .carb-result-card {
@@ -774,32 +860,33 @@ button {
   align-items: center;
   justify-content: center;
 
-  gap: 7px;
+  gap: 6px;
 
-  min-height: 105px;
+  min-height: 100px;
 
   margin-top: 5px;
 
   padding: 18px;
 
-  border-radius: 20px;
+  border-radius: 14px;
+  border: 1px solid #E1EBE9;
 
-  background: #f0f6e9;
+  background: #E8F3F1;
 
   text-align: center;
 }
 
 .carb-result-card span {
-  color: #6d746d;
+  color: #5C7A78;
 
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
 .carb-result-card strong {
-  color: #17603f;
+  color: #2B7A78;
 
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1;
 
   font-weight: 800;
@@ -819,24 +906,22 @@ button {
   display: flex;
   flex-direction: column;
 
-  background: #eefbdd;
+  background: #F3F8F7;
 }
 
 .pdf-viewer-header {
   flex: 0 0 auto;
 
-  min-height: 62px;
+  min-height: 58px;
 
   display: flex;
   align-items: center;
 
   padding: 9px 13px;
 
-  background: #ffffff;
+  background: #FFFFFF;
 
-  border-bottom: 1px solid #e1e6de;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #E1EBE9;
 }
 
 .pdf-back {
@@ -845,7 +930,7 @@ button {
   border: 0;
   background: transparent;
 
-  color: #17603f;
+  color: #2B7A78;
 
   padding: 9px 5px;
 
@@ -862,10 +947,10 @@ button {
 
   padding: 0 10px;
 
-  color: #173f2c;
+  color: #0F2A2E;
 
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
 
   text-align: center;
 
@@ -880,7 +965,7 @@ button {
 
   width: 100%;
 
-  background: #dfead6;
+  background: #E1EBE9;
 }
 
 .pdf-viewer-content iframe {
@@ -891,11 +976,11 @@ button {
 
   border: 0;
 
-  background: #ffffff;
+  background: #FFFFFF;
 }
 
 /* =========================================================
-   BOTTOM NAVIGATION
+   BOTTOM NAVIGATION — dasar gelap, ikon SVG putih
    ========================================================= */
 
 .bottom-nav {
@@ -912,64 +997,62 @@ button {
 
   grid-template-columns: repeat(4, 1fr);
 
-  padding: 9px 7px 10px;
+  padding: 12px 7px 18px;
 
-  background: #ffffff;
+  background: #0F2A2E;
 
-  border-radius: 27px 27px 0 0;
-
-  box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 22px 22px 0 0;
 
   z-index: 100;
 }
 
 .nav-item {
-  min-height: 61px;
+  min-height: 54px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
 
-  gap: 4px;
+  gap: 5px;
 
   border: 0;
   background: transparent;
 
-  color: #777777;
+  color: rgba(255, 255, 255, 0.55);
 
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 500;
 
   cursor: pointer;
 }
 
 .nav-icon {
-  width: 43px;
-  height: 43px;
+  width: 24px;
+  height: 24px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
+  color: #FFFFFF;
+  opacity: 0.55;
 
-  background: #cbd8b9;
-  color: #ffffff;
+  transition: opacity 0.2s ease;
+}
 
-  font-size: 21px;
-
-  transition: 0.2s ease;
+.nav-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .nav-item.active {
-  color: #205a40;
+  color: #FFFFFF;
+  font-weight: 700;
 }
 
 .nav-item.active .nav-icon {
-  background: #17603f;
-
-  transform: translateY(-2px);
+  opacity: 1;
 }
 
 .nav-item:active {
@@ -990,20 +1073,15 @@ body.pdf-viewer-open {
 
 @media (min-width: 481px) {
   body {
-    background: #dfead6;
-  }
-
-  .login-screen {
-    background: #dfead6;
+    background: #E1EBE9;
   }
 
   .app {
     min-height: 100vh;
 
-    background: #eefbdd;
+    background: #F3F8F7;
 
-    box-shadow:
-      0 0 30px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
   }
 }
 
@@ -1012,81 +1090,65 @@ body.pdf-viewer-open {
    ========================================================= */
 
 @media (max-width: 360px) {
-
   .app {
     padding-left: 12px;
     padding-right: 12px;
   }
 
   .top-header h1 {
-    font-size: 28px;
+    font-size: 25px;
   }
 
   .top-header p {
-    font-size: 15px;
-  }
-
-  .streak-card {
-    padding-left: 15px;
-    padding-right: 15px;
-  }
-
-  .streak-left strong {
-    font-size: 16px;
-  }
-
-  .streak-message {
-    font-size: 12px;
+    font-size: 13.5px;
   }
 
   .content-section,
   .tracker-section,
   .tracker-form-card {
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 13px;
+    padding-right: 13px;
   }
 
   .pdf-grid {
-    gap: 11px 9px;
+    gap: 10px 8px;
   }
 
-  .pdf-title {
-    font-size: 12px;
+  .summary-cards {
+    gap: 8px;
   }
 
-  .tracker-info h3 {
-    font-size: 13px;
+  .summary-card {
+    padding: 12px 11px 11px;
   }
 
-  .tracker-info p {
-    font-size: 11px;
-  }
-
-  .tracker-icon {
-    width: 50px;
-    height: 50px;
-
-    flex-basis: 50px;
-
+  .summary-card-value {
     font-size: 22px;
   }
 
-  .nav-icon {
-    width: 40px;
-    height: 40px;
+  .pdf-title {
+    font-size: 11.5px;
+  }
+
+  .tracker-info h3 {
+    font-size: 12.5px;
+  }
+
+  .tracker-info p {
+    font-size: 10.5px;
+  }
+
+  .tracker-icon {
+    width: 38px;
+    height: 38px;
+
+    flex-basis: 38px;
+
+    font-size: 17px;
   }
 
   .nav-item {
-    font-size: 10px;
-  }
-
-  .section-title-row {
-    align-items: flex-start;
-  }
-
-  .secondary-btn {
-    font-size: 10px;
-    padding: 7px 9px;
+    font-size: 9.5px;
   }
 }
 
@@ -1096,10 +1158,174 @@ body.pdf-viewer-open {
 
 @media (hover: hover) {
   .tracker-card:hover {
-    background: #edf4e5;
+    border-color: #B8CDCB;
   }
 
   .pdf-card:hover .pdf-cover-wrapper {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #B8CDCB;
   }
+
+  .secondary-btn:hover,
+  .logout-btn:hover {
+    background: #DFF0EC;
+  }
+}
+
+/* =========================================================
+   OVERRIDE WARNA UNTUK ELEMEN YANG DI-GENERATE JS
+   ---------------------------------------------------------
+   script.js dan carb-calculator.js menyuntikkan <style> mereka
+   sendiri saat runtime (chart gula darah, chart berat badan,
+   modal edit, kalkulator karbo multi-baris). File JS itu TIDAK
+   diubah sama sekali — override di bawah ini HANYA mengganti
+   warna/aksen lewat CSS baru, ditandai !important karena
+   <style> bawaan JS disisipkan belakangan di <head> sehingga
+   menang duluan tanpa override eksplisit.
+   ========================================================= */
+
+/* Chart Gula Darah */
+#mpd-blood-sugar-chart-card,
+#mpd-weight-progress-card {
+  border: 1px solid #E1EBE9 !important;
+  box-shadow: none !important;
+}
+
+#mpd-blood-sugar-chart-card .mpd-chart-title,
+#mpd-weight-progress-card .mpd-progress-title {
+  color: #0F2A2E !important;
+}
+
+#mpd-blood-sugar-chart-card .mpd-blood-sugar-csv-btn,
+#mpd-weight-progress-card .mpd-weight-csv-btn {
+  color: #2B7A78 !important;
+  border-color: #E1EBE9 !important;
+}
+
+.mpd-blood-sugar-period-btn,
+.mpd-weight-period-btn {
+  background: #F3F8F7 !important;
+  border-color: #E1EBE9 !important;
+  color: #5C7A78 !important;
+}
+
+.mpd-blood-sugar-period-btn.active,
+.mpd-weight-period-btn.active {
+  background: #0F2A2E !important;
+  border-color: #0F2A2E !important;
+  color: #FFFFFF !important;
+}
+
+.mpd-blood-sugar-progress-item,
+.mpd-weight-progress-item {
+  border-color: #E1EBE9 !important;
+  background: #F8FBFA !important;
+}
+
+.mpd-blood-sugar-progress-value,
+.mpd-weight-progress-value {
+  color: #0F2A2E !important;
+}
+
+/* Tanggal, waktu pengukuran, catatan, dan selisih:
+   dibesarkan dan digelapkan (sama seperti warna footer)
+   supaya lebih mudah dibaca. */
+.mpd-blood-sugar-progress-date,
+.mpd-weight-progress-date {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+}
+
+.mpd-blood-sugar-progress-type {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+}
+
+.mpd-blood-sugar-progress-note,
+.mpd-weight-progress-note {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+}
+
+.mpd-blood-sugar-progress-change,
+.mpd-weight-progress-change {
+  color: #0F2A2E !important;
+  font-size: 13.5px !important;
+}
+
+.mpd-blood-sugar-progress-more,
+.mpd-weight-progress-more {
+  border-color: #E1EBE9 !important;
+  color: #2B7A78 !important;
+}
+
+/* Modal Edit Tracker */
+.mpd-tracker-edit-sheet {
+  border-radius: 18px !important;
+}
+
+.mpd-tracker-edit-title {
+  color: #0F2A2E !important;
+}
+
+.mpd-tracker-edit-sheet label {
+  color: #2B7A78 !important;
+}
+
+.mpd-tracker-edit-sheet input,
+.mpd-tracker-edit-sheet select,
+.mpd-tracker-edit-sheet textarea {
+  border-color: #E1EBE9 !important;
+  background: #F8FBFA !important;
+}
+
+.mpd-tracker-edit-cancel {
+  background: #E1EBE9 !important;
+  color: #0F2A2E !important;
+}
+
+.mpd-tracker-edit-save {
+  background: #2B7A78 !important;
+  color: #FFFFFF !important;
+}
+
+.mpd-tracker-edit-btn {
+  color: #2B7A78 !important;
+}
+
+.mpd-tracker-delete-btn {
+  color: #C24545 !important;
+}
+
+.mpd-tracker-actions button {
+  font-size: 13.5px !important;
+  padding: 6px 4px !important;
+}
+
+/* Kalkulator Karbohidrat (multi-baris) */
+.mpd-carb-row {
+  border-color: #E1EBE9 !important;
+  background: #F8FBFA !important;
+}
+
+.mpd-carb-row-head {
+  color: #0F2A2E !important;
+}
+
+.mpd-carb-remove {
+  color: #C24545 !important;
+}
+
+.mpd-carb-results {
+  border-color: #E1EBE9 !important;
+}
+
+.mpd-carb-unit {
+  border-color: #E1EBE9 !important;
+  background: #E8F3F1 !important;
+  color: #2B7A78 !important;
+}
+
+.mpd-carb-item-total-row strong {
+  color: #2B7A78 !important;
 }

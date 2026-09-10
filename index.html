@@ -41,11 +41,32 @@
             <h1>Hi, <span id="user-name">Akai</span></h1>
             <p>Semangat jaga pola makan dan hidup<br>sehat hari ini!</p>
           </div>
-          <button id="logout-btn" class="logout-btn">Logout</button>
+          <button id="logout-btn" class="logout-btn">Keluar</button>
         </header>
+        <!-- Placeholder: menunggu logic penghitung nilai gula darah / berat
+             badan terakhir user (belum diisi, sengaja tampil "—" dulu
+             daripada data contoh yang bisa menyesatkan). -->
+        <section class="summary-cards">
+          <div class="summary-card">
+            <div class="summary-card-head">
+              <span class="summary-card-label">Gula Darah</span>
+              <span class="summary-card-date" id="summary-blood-sugar-date">—</span>
+            </div>
+            <div class="summary-card-value" id="summary-blood-sugar-value">—<span class="summary-card-unit">mg/dL</span></div>
+            <div class="summary-card-sub" id="summary-blood-sugar-sub">—</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-head">
+              <span class="summary-card-label">Berat Badan</span>
+              <span class="summary-card-date" id="summary-weight-date">—</span>
+            </div>
+            <div class="summary-card-value" id="summary-weight-value">—<span class="summary-card-unit">kg</span></div>
+            <div class="summary-card-sub" id="summary-weight-sub">—</div>
+          </div>
+        </section>
         <section class="streak-card">
           <div class="streak-left"><span class="streak-icon">🔥</span><strong><span id="streak-count">2</span> Day Streak</strong></div>
-          <span class="streak-message">Keep it up!</span>
+          <span class="streak-message">Lanjutkan</span>
         </section>
         <section class="content-section">
           <h2>MPD LIBRARY</h2>
@@ -53,9 +74,9 @@
         </section>
         <section class="tracker-section">
           <h2>TRACKER</h2>
-          <button type="button" class="tracker-card" data-page="blood-sugar"><div class="tracker-icon">🩸</div><div class="tracker-info"><h3>TRACKER GULA DARAH</h3><p>Catat dan pantau kadar gula darahmu secara berkala.</p></div><span class="tracker-arrow">›</span></button>
-          <button type="button" class="tracker-card" data-page="weight"><div class="tracker-icon">⚖️</div><div class="tracker-info"><h3>TRACKER BERAT BADAN</h3><p>Pantau perubahan berat badan dan progresmu.</p></div><span class="tracker-arrow">›</span></button>
-          <button type="button" class="tracker-card" data-page="carb-calculator"><div class="tracker-icon">🧮</div><div class="tracker-info"><h3>KALKULATOR KARBOHIDRAT</h3><p>Hitung jumlah karbohidrat makananmu.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="blood-sugar"><div class="tracker-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg></div><div class="tracker-info"><h3>TRACKER GULA DARAH</h3><p>Catat dan pantau kadar gula darahmu secara berkala.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="weight"><div class="tracker-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M4 7h6M14 7h6"/><path d="M7 7 4 13a3 3 0 0 0 6 0L7 7Z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6Z"/></svg></div><div class="tracker-info"><h3>TRACKER BERAT BADAN</h3><p>Pantau perubahan berat badan dan progresmu.</p></div><span class="tracker-arrow">›</span></button>
+          <button type="button" class="tracker-card" data-page="carb-calculator"><div class="tracker-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg></div><div class="tracker-info"><h3>KALKULATOR KARBOHIDRAT</h3><p>Hitung jumlah karbohidrat makananmu.</p></div><span class="tracker-arrow">›</span></button>
         </section>
       </main>
 
@@ -104,10 +125,22 @@
       </div>
 
       <nav class="bottom-nav">
-        <button type="button" class="nav-item active" data-page="home"><div class="nav-icon">⌂</div><span>Home</span></button>
-        <button type="button" class="nav-item" data-page="blood-sugar"><div class="nav-icon">🩸</div><span>Gula Darah</span></button>
-        <button type="button" class="nav-item" data-page="weight"><div class="nav-icon">⚖️</div><span>BB Tracker</span></button>
-        <button type="button" class="nav-item" data-page="carb-calculator"><div class="nav-icon">🧮</div><span>Karbo Calc</span></button>
+        <button type="button" class="nav-item active" data-page="home">
+          <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></div>
+          <span>Home</span>
+        </button>
+        <button type="button" class="nav-item" data-page="blood-sugar">
+          <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg></div>
+          <span>Gula Darah</span>
+        </button>
+        <button type="button" class="nav-item" data-page="weight">
+          <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M4 7h6M14 7h6"/><path d="M7 7 4 13a3 3 0 0 0 6 0L7 7Z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6Z"/></svg></div>
+          <span>BB Tracker</span>
+        </button>
+        <button type="button" class="nav-item" data-page="carb-calculator">
+          <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg></div>
+          <span>Karbo Calc</span>
+        </button>
       </nav>
     </div>
   </div>
