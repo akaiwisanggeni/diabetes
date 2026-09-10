@@ -290,3 +290,15 @@
     initializeHomeIntegration();
   }
 })();
+
+/* =========================================================
+   MINOR HOME UI OVERRIDE
+   =========================================================
+   Keep the summary-card dates consistent with the teal unit text
+   (mg/dL / kg), without changing the main stylesheet.
+   ========================================================= */
+(function () {
+  const style = document.createElement('style');
+  style.textContent = '.summary-card-date { color: #2B7A78; }';
+  document.head.appendChild(style);
+})();
