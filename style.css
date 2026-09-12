@@ -43,55 +43,120 @@ button {
    ========================================================= */
 
 .login-screen {
+  position: relative;
+
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 
   padding: 24px 18px;
 
-  background: #eefbdd;
+  overflow: hidden;
+
+  background: #F3F8F7;
+}
+
+/* Dua blob gradasi mint yang lembut di pojok layar — satu-satunya
+   momen dekoratif di halaman ini, supaya fokus tetap ke kartu. */
+.login-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-decor::before,
+.login-decor::after {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(10px);
+  opacity: 0.55;
+}
+
+.login-decor::before {
+  top: -140px;
+  left: -110px;
+  background: radial-gradient(circle, #DCEFEB 0%, rgba(220, 239, 235, 0) 70%);
+}
+
+.login-decor::after {
+  bottom: -160px;
+  right: -120px;
+  background: radial-gradient(circle, #E8F3F1 0%, rgba(232, 243, 241, 0) 70%);
 }
 
 .login-card {
+  position: relative;
+  z-index: 1;
+
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
 
   background: #ffffff;
-  border-radius: 28px;
+  border: 1px solid #E1EBE9;
+  border-radius: 26px;
 
-  padding: 32px 25px;
+  padding: 34px 26px 28px;
 
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 18px 44px rgba(15, 42, 46, 0.08);
+
+  text-align: center;
+}
+
+.login-badge {
+  width: 60px;
+  height: 60px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #E8F3F1;
+}
+
+.login-badge svg {
+  width: 30px;
+  height: 30px;
 }
 
 .login-card h1 {
-  color: #173f2c;
-  font-size: 30px;
-  line-height: 1.15;
+  color: #0F2A2E;
+  font-size: 25px;
+  line-height: 1.2;
   font-weight: 800;
+  letter-spacing: -0.3px;
 
   margin-bottom: 10px;
 }
 
 .login-card > p {
-  color: #6e746d;
-  font-size: 15px;
-  line-height: 1.5;
+  color: #5C7A78;
+  font-size: 14.5px;
+  line-height: 1.55;
 
-  margin-bottom: 25px;
+  margin-bottom: 26px;
 }
 
 .login-card form {
   display: flex;
   flex-direction: column;
+
+  text-align: left;
 }
 
 .login-card label {
-  color: #315f47;
+  color: #2B7A78;
   font-size: 13px;
   font-weight: 700;
 
@@ -101,35 +166,102 @@ button {
 .login-card input {
   width: 100%;
 
-  border: 1px solid #d8ded3;
-  border-radius: 13px;
+  border: 1px solid #E1EBE9;
+  border-radius: 14px;
 
-  background: #fafcf8;
-  color: #173f2c;
+  background: #F8FBFA;
+  color: #0F2A2E;
 
-  padding: 13px 14px;
+  padding: 15px 15px;
 
   font-size: 15px;
 
   outline: none;
 
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-card input::placeholder {
+  color: #9BB3B0;
 }
 
 .login-card input:focus {
-  border-color: #17603f;
+  border-color: #2B7A78;
   background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(43, 122, 120, 0.14);
+}
+
+.login-card input:focus-visible {
+  outline: 2px solid #2B7A78;
+  outline-offset: 2px;
 }
 
 .login-message {
   min-height: 20px;
 
-  color: #315f47 !important;
+  color: #2B7A78 !important;
   font-size: 13px !important;
+  font-weight: 600 !important;
   line-height: 1.4 !important;
 
   margin-top: 14px !important;
   margin-bottom: 0 !important;
+}
+
+.login-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 22px;
+  padding-top: 18px;
+
+  border-top: 1px solid #EDF3F1;
+
+  color: #7A9E9B;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.login-trust svg {
+  flex: 0 0 auto;
+
+  width: 15px;
+  height: 15px;
+
+  color: #7A9E9B;
+}
+
+.login-footer {
+  position: relative;
+  z-index: 1;
+
+  margin-top: 20px;
+
+  color: #9BB3B0;
+  font-size: 12px;
+
+  text-align: center;
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: 28px 20px 24px;
+  }
+
+  .login-card h1 {
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-card input {
+    transition: none;
+  }
 }
 
 /* =========================================================
@@ -728,6 +860,11 @@ button {
 
 .primary-btn:active {
   transform: scale(0.98);
+}
+
+.primary-btn:focus-visible {
+  outline: 2px solid #2B7A78;
+  outline-offset: 2px;
 }
 
 /* =========================================================
