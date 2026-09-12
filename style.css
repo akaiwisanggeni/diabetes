@@ -44,25 +44,18 @@ button {
 
 .login-screen {
   position: relative;
-
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   padding: 24px 18px;
-
   overflow: hidden;
-
   background: #F3F8F7;
 }
 
-/* Dua blob gradasi mint yang lembut di pojok layar — satu-satunya
-   momen dekoratif di halaman ini, supaya fokus tetap ke kartu. */
 .login-decor {
   position: absolute;
   inset: 0;
@@ -96,31 +89,23 @@ button {
 .login-card {
   position: relative;
   z-index: 1;
-
   width: 100%;
   max-width: 400px;
-
   background: #ffffff;
   border: 1px solid #E1EBE9;
   border-radius: 26px;
-
   padding: 34px 26px 28px;
-
   box-shadow: 0 18px 44px rgba(15, 42, 46, 0.08);
-
   text-align: center;
 }
 
 .login-badge {
   width: 60px;
   height: 60px;
-
   margin: 0 auto 18px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
   background: #E8F3F1;
 }
@@ -136,7 +121,6 @@ button {
   line-height: 1.2;
   font-weight: 800;
   letter-spacing: -0.3px;
-
   margin-bottom: 10px;
 }
 
@@ -144,14 +128,12 @@ button {
   color: #5C7A78;
   font-size: 14.5px;
   line-height: 1.55;
-
   margin-bottom: 26px;
 }
 
 .login-card form {
   display: flex;
   flex-direction: column;
-
   text-align: left;
 }
 
@@ -159,27 +141,19 @@ button {
   color: #2B7A78;
   font-size: 13px;
   font-weight: 700;
-
   margin-bottom: 7px;
 }
 
 .login-card input {
   width: 100%;
-
   border: 1px solid #E1EBE9;
   border-radius: 14px;
-
   background: #F8FBFA;
   color: #0F2A2E;
-
   padding: 15px 15px;
-
   font-size: 15px;
-
   outline: none;
-
   margin-bottom: 16px;
-
   transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -200,12 +174,10 @@ button {
 
 .login-message {
   min-height: 20px;
-
   color: #2B7A78 !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 1.4 !important;
-
   margin-top: 14px !important;
   margin-bottom: 0 !important;
 }
@@ -214,14 +186,10 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-
   gap: 7px;
-
   margin-top: 22px;
   padding-top: 18px;
-
   border-top: 1px solid #EDF3F1;
-
   color: #7A9E9B;
   font-size: 12px;
   line-height: 1.4;
@@ -229,207 +197,132 @@ button {
 
 .login-trust svg {
   flex: 0 0 auto;
-
   width: 15px;
   height: 15px;
-
   color: #7A9E9B;
 }
 
 .login-footer {
   position: relative;
   z-index: 1;
-
-  margin-top: 20px;
-
-  color: #9BB3B0;
-  font-size: 12px;
-
+  margin-top: 18px;
+  color: #7A9E9B;
+  font-size: 11.5px;
   text-align: center;
 }
 
-@media (max-width: 360px) {
-  .login-card {
-    padding: 28px 20px 24px;
-  }
-
-  .login-card h1 {
-    font-size: 23px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .login-card input {
-    transition: none;
-  }
-}
-
 /* =========================================================
-   APP CONTAINER
+   APP SHELL
    ========================================================= */
 
 .app-screen {
-  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .app {
   width: 100%;
-  max-width: 480px;
+  max-width: 560px;
   min-height: 100vh;
-
+  min-height: 100dvh;
   margin: 0 auto;
-
-  padding: 22px 15px 105px;
-
-  background: #F3F8F7;
-}
-
-.page {
-  width: 100%;
-}
-
-.tracker-page {
-  padding-bottom: 20px;
+  padding: 18px 16px 94px;
+  position: relative;
 }
 
 /* =========================================================
-   SUMMARY CARDS (ringkasan gula darah / berat badan)
+   TOP HEADER
+   ========================================================= */
+
+.top-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.top-header h1 {
+  color: #0F2A2E;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.top-header p {
+  color: #5C7A78;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 5px;
+}
+
+.logout-btn {
+  border: 1px solid #E1EBE9;
+  border-radius: 10px;
+  padding: 8px 11px;
+  background: #FFFFFF;
+  color: #2B7A78;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* =========================================================
+   SUMMARY CARDS
    ========================================================= */
 
 .summary-cards {
   display: grid;
-
   grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  gap: 11px;
-
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .summary-card {
-  min-width: 0;
-
   background: #FFFFFF;
   border: 1px solid #E1EBE9;
-  border-radius: 16px;
-
-  padding: 14px 14px 13px;
+  border-radius: 14px;
+  padding: 13px;
 }
 
 .summary-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  gap: 6px;
-
-  margin-bottom: 11px;
+  gap: 8px;
+  margin-bottom: 9px;
 }
 
 .summary-card-label {
-  color: #0F2A2E;
-
-  font-size: 12.5px;
+  color: #5C7A78;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .summary-card-date {
-  flex: 0 0 auto;
-
-  color: #0F2A2E;
-
-  font-size: 12.5px;
-  font-weight: 600;
+  color: #9BB3B0;
+  font-size: 10px;
 }
 
 .summary-card-value {
   color: #0F2A2E;
-
   font-size: 25px;
   line-height: 1;
   font-weight: 800;
-
-  margin-bottom: 7px;
 }
 
 .summary-card-unit {
-  color: #2B7A78;
-
-  font-size: 13.5px;
-  font-weight: 700;
-
-  margin-left: 3px;
+  margin-left: 4px;
+  color: #7A9E9B;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .summary-card-sub {
-  color: #2B7A78;
-
-  font-size: 12.5px;
-  font-weight: 700;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* =========================================================
-   HOME HEADER
-   ========================================================= */
-
-.top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-
-  gap: 12px;
-
-  margin-bottom: 22px;
-}
-
-.top-header h1 {
-  color: #0F2A2E;
-
-  font-size: 28px;
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-
-  margin-bottom: 8px;
-}
-
-.top-header p {
-  color: #5C7A78;
-
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.logout-btn {
-  flex-shrink: 0;
-
-  border: 1px solid #E1EBE9;
-  border-radius: 10px;
-
-  background: #E8F3F1;
-  color: #2B7A78;
-
-  padding: 8px 14px;
-
-  font-size: 12.5px;
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-.logout-btn:active {
-  transform: scale(0.98);
+  color: #7A9E9B;
+  font-size: 11px;
+  margin-top: 7px;
 }
 
 /* =========================================================
@@ -440,74 +333,49 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  min-height: 62px;
-
-  padding: 14px 18px;
-
-  margin-bottom: 18px;
-
-  background: #0F2A2E;
-  border-radius: 16px;
+  gap: 12px;
+  padding: 12px 13px;
+  margin-bottom: 24px;
+  border: 1px solid #E1EBE9;
+  border-radius: 14px;
+  background: #FFFFFF;
 }
 
 .streak-left {
   display: flex;
   align-items: center;
-
-  gap: 10px;
+  gap: 8px;
+  color: #0F2A2E;
+  font-size: 13px;
 }
 
 .streak-icon {
-  font-size: 26px;
-  line-height: 1;
-}
-
-.streak-left strong {
-  color: #FFFFFF;
-
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
 }
 
 .streak-message {
-  color: #4ADE9E;
-
-  font-size: 13px;
+  color: #2B7A78;
+  font-size: 11px;
   font-weight: 700;
 }
 
 /* =========================================================
-   GENERAL SECTION
+   CONTENT SECTIONS
    ========================================================= */
 
 .content-section,
 .tracker-section {
-  background: #FFFFFF;
-  border: 1px solid #E1EBE9;
-  border-radius: 16px;
-
-  padding: 18px 16px;
-
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
-.content-section h2,
-.tracker-section h2 {
-  color: #0F2A2E;
-
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-
-  margin-bottom: 15px;
-
-  padding-left: 10px;
-  border-left: 3px solid #2B7A78;
-}
-
-.tracker-section {
-  padding-bottom: 15px;
+.content-section > h2,
+.tracker-section > h2 {
+  color: #7A9E9B;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  margin-bottom: 11px;
 }
 
 /* =========================================================
@@ -516,85 +384,51 @@ button {
 
 .pdf-grid {
   display: grid;
-
   grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  gap: 14px 11px;
+  gap: 11px;
 }
 
 .pdf-card {
   width: 100%;
-  min-width: 0;
-
-  display: block;
-
-  border: 0;
-  background: transparent;
-
+  border: 1px solid #E1EBE9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #FFFFFF;
+  color: #0F2A2E;
   text-align: left;
-
   cursor: pointer;
 }
 
 .pdf-cover-wrapper {
   width: 100%;
-
-  /* Rasio A4 asli supaya cover tidak terpotong. */
-  aspect-ratio: 210 / 297;
-
+  aspect-ratio: 1 / 1.414;
+  background: #EEF5F3;
   overflow: hidden;
-
-  border-radius: 10px;
-  border: 1px solid #E1EBE9;
-
-  background: #E8F3F1;
-
-  margin-bottom: 8px;
 }
 
 .pdf-cover {
   width: 100%;
   height: 100%;
-
   display: block;
-
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .pdf-title {
+  padding: 10px 10px 12px;
   color: #0F2A2E;
-
-  font-size: 12.5px;
-  line-height: 1.35;
-  font-weight: 600;
-
-  text-align: center;
-
-  padding: 0 2px;
-
-  /* Reserve tinggi tetap untuk 2 baris, supaya semua card
-     (judul pendek maupun panjang) punya tinggi sama persis
-     dan baris grid selalu sejajar rapi. */
-  min-height: 2.75em;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
 }
 
 .pdf-message {
   grid-column: 1 / -1;
-
-  padding: 25px 10px;
-
+  padding: 22px 16px;
+  border: 1px dashed #C9DAD7;
+  border-radius: 14px;
   color: #7A9E9B;
-
+  font-size: 12px;
   text-align: center;
-
-  font-size: 13px;
-  border: 1px dashed #B8CDCB;
-  border-radius: 12px;
 }
 
 /* =========================================================
@@ -604,24 +438,16 @@ button {
 .tracker-card {
   width: 100%;
   min-height: 84px;
-
   display: flex;
   align-items: center;
-
   gap: 13px;
-
   padding: 13px;
-
   margin-bottom: 9px;
-
   border: 1px solid #E1EBE9;
   border-radius: 14px;
-
   background: #FFFFFF;
   color: #0F2A2E;
-
   text-align: left;
-
   cursor: pointer;
 }
 
@@ -636,16 +462,11 @@ button {
 .tracker-icon {
   width: 42px;
   height: 42px;
-
   flex: 0 0 42px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 11px;
-
-  /* Samakan dengan warna dasar bottom-nav (footer). */
   background: #0F2A2E;
   color: #FFFFFF;
 }
@@ -662,26 +483,21 @@ button {
 
 .tracker-info h3 {
   color: #0F2A2E;
-
   font-size: 13.5px;
   line-height: 1.25;
   font-weight: 700;
-
   margin-bottom: 4px;
 }
 
 .tracker-info p {
   color: #7A9E9B;
-
   font-size: 11.5px;
   line-height: 1.35;
 }
 
 .tracker-arrow {
   flex: 0 0 auto;
-
   color: #B8CDCB;
-
   font-size: 22px;
   line-height: 1;
 }
@@ -692,23 +508,18 @@ button {
 
 .page-header {
   position: relative;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   min-height: 44px;
-
   margin-bottom: 18px;
 }
 
 .page-header h1 {
   color: #0F2A2E;
-
   font-size: 19px;
   line-height: 1.2;
   font-weight: 700;
-
   text-align: center;
 }
 
@@ -716,21 +527,15 @@ button {
   position: absolute;
   left: 0;
   top: 50%;
-
   transform: translateY(-50%);
-
   width: 38px;
   height: 38px;
-
   border: 1px solid #E1EBE9;
   border-radius: 10px;
-
   background: #FFFFFF;
   color: #0F2A2E;
-
   font-size: 22px;
   line-height: 1;
-
   cursor: pointer;
 }
 
@@ -746,54 +551,42 @@ button {
   background: #FFFFFF;
   border: 1px solid #E1EBE9;
   border-radius: 16px;
-
   padding: 18px 16px;
-
   margin-bottom: 16px;
 }
 
 .tracker-form-card h2,
 .tracker-history h2 {
   color: #0F2A2E;
-
   font-size: 15px;
   font-weight: 700;
-
-  margin-bottom: 15px;
-}
-
-.tracker-form-card form {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 14px;
 }
 
 .tracker-form-card label {
+  display: block;
   color: #2B7A78;
-
   font-size: 12.5px;
-  font-weight: 600;
-
-  margin-bottom: 6px;
+  font-weight: 700;
+  margin-bottom: 7px;
 }
 
 .tracker-form-card input,
 .tracker-form-card select,
 .tracker-form-card textarea {
   width: 100%;
-
   border: 1px solid #E1EBE9;
-  border-radius: 10px;
-
+  border-radius: 11px;
   background: #F8FBFA;
   color: #0F2A2E;
-
-  padding: 11px 12px;
-
+  padding: 12px 13px;
   font-size: 14px;
-
   outline: none;
+  margin-bottom: 13px;
+}
 
-  margin-bottom: 14px;
+.tracker-form-card textarea {
+  resize: vertical;
 }
 
 .tracker-form-card input:focus,
@@ -801,232 +594,105 @@ button {
 .tracker-form-card textarea:focus {
   border-color: #2B7A78;
   background: #FFFFFF;
-}
-
-.tracker-form-card textarea {
-  resize: vertical;
-
-  min-height: 80px;
+  box-shadow: 0 0 0 3px rgba(43, 122, 120, 0.1);
 }
 
 .input-with-unit {
   position: relative;
-
-  width: 100%;
 }
 
 .input-with-unit input {
-  padding-right: 64px;
+  padding-right: 62px;
 }
 
 .input-with-unit span {
   position: absolute;
-
-  right: 13px;
-  top: 50%;
-
-  transform: translateY(-50%);
-
+  top: 0;
+  right: 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
   color: #7A9E9B;
-
-  font-size: 12.5px;
-  font-weight: 600;
-
+  font-size: 12px;
+  font-weight: 700;
   pointer-events: none;
 }
 
 .primary-btn {
   width: 100%;
-
   border: 0;
   border-radius: 12px;
-
   padding: 13px 16px;
-
-  background: #0F2A2E;
+  background: #2B7A78;
   color: #FFFFFF;
-
   font-size: 14px;
   font-weight: 700;
-
   cursor: pointer;
-
-  transition: 0.2s ease;
 }
 
-.primary-btn:hover {
-  background: #1B3F44;
-}
-
-.primary-btn:active {
-  transform: scale(0.98);
-}
-
-.primary-btn:focus-visible {
-  outline: 2px solid #2B7A78;
-  outline-offset: 2px;
+.primary-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 /* =========================================================
-   TRACKER HISTORY (baris/tabel riwayat lama, jika terpakai)
+   HISTORY / PROGRESS
    ========================================================= */
 
 .tracker-history {
-  width: 100%;
-}
-
-.section-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  margin-bottom: 8px;
-}
-
-.tracker-period {
-  color: #7A9E9B;
-
-  font-size: 11.5px;
-  line-height: 1.4;
-
-  margin-bottom: 12px;
-}
-
-.secondary-btn {
-  flex-shrink: 0;
-
-  border: 1px solid #E1EBE9;
-  border-radius: 10px;
-
-  background: #FFFFFF;
-  color: #2B7A78;
-
-  padding: 8px 11px;
-
-  font-size: 11px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.empty-state {
-  padding: 22px 15px;
-
-  background: #F8FBFA;
-  border: 1px dashed #B8CDCB;
-
-  border-radius: 12px;
-
-  color: #7A9E9B;
-
-  font-size: 13px;
-
-  text-align: center;
-}
-
-.tracker-row {
-  width: 100%;
-
-  background: #FFFFFF;
-  border: 1px solid #E1EBE9;
-
-  border-radius: 12px;
-
-  padding: 13px 14px;
-
-  margin-bottom: 8px;
-}
-
-.tracker-date {
-  color: #7A9E9B;
-
-  font-size: 11px;
-  line-height: 1.3;
-
-  margin-bottom: 4px;
-}
-
-.tracker-value {
-  color: #0F2A2E;
-
-  font-size: 18px;
-  line-height: 1.2;
-  font-weight: 700;
-
-  margin-bottom: 4px;
-}
-
-.tracker-value span {
-  color: #7A9E9B;
-
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.tracker-type {
-  color: #2B7A78;
-
-  font-size: 11.5px;
-  font-weight: 700;
-
-  margin-bottom: 3px;
-}
-
-.tracker-notes {
-  color: #5C7A78;
-
-  font-size: 11.5px;
-  line-height: 1.4;
-
-  margin-top: 6px;
-
-  padding-top: 6px;
-
-  border-top: 1px solid #E1EBE9;
+  margin-top: 16px;
 }
 
 /* =========================================================
-   CARB CALCULATOR RESULT
+   BOTTOM NAV
    ========================================================= */
 
-.carb-result-card {
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 100;
+  transform: translateX(-50%);
+  width: min(560px, 100%);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+  border-top: 1px solid #E1EBE9;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+}
+
+.nav-item {
+  border: 0;
+  background: transparent;
+  color: #8EA6A3;
+  padding: 7px 4px 5px;
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: #2B7A78;
+}
+
+.nav-icon {
+  height: 22px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  gap: 6px;
-
-  min-height: 100px;
-
-  margin-top: 5px;
-
-  padding: 18px;
-
-  border-radius: 14px;
-  border: 1px solid #E1EBE9;
-
-  background: #E8F3F1;
-
-  text-align: center;
+  margin-bottom: 2px;
 }
 
-.carb-result-card span {
-  color: #5C7A78;
-
-  font-size: 12.5px;
-  font-weight: 600;
+.nav-icon svg {
+  width: 19px;
+  height: 19px;
 }
 
-.carb-result-card strong {
-  color: #2B7A78;
-
-  font-size: 28px;
-  line-height: 1;
-
-  font-weight: 800;
+.nav-item span {
+  display: block;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
 }
 
 /* =========================================================
@@ -1035,434 +701,118 @@ button {
 
 .pdf-viewer {
   position: fixed;
-
   inset: 0;
-
-  z-index: 300;
-
+  z-index: 200;
   display: flex;
   flex-direction: column;
-
   background: #F3F8F7;
 }
 
 .pdf-viewer-header {
   flex: 0 0 auto;
-
-  min-height: 58px;
-
-  display: flex;
-  align-items: center;
-
-  padding: 9px 13px;
-
-  background: #FFFFFF;
-
-  border-bottom: 1px solid #E1EBE9;
-}
-
-.pdf-back {
-  flex: 0 0 auto;
-
-  border: 0;
-  background: transparent;
-
-  color: #2B7A78;
-
-  padding: 9px 5px;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.pdf-viewer-title {
-  flex: 1;
-
-  overflow: hidden;
-
-  padding: 0 10px;
-
-  color: #0F2A2E;
-
-  font-size: 15px;
-  font-weight: 700;
-
-  text-align: center;
-
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.pdf-viewer-content {
-  flex: 1;
-
-  min-height: 0;
-
-  width: 100%;
-
-  background: #E1EBE9;
-}
-
-.pdf-viewer-content iframe {
-  width: 100%;
-  height: 100%;
-
-  display: block;
-
-  border: 0;
-
-  background: #FFFFFF;
-}
-
-/* =========================================================
-   BOTTOM NAVIGATION — dasar gelap, ikon SVG putih
-   ========================================================= */
-
-.bottom-nav {
-  position: fixed;
-
-  left: 50%;
-  bottom: 0;
-
-  transform: translateX(-50%);
-
-  width: min(100%, 480px);
-
-  display: grid;
-
-  grid-template-columns: repeat(4, 1fr);
-
-  padding: 12px 7px 18px;
-
-  background: #0F2A2E;
-
-  border-radius: 22px 22px 0 0;
-
-  z-index: 100;
-}
-
-.nav-item {
-  min-height: 54px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-
-  gap: 5px;
-
-  border: 0;
-  background: transparent;
-
-  color: rgba(255, 255, 255, 0.55);
-
-  font-size: 10.5px;
-  font-weight: 500;
-
-  cursor: pointer;
-}
-
-.nav-icon {
-  width: 24px;
-  height: 24px;
-
+  position: relative;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  color: #FFFFFF;
-  opacity: 0.55;
-
-  transition: opacity 0.2s ease;
+  gap: 8px;
+  padding: 8px 58px;
+  border-bottom: 1px solid #E1EBE9;
+  background: #FFFFFF;
 }
 
-.nav-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.nav-item.active {
-  color: #FFFFFF;
+.pdf-viewer-title {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: #0F2A2E;
+  font-size: 15px;
+  line-height: 1.25;
   font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.nav-item.active .nav-icon {
-  opacity: 1;
+.pdf-back {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #2B7A78;
+  padding: 10px 8px;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.nav-item:active {
-  transform: none;
+.pdf-viewer-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 12px 28px;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* =========================================================
-   PDF VIEWER STATE
-   ========================================================= */
+.pdf-viewer-content canvas {
+  display: block;
+  flex: 0 0 auto;
+  max-width: none;
+  height: auto;
+  border-radius: 2px;
+  box-shadow: 0 2px 12px rgba(15, 42, 46, 0.12);
+  background: #FFFFFF;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.pdf-viewer-message {
+  margin: auto;
+  padding: 20px;
+  color: #7A9E9B;
+  font-size: 13px;
+  text-align: center;
+}
 
 body.pdf-viewer-open {
   overflow: hidden;
 }
 
 /* =========================================================
-   RESPONSIVE — DESKTOP
+   CARB RESULT
    ========================================================= */
 
-@media (min-width: 481px) {
-  body {
-    background: #E1EBE9;
-  }
+.carb-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #E1EBE9;
+  border-radius: 12px;
+  background: #F8FBFA;
+  color: #5C7A78;
+  font-size: 12px;
+}
 
+.carb-result-card strong {
+  color: #0F2A2E;
+  font-size: 20px;
+}
+
+@media (min-width: 561px) {
   .app {
-    min-height: 100vh;
-
+    border-left: 1px solid #E1EBE9;
+    border-right: 1px solid #E1EBE9;
     background: #F3F8F7;
-
-    box-shadow: 0 0 40px rgba(15, 42, 46, 0.06);
   }
-}
-
-/* =========================================================
-   SMALL PHONES
-   ========================================================= */
-
-@media (max-width: 360px) {
-  .app {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .top-header h1 {
-    font-size: 25px;
-  }
-
-  .top-header p {
-    font-size: 13.5px;
-  }
-
-  .content-section,
-  .tracker-section,
-  .tracker-form-card {
-    padding-left: 13px;
-    padding-right: 13px;
-  }
-
-  .pdf-grid {
-    gap: 10px 8px;
-  }
-
-  .summary-cards {
-    gap: 8px;
-  }
-
-  .summary-card {
-    padding: 12px 11px 11px;
-  }
-
-  .summary-card-value {
-    font-size: 22px;
-  }
-
-  .pdf-title {
-    font-size: 11.5px;
-  }
-
-  .tracker-info h3 {
-    font-size: 12.5px;
-  }
-
-  .tracker-info p {
-    font-size: 10.5px;
-  }
-
-  .tracker-icon {
-    width: 38px;
-    height: 38px;
-
-    flex-basis: 38px;
-
-    font-size: 17px;
-  }
-
-  .nav-item {
-    font-size: 9.5px;
-  }
-}
-
-/* =========================================================
-   ACCESSIBILITY / TOUCH
-   ========================================================= */
-
-@media (hover: hover) {
-  .tracker-card:hover {
-    border-color: #B8CDCB;
-  }
-
-  .pdf-card:hover .pdf-cover-wrapper {
-    border-color: #B8CDCB;
-  }
-
-  .secondary-btn:hover,
-  .logout-btn:hover {
-    background: #DFF0EC;
-  }
-}
-
-/* =========================================================
-   OVERRIDE WARNA UNTUK ELEMEN YANG DI-GENERATE JS
-   ---------------------------------------------------------
-   script.js dan carb-calculator.js menyuntikkan <style> mereka
-   sendiri saat runtime (chart gula darah, chart berat badan,
-   modal edit, kalkulator karbo multi-baris). File JS itu TIDAK
-   diubah sama sekali — override di bawah ini HANYA mengganti
-   warna/aksen lewat CSS baru, ditandai !important karena
-   <style> bawaan JS disisipkan belakangan di <head> sehingga
-   menang duluan tanpa override eksplisit.
-   ========================================================= */
-
-/* Chart Gula Darah */
-#mpd-blood-sugar-chart-card,
-#mpd-weight-progress-card {
-  border: 1px solid #E1EBE9 !important;
-  box-shadow: none !important;
-}
-
-#mpd-blood-sugar-chart-card .mpd-chart-title,
-#mpd-weight-progress-card .mpd-progress-title {
-  color: #0F2A2E !important;
-}
-
-#mpd-blood-sugar-chart-card .mpd-blood-sugar-csv-btn,
-#mpd-weight-progress-card .mpd-weight-csv-btn {
-  color: #2B7A78 !important;
-  border-color: #E1EBE9 !important;
-}
-
-.mpd-blood-sugar-period-btn,
-.mpd-weight-period-btn {
-  background: #F3F8F7 !important;
-  border-color: #E1EBE9 !important;
-  color: #5C7A78 !important;
-}
-
-.mpd-blood-sugar-period-btn.active,
-.mpd-weight-period-btn.active {
-  background: #0F2A2E !important;
-  border-color: #0F2A2E !important;
-  color: #FFFFFF !important;
-}
-
-.mpd-blood-sugar-progress-item,
-.mpd-weight-progress-item {
-  border-color: #E1EBE9 !important;
-  background: #F8FBFA !important;
-}
-
-.mpd-blood-sugar-progress-value,
-.mpd-weight-progress-value {
-  color: #0F2A2E !important;
-}
-
-/* Tanggal, waktu pengukuran, catatan, dan selisih:
-   dibesarkan dan digelapkan (sama seperti warna footer)
-   supaya lebih mudah dibaca. */
-.mpd-blood-sugar-progress-date,
-.mpd-weight-progress-date {
-  color: #0F2A2E !important;
-  font-size: 13.5px !important;
-}
-
-.mpd-blood-sugar-progress-type {
-  color: #0F2A2E !important;
-  font-size: 13.5px !important;
-  font-weight: 700 !important;
-}
-
-.mpd-blood-sugar-progress-note,
-.mpd-weight-progress-note {
-  color: #0F2A2E !important;
-  font-size: 13.5px !important;
-}
-
-.mpd-blood-sugar-progress-change,
-.mpd-weight-progress-change {
-  color: #0F2A2E !important;
-  font-size: 13.5px !important;
-}
-
-.mpd-blood-sugar-progress-more,
-.mpd-weight-progress-more {
-  border-color: #E1EBE9 !important;
-  color: #2B7A78 !important;
-}
-
-/* Modal Edit Tracker */
-.mpd-tracker-edit-sheet {
-  border-radius: 18px !important;
-}
-
-.mpd-tracker-edit-title {
-  color: #0F2A2E !important;
-}
-
-.mpd-tracker-edit-sheet label {
-  color: #2B7A78 !important;
-}
-
-.mpd-tracker-edit-sheet input,
-.mpd-tracker-edit-sheet select,
-.mpd-tracker-edit-sheet textarea {
-  border-color: #E1EBE9 !important;
-  background: #F8FBFA !important;
-}
-
-.mpd-tracker-edit-cancel {
-  background: #E1EBE9 !important;
-  color: #0F2A2E !important;
-}
-
-.mpd-tracker-edit-save {
-  background: #2B7A78 !important;
-  color: #FFFFFF !important;
-}
-
-.mpd-tracker-edit-btn {
-  color: #2B7A78 !important;
-}
-
-.mpd-tracker-delete-btn {
-  color: #C24545 !important;
-}
-
-.mpd-tracker-actions button {
-  font-size: 13.5px !important;
-  padding: 6px 4px !important;
-}
-
-/* Kalkulator Karbohidrat (multi-baris) */
-.mpd-carb-row {
-  border-color: #E1EBE9 !important;
-  background: #F8FBFA !important;
-}
-
-.mpd-carb-row-head {
-  color: #0F2A2E !important;
-}
-
-.mpd-carb-remove {
-  color: #C24545 !important;
-}
-
-.mpd-carb-results {
-  border-color: #E1EBE9 !important;
-}
-
-.mpd-carb-unit {
-  border-color: #E1EBE9 !important;
-  background: #E8F3F1 !important;
-  color: #2B7A78 !important;
-}
-
-.mpd-carb-item-total-row strong {
-  color: #2B7A78 !important;
 }
