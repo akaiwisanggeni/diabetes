@@ -110,6 +110,36 @@
 (function () {
   'use strict';
 
+  const dailyMessages = [
+    'Semangat jaga pola makan hari ini!',
+    'Pelan-pelan, yang penting konsisten.',
+    'Satu pilihan sehat tetap berarti.',
+    'Tidak harus sempurna, cukup konsisten.',
+    'Hari ini, pilih yang baik untuk tubuh Anda.',
+    'Rawat tubuh Anda, satu kebiasaan kecil setiap hari.',
+    'Langkah kecil tetap membawa perubahan.',
+    'Makan dengan lebih sadar hari ini.',
+    'Tubuh Anda layak dirawat dengan baik.',
+    'Tetap tenang, tetap konsisten.',
+    'Jaga pola makan, jaga kesehatan.',
+    'Kebiasaan baik dimulai dari pilihan kecil.',
+    'Hari ini juga bisa jadi hari yang lebih sehat.',
+    'Dengarkan tubuh Anda, rawat dengan baik.',
+    'Tetap jaga diri, tetap jaga pola makan.'
+  ];
+
+  function setDailyMessage() {
+    const messageElement = document.querySelector('.top-header p');
+    if (!messageElement || !dailyMessages.length) return;
+
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const dayOfYear = Math.floor((today - startOfYear) / 86400000);
+    const messageIndex = dayOfYear % dailyMessages.length;
+
+    messageElement.textContent = dailyMessages[messageIndex];
+  }
+
   function setSummaryValue(elementId, value) {
     const element = document.getElementById(elementId);
     if (!element) return;
@@ -259,6 +289,7 @@
 
   function initializeHomeIntegration() {
     installLoadHooks();
+    setDailyMessage();
 
     updateStreakUI(StreakEngine.load());
 
