@@ -66,9 +66,6 @@
           </div>
           <button id="logout-btn" class="logout-btn">Keluar</button>
         </header>
-        <!-- Placeholder: menunggu logic penghitung nilai gula darah / berat
-             badan terakhir user (belum diisi, sengaja tampil "—" dulu
-             daripada data contoh yang bisa menyesatkan). -->
         <section class="summary-cards">
           <div class="summary-card">
             <div class="summary-card-head">
@@ -144,12 +141,12 @@
 
       <div id="pdf-viewer" class="pdf-viewer" data-pdf-viewer style="display: none;">
         <header class="pdf-viewer-header"><button type="button" id="pdf-back" class="pdf-back">‹ Kembali</button><h1 id="pdf-viewer-title" class="pdf-viewer-title">Materi</h1></header>
-        <div class="pdf-viewer-content"><iframe id="pdf-frame" title="PDF Viewer" data-pdf-frame></iframe></div>
+        <div class="pdf-viewer-content"><canvas id="pdf-canvas" aria-label="PDF Viewer" data-pdf-canvas></canvas></div>
       </div>
 
       <nav class="bottom-nav">
         <button type="button" class="nav-item active" data-page="home">
-          <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 1 1 1h4v-6h4v6h4a1 1 0 0 1 1-1v-9"/></svg></div>
+          <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 1 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></div>
           <span>Home</span>
         </button>
         <button type="button" class="nav-item" data-page="blood-sugar">
@@ -184,6 +181,7 @@
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
   <script src="script.js"></script>
   <script src="name-onboarding.js"></script>
   <script src="carb-calculator.js"></script>
