@@ -107,7 +107,8 @@
       const linked = await user.linkWithCredential(firebase.auth.EmailAuthProvider.credential(e, p));
       await activate(linked.user, n, e); return;
     } catch (error) {
-      if (error?.code !== "auth/credential-already-in-use") throw error;
+      // Firebase may return either code when the email already belongs to another account.
+      if (error?.code !== "auth/credential-already-in-use" && error?.code !== "auth/email-already-in-use") throw error;
     }
     msg("Menyiapkan pemindahan data lama..."); await capture(user, n, e); await sendLink(e); msg("Link verifikasi sudah dikirim ke email Anda. Buka link tersebut di perangkat ini. Jangan hapus data browser dulu.");
   }
