@@ -1,6 +1,6 @@
 /* =========================================================
    MPD — DIRECT LOGIN
-   Name + email only. No magic link.
+   Name + email + password.
    ========================================================= */
 
 (function () {
@@ -84,10 +84,14 @@
     };
   }
 
-  async function getOrCreateAnonymousUser() {
+  async function getOrCreateAuthUser(email, password) {
     let user = firebaseAuth.currentUser;
 
     if (user && !user.isAnonymous) {
+      if (normalizeEmail(user.email) === email) {
+        return user;
+      }
+
       await firebaseAuth.signOut();
       user = null;
     }
@@ -97,7 +101,26 @@
       user = credential.user;
     }
 
-    return user;
+    const emailCredential = firebase.auth.EmailAuthProvider.credential(
+      email,
+      password
+    );
+
+    try {
+      const linked = await user.linkWithCredential(emailCredential);
+      return linked.user;
+    } catch (error) {
+      if (error && error.code === "auth/credential-already-in-use") {
+        await firebaseAuth.signOut();
+        const signedIn = await firebaseAuth.signInWithEmailAndPassword(
+          email,
+          password
+        );
+        return signedIn.user;
+      }
+
+      throw error;
+    }
   }
 
   async function loadProfile(authUser) {
@@ -135,6 +158,12 @@
 
     await userRef.set(profileData, { merge: true });
 
+    try {
+      await authUser.updateProfile({ displayName: normalizedName });
+    } catch (error) {
+      console.warn("Firebase display name update skipped:", error);
+    }
+
     const profile = {
       name: normalizedName,
       email: normalizedEmail,
@@ -155,7 +184,7 @@
     return currentUser;
   }
 
-  /* Keep Firebase Authentication as the invisible technical session. */
+  /* Keep Firebase Authentication as the technical cross-device identity. */
   initializeAuth = function () {
     firebaseAuth.onAuthStateChanged(async (authUser) => {
       if (!authUser) {
@@ -213,7 +242,7 @@
     });
   };
 
-  /* App-level logout only. Keep anonymous Firebase auth alive. */
+  /* App-level logout only. Keep Firebase auth available for the next login. */
   setupLogout = function () {
     const logoutButtons = document.querySelectorAll(
       "#logout-btn, #logout, .logout-btn, [data-logout]"
@@ -276,6 +305,37 @@
       form.insertBefore(helper, emailInput.nextSibling);
     }
 
+    let passwordInput = form.querySelector("#password");
+    if (!passwordInput) {
+      const passwordLabel = document.createElement("label");
+      passwordLabel.htmlFor = "password";
+      passwordLabel.textContent = "Kata sandi";
+
+      passwordInput = document.createElement("input");
+      passwordInput.id = "password";
+      passwordInput.type = "password";
+      passwordInput.minLength = 6;
+      passwordInput.autocomplete = "current-password";
+      passwordInput.placeholder = "Minimal 6 karakter";
+      passwordInput.required = true;
+      passwordInput.style.marginBottom = "12px";
+
+      form.insertBefore(passwordLabel, emailInput.nextSibling);
+      form.insertBefore(passwordInput, passwordLabel.nextSibling);
+    }
+
+    let passwordHelper = form.querySelector("#password-helper");
+    if (!passwordHelper) {
+      passwordHelper = document.createElement("div");
+      passwordHelper.id = "password-helper";
+      passwordHelper.textContent = "Kata sandi ini digunakan untuk mengakses data Anda di perangkat lain.";
+      passwordHelper.style.margin = "-7px 0 15px";
+      passwordHelper.style.color = "#7A9E9B";
+      passwordHelper.style.fontSize = "11.5px";
+      passwordHelper.style.lineHeight = "1.4";
+      form.insertBefore(passwordHelper, passwordInput.nextSibling);
+    }
+
     const submitButton = form.querySelector("button[type='submit']");
     if (submitButton) submitButton.textContent = "Masuk ke MPD";
 
@@ -285,6 +345,7 @@
 
       const name = normalizeName(nameInput.value);
       const email = normalizeEmail(emailInput.value);
+      const password = String(passwordInput.value || "");
 
       if (!name) {
         setMessage("Masukkan nama Anda.");
@@ -310,19 +371,34 @@
         return;
       }
 
+      if (password.length < 6) {
+        setMessage("Kata sandi minimal 6 karakter.");
+        passwordInput.focus();
+        return;
+      }
+
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = "Masuk...";
       }
 
       try {
-        const user = await getOrCreateAnonymousUser();
+        const user = await getOrCreateAuthUser(email, password);
         await activateSession(user, name, email);
       } catch (error) {
         console.error("Direct login error:", error);
 
         if (error && error.code === "auth/operation-not-allowed") {
-          setMessage("Login belum aktif. Aktifkan Anonymous Authentication di Firebase.");
+          setMessage("Aktifkan Email/Password dan Anonymous Authentication di Firebase.");
+        } else if (
+          error &&
+          ["auth/wrong-password", "auth/invalid-credential", "auth/user-disabled"].includes(error.code)
+        ) {
+          setMessage("Email atau kata sandi salah.");
+        } else if (error && error.code === "auth/email-already-in-use") {
+          setMessage("Email ini sudah terdaftar. Gunakan kata sandi akun tersebut.");
+        } else if (error && error.code === "auth/weak-password") {
+          setMessage("Kata sandi terlalu lemah. Gunakan minimal 6 karakter.");
         } else {
           setMessage("Gagal masuk. Coba lagi.");
         }
@@ -420,10 +496,12 @@
 
   function resetPdfViewerZoom(content) {
     if (!content) return;
-    content.style.touchAction = "pan-y pinch-zoom";
-    content.style.transform = "none";
-    content.style.transformOrigin = "center top";
-    content.style.zoom = "1";
+    const pages = content.querySelector(".mpd-pdf-pages");
+    if (pages) {
+      pages.style.transform = "none";
+      pages.style.transformOrigin = "center top";
+    }
+    content.style.touchAction = "pan-y";
   }
 
   function setupPdfPinchZoom(content) {
@@ -436,9 +514,16 @@
 
     resetPdfViewerZoom(content);
 
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
     let startDistance = 0;
     let startZoom = 1;
-    let zoom = 1;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let isPanning = false;
+
+    const getPages = () => content.querySelector(".mpd-pdf-pages");
 
     const getDistance = (touches) => {
       const dx = touches[0].clientX - touches[1].clientX;
@@ -446,25 +531,99 @@
       return Math.hypot(dx, dy);
     };
 
+    const getMidpoint = (touches) => ({
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2
+    });
+
+    const clampPan = () => {
+      const pages = getPages();
+      if (!pages || zoom <= 1) {
+        panX = 0;
+        panY = 0;
+        return;
+      }
+
+      const baseWidth = pages.offsetWidth;
+      const baseHeight = pages.offsetHeight;
+      const maxX = Math.max(0, (baseWidth * zoom - content.clientWidth) / 2 + 24);
+      const maxY = Math.max(0, (baseHeight * zoom - content.clientHeight) / 2 + 24);
+
+      panX = Math.min(maxX, Math.max(-maxX, panX));
+      panY = Math.min(maxY, Math.max(-maxY, panY));
+    };
+
+    const applyTransform = () => {
+      const pages = getPages();
+      if (!pages) return;
+
+      clampPan();
+      pages.style.transformOrigin = "center top";
+      pages.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoom})`;
+      pages.style.willChange = zoom > 1 ? "transform" : "auto";
+    };
+
+    const resetZoom = () => {
+      zoom = 1;
+      panX = 0;
+      panY = 0;
+      startDistance = 0;
+      startZoom = 1;
+      isPanning = false;
+      applyTransform();
+    };
+
     const onTouchStart = (event) => {
-      if (event.touches.length !== 2) return;
-      startDistance = getDistance(event.touches);
-      startZoom = zoom;
+      if (event.touches.length === 2) {
+        startDistance = getDistance(event.touches);
+        startZoom = zoom;
+        isPanning = false;
+        return;
+      }
+
+      if (event.touches.length === 1 && zoom > 1) {
+        lastTouchX = event.touches[0].clientX;
+        lastTouchY = event.touches[0].clientY;
+        isPanning = true;
+      }
     };
 
     const onTouchMove = (event) => {
-      if (event.touches.length !== 2 || !startDistance) return;
+      if (event.touches.length === 2 && startDistance) {
+        const distance = getDistance(event.touches);
+        const scale = distance / startDistance;
+        zoom = Math.min(3, Math.max(1, startZoom * scale));
+        if (zoom === 1) {
+          panX = 0;
+          panY = 0;
+        }
+        applyTransform();
+        event.preventDefault();
+        return;
+      }
 
-      const distance = getDistance(event.touches);
-      const scale = distance / startDistance;
-      zoom = Math.min(3, Math.max(1, startZoom * scale));
-      content.style.zoom = String(zoom);
-      event.preventDefault();
+      if (event.touches.length === 1 && isPanning && zoom > 1) {
+        const touch = event.touches[0];
+        panX += touch.clientX - lastTouchX;
+        panY += touch.clientY - lastTouchY;
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
+        applyTransform();
+        event.preventDefault();
+      }
     };
 
     const onTouchEnd = (event) => {
       if (event.touches.length >= 2) return;
-      startDistance = 0;
+
+      if (event.touches.length === 1 && zoom > 1) {
+        lastTouchX = event.touches[0].clientX;
+        lastTouchY = event.touches[0].clientY;
+        isPanning = true;
+      } else {
+        startDistance = 0;
+        isPanning = false;
+      }
     };
 
     content.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -477,6 +636,7 @@
       content.removeEventListener("touchmove", onTouchMove);
       content.removeEventListener("touchend", onTouchEnd);
       content.removeEventListener("touchcancel", onTouchEnd);
+      resetZoom();
       resetPdfViewerZoom(content);
     };
   }
@@ -496,7 +656,7 @@
     content.style.background = "#f5f8f7";
     content.style.padding = "12px";
     content.style.boxSizing = "border-box";
-    content.style.touchAction = "pan-y pinch-zoom";
+    content.style.touchAction = "pan-y";
   }
 
   function clearPdfPages(content) {
