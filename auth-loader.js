@@ -159,16 +159,19 @@
     if (!e || !form.querySelector("#email")?.checkValidity()) return msg("Masukkan alamat email yang valid.");
     if (p.length < 6) return msg("Kata sandi minimal 6 karakter.");
     if (button) { button.disabled = true; button.textContent = "Memproses..."; }
-    try { await login(n, e, p); } catch (error) { errorText(error); } finally { if (button) { button.disabled = false; button.textContent = "Masuk ke MPD"; } }
+    try { await login(n, e, p); } catch (error) { errorText(error); } finally { if (button) { button.disabled = false; button.textContent = "Masuk"; } }
   }, true);
 
   const addPasswordRecovery = () => {
     const form = document.querySelector("#login-form");
-    if (!form || form.querySelector("#password-recovery-helper")) return;
+    if (!form) return;
+    const button = form.querySelector("button[type='submit']");
+    if (button) button.textContent = "Masuk";
+    if (form.querySelector("#password-recovery-helper")) return;
     const helper = document.createElement("div");
     helper.id = "password-recovery-helper";
     helper.textContent = "Lupa password? DM @panduandiabetes di Instagram dengan email yang Anda gunakan saat mendaftar.";
-    helper.style.margin = "-5px 0 16px";
+    helper.style.margin = "4px 0 16px";
     helper.style.color = "#7A9E9B";
     helper.style.fontSize = "11.5px";
     helper.style.lineHeight = "1.45";
