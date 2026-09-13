@@ -1,1 +1,1 @@
-Redeploy trigger after reverting demo.html to the previous version.
+Redeploy trigger: restore verified script.js and refresh production deployment.
