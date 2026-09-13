@@ -169,8 +169,25 @@
   let activeDocument = null;
   let activeRenderTasks = [];
 
+  function configurePdfJsWorker(pdfjsLib) {
+    if (!pdfjsLib || !pdfjsLib.GlobalWorkerOptions) {
+      throw new Error("PDF.js tidak menyediakan GlobalWorkerOptions.");
+    }
+
+    const version = String(pdfjsLib.version || "4.4.168");
+    const isLegacyJs = version.startsWith("3.");
+    const workerExtension = isLegacyJs ? "js" : "mjs";
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.${workerExtension}`;
+
+    return pdfjsLib;
+  }
+
   function loadPdfJs() {
-    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (window.pdfjsLib) {
+      return Promise.resolve(configurePdfJsWorker(window.pdfjsLib));
+    }
 
     if (!pdfJsPromise) {
       pdfJsPromise = new Promise((resolve, reject) => {
@@ -179,7 +196,13 @@
         );
 
         if (existingScript) {
-          existingScript.addEventListener("load", () => resolve(window.pdfjsLib));
+          existingScript.addEventListener("load", () => {
+            try {
+              resolve(configurePdfJsWorker(window.pdfjsLib));
+            } catch (error) {
+              reject(error);
+            }
+          });
           existingScript.addEventListener("error", reject);
           return;
         }
@@ -191,15 +214,11 @@
         script.dataset.mpdPdfjs = "true";
 
         script.onload = () => {
-          if (!window.pdfjsLib) {
-            reject(new Error("PDF.js gagal dimuat."));
-            return;
+          try {
+            resolve(configurePdfJsWorker(window.pdfjsLib));
+          } catch (error) {
+            reject(error);
           }
-
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-          resolve(window.pdfjsLib);
         };
 
         script.onerror = () => reject(new Error("PDF.js gagal dimuat."));
