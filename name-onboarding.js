@@ -89,7 +89,11 @@
 
     if (user && !user.isAnonymous) {
       if (normalizeEmail(user.email) === email) {
-        return user;
+        const signedIn = await firebaseAuth.signInWithEmailAndPassword(
+          email,
+          password
+        );
+        return signedIn.user;
       }
 
       await firebaseAuth.signOut();
@@ -530,11 +534,6 @@
       const dy = touches[0].clientY - touches[1].clientY;
       return Math.hypot(dx, dy);
     };
-
-    const getMidpoint = (touches) => ({
-      x: (touches[0].clientX + touches[1].clientX) / 2,
-      y: (touches[0].clientY + touches[1].clientY) / 2
-    });
 
     const clampPan = () => {
       const pages = getPages();
