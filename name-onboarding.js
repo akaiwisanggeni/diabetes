@@ -65,10 +65,7 @@
       lastActive: Date.now()
     };
 
-    window.localStorage.setItem(
-      SESSION_KEY,
-      JSON.stringify(session)
-    );
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 
   function clearSession() {
@@ -114,7 +111,6 @@
     const normalizedEmail = normalizeEmail(email);
     const identityKey = makeIdentityKey(normalizedName, normalizedEmail);
     const { userRef, snapshot } = await loadProfile(authUser);
-
     const existingData = snapshot.exists ? snapshot.data() : null;
 
     if (existingData && existingData.status === "banned") {
@@ -123,11 +119,6 @@
       return null;
     }
 
-    /*
-       The app identity is name + email. The Firebase anonymous UID is kept
-       only as the technical owner of the Firestore records. We never expose
-       this UID to the user and we do not sign it out when the user logs out.
-    */
     const profileData = {
       name: normalizedName,
       email: normalizedEmail,
@@ -151,7 +142,6 @@
     };
 
     writeSession(authUser, profile);
-
     currentUser = buildAppUser(authUser, profile);
     updateUserUI(currentUser);
     showPage("home");
@@ -165,11 +155,7 @@
     return currentUser;
   }
 
-  /*
-     Keep Firebase Authentication as an invisible technical session so the
-     existing Firestore security rules continue to protect tracker data.
-     The user-facing login is still only name + email.
-  */
+  /* Keep Firebase Authentication as the invisible technical session. */
   initializeAuth = function () {
     firebaseAuth.onAuthStateChanged(async (authUser) => {
       if (!authUser) {
@@ -203,12 +189,14 @@
         const profile = {
           name: data.name || session.name,
           email: data.email || session.email,
-          identity_key: data.identity_key || makeIdentityKey(data.name || session.name, data.email || session.email)
+          identity_key: data.identity_key || makeIdentityKey(
+            data.name || session.name,
+            data.email || session.email
+          )
         };
 
         /* Sliding 30-day session: every app open resets the 30-day window. */
         writeSession(authUser, profile);
-
         currentUser = buildAppUser(authUser, profile);
         updateUserUI(currentUser);
 
@@ -225,11 +213,7 @@
     });
   };
 
-  /*
-     Override logout before script.js registers its original handler.
-     Logout is app-level only: Firebase anonymous auth stays alive so the
-     same name + email can reconnect to the same Firestore data.
-  */
+  /* App-level logout only. Keep anonymous Firebase auth alive. */
   setupLogout = function () {
     const logoutButtons = document.querySelectorAll(
       "#logout-btn, #logout, .logout-btn, [data-logout]"
@@ -295,7 +279,6 @@
     const submitButton = form.querySelector("button[type='submit']");
     if (submitButton) submitButton.textContent = "Masuk ke MPD";
 
-    /* Capture phase blocks the old magic-link submit handler in script.js. */
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -354,20 +337,21 @@
 
   /* =========================================================
      CUSTOM PDF.JS VIEWER
-     Replaces the native iframe viewer while keeping the
-     existing PDF library and viewer UI intact.
+     Keeps the existing PDF viewer UI and fixes loading,
+     memory usage, pinch zoom, and viewer cleanup.
      ========================================================= */
 
   let pdfJsPromise = null;
   let activeDocument = null;
   let activeRenderTasks = [];
+  let pdfViewerZoomCleanup = null;
 
   function configurePdfJsWorker(pdfjsLib) {
     if (!pdfjsLib || !pdfjsLib.GlobalWorkerOptions) {
       throw new Error("PDF.js tidak menyediakan GlobalWorkerOptions.");
     }
 
-    const version = String(pdfjsLib.version || "4.4.168");
+    const version = String(pdfjsLib.version || "3.11.174");
     const isLegacyJs = version.startsWith("3.");
     const workerExtension = isLegacyJs ? "js" : "mjs";
 
@@ -384,9 +368,7 @@
 
     if (!pdfJsPromise) {
       pdfJsPromise = new Promise((resolve, reject) => {
-        const existingScript = document.querySelector(
-          "script[data-mpd-pdfjs]"
-        );
+        const existingScript = document.querySelector("script[data-mpd-pdfjs]");
 
         if (existingScript) {
           existingScript.addEventListener("load", () => {
@@ -401,8 +383,7 @@
         }
 
         const script = document.createElement("script");
-        script.src =
-          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
         script.async = true;
         script.dataset.mpdPdfjs = "true";
 
@@ -434,8 +415,70 @@
     }
 
     const title = viewer.querySelector("#pdf-viewer-title");
-
     return { viewer, content, title };
+  }
+
+  function resetPdfViewerZoom(content) {
+    if (!content) return;
+    content.style.touchAction = "pan-y pinch-zoom";
+    content.style.transform = "none";
+    content.style.transformOrigin = "center top";
+    content.style.zoom = "1";
+  }
+
+  function setupPdfPinchZoom(content) {
+    if (!content) return;
+
+    if (pdfViewerZoomCleanup) {
+      pdfViewerZoomCleanup();
+      pdfViewerZoomCleanup = null;
+    }
+
+    resetPdfViewerZoom(content);
+
+    let startDistance = 0;
+    let startZoom = 1;
+    let zoom = 1;
+
+    const getDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(dx, dy);
+    };
+
+    const onTouchStart = (event) => {
+      if (event.touches.length !== 2) return;
+      startDistance = getDistance(event.touches);
+      startZoom = zoom;
+    };
+
+    const onTouchMove = (event) => {
+      if (event.touches.length !== 2 || !startDistance) return;
+
+      const distance = getDistance(event.touches);
+      const scale = distance / startDistance;
+      zoom = Math.min(3, Math.max(1, startZoom * scale));
+      content.style.zoom = String(zoom);
+      event.preventDefault();
+    };
+
+    const onTouchEnd = () => {
+      if (event?.touches?.length >= 2) return;
+      startDistance = 0;
+    };
+
+    content.addEventListener("touchstart", onTouchStart, { passive: true });
+    content.addEventListener("touchmove", onTouchMove, { passive: false });
+    content.addEventListener("touchend", onTouchEnd, { passive: true });
+    content.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
+    pdfViewerZoomCleanup = () => {
+      content.removeEventListener("touchstart", onTouchStart);
+      content.removeEventListener("touchmove", onTouchMove);
+      content.removeEventListener("touchend", onTouchEnd);
+      content.removeEventListener("touchcancel", onTouchEnd);
+      resetPdfViewerZoom(content);
+    };
   }
 
   function setupPdfCanvas() {
@@ -444,7 +487,6 @@
 
     const { content } = parts;
 
-    /* Remove only the old native PDF iframe/canvas. */
     content.querySelectorAll("iframe, #pdf-canvas, .mpd-pdf-pages").forEach((element) => {
       element.remove();
     });
@@ -454,6 +496,7 @@
     content.style.background = "#f5f8f7";
     content.style.padding = "12px";
     content.style.boxSizing = "border-box";
+    content.style.touchAction = "pan-y pinch-zoom";
   }
 
   function clearPdfPages(content) {
@@ -466,6 +509,34 @@
 
     const pages = content.querySelector(".mpd-pdf-pages");
     if (pages) pages.remove();
+  }
+
+  async function closePdfDocument() {
+    const parts = getViewerParts();
+    if (!parts) return;
+
+    const { viewer, content } = parts;
+
+    clearPdfPages(content);
+
+    if (pdfViewerZoomCleanup) {
+      pdfViewerZoomCleanup();
+      pdfViewerZoomCleanup = null;
+    } else {
+      resetPdfViewerZoom(content);
+    }
+
+    if (activeDocument) {
+      try {
+        await activeDocument.destroy();
+      } catch (error) {
+        console.error("PDF.js document cleanup error:", error);
+      }
+      activeDocument = null;
+    }
+
+    viewer.style.display = "none";
+    document.body.classList.remove("pdf-viewer-open");
   }
 
   async function renderPdfDocument() {
@@ -482,15 +553,15 @@
     pagesContainer.style.flexDirection = "column";
     pagesContainer.style.alignItems = "center";
     pagesContainer.style.gap = "12px";
+    pagesContainer.style.transformOrigin = "center top";
 
     content.appendChild(pagesContainer);
 
     const availableWidth = Math.max(280, content.clientWidth - 24);
-    const deviceScale = window.devicePixelRatio || 1;
+    const deviceScale = Math.min(window.devicePixelRatio || 1, 2);
     const totalPages = activeDocument.numPages;
     const pageItems = [];
 
-    /* Create all page shells first so the first page can appear immediately. */
     for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
       const pageWrapper = document.createElement("div");
       pageWrapper.className = "mpd-pdf-page";
@@ -545,10 +616,10 @@
       }
     }
 
-    /* Render page 1 first. This is the only page the viewer waits for. */
+    if (pageItems.length === 0) return;
+
     await renderPage(pageItems[0]);
 
-    /* Render the remaining pages in small concurrent batches in the background. */
     const remainingItems = pageItems.slice(1);
     const concurrency = 3;
 
@@ -573,12 +644,6 @@
   function resolvePdfUrl(pdfUrl) {
     const parsedUrl = new URL(pdfUrl, window.location.href);
 
-    /*
-       The PDF files live in this repository under /assets/pdfs/.
-       Firestore still contains the old aman-diabetes.vercel.app host,
-       so use the current app origin for those files. This keeps the
-       PDF.js request same-origin and avoids the Vercel CORS redirect.
-    */
     if (parsedUrl.pathname.startsWith("/assets/pdfs/")) {
       return `${window.location.origin}${parsedUrl.pathname}${parsedUrl.search}`;
     }
@@ -597,6 +662,7 @@
     viewer.style.display = "";
     document.body.classList.add("pdf-viewer-open");
     content.setAttribute("aria-busy", "true");
+    setupPdfPinchZoom(content);
 
     try {
       const pdfjsLib = await loadPdfJs();
@@ -610,6 +676,12 @@
     } catch (error) {
       console.error("PDF.js viewer error:", error);
       clearPdfPages(content);
+      if (activeDocument) {
+        try {
+          await activeDocument.destroy();
+        } catch (_) {}
+        activeDocument = null;
+      }
       setMessage("Materi PDF gagal dimuat. Coba lagi.");
     } finally {
       content.removeAttribute("aria-busy");
@@ -618,12 +690,28 @@
 
   function overridePdfViewer() {
     window.openPdfViewer = customOpenPdfViewer;
+    window.closePdfViewer = closePdfDocument;
     setupPdfCanvas();
+
+    /* Capture-phase handler reliably replaces script.js's old Back handler. */
+    const backButton = document.querySelector("#pdf-back");
+    if (backButton) {
+      backButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        await closePdfDocument();
+      }, true);
+    }
   }
 
   function setup() {
     setupLoginForm();
     overridePdfViewer();
+
+    /* Preload the same PDF.js build used by the viewer. */
+    loadPdfJs().catch((error) => {
+      console.error("PDF.js preload error:", error);
+    });
 
     const onboarding = document.querySelector("#name-onboarding");
     if (onboarding) onboarding.remove();
