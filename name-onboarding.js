@@ -6,6 +6,10 @@
 (function () {
   "use strict";
 
+  const SESSION_KEY = "mpdAppSession";
+  const SESSION_DAYS = 30;
+  const SESSION_MS = SESSION_DAYS * 24 * 60 * 60 * 1000;
+
   /* Disable the old magic-link completion path. */
   if (typeof completeMagicLinkLogin === "function") {
     completeMagicLinkLogin = async function () {};
@@ -19,6 +23,230 @@
   function normalizeEmail(value) {
     return String(value || "").trim().toLowerCase();
   }
+
+  function normalizeName(value) {
+    return String(value || "").trim().replace(/\s+/g, " ");
+  }
+
+  function makeIdentityKey(name, email) {
+    return `${normalizeName(name).toLowerCase()}|${normalizeEmail(email)}`;
+  }
+
+  function readSession() {
+    try {
+      const raw = window.localStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+
+      const session = JSON.parse(raw);
+      if (!session || !session.lastActive) return null;
+
+      const lastActive = Number(session.lastActive);
+      if (!Number.isFinite(lastActive)) return null;
+
+      if (Date.now() - lastActive >= SESSION_MS) {
+        window.localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+
+      return session;
+    } catch (error) {
+      console.error("MPD session read error:", error);
+      window.localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+  }
+
+  function writeSession(user, profile) {
+    const session = {
+      uid: user.uid,
+      name: profile.name,
+      email: profile.email,
+      identity_key: profile.identity_key,
+      lastActive: Date.now()
+    };
+
+    window.localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify(session)
+    );
+  }
+
+  function clearSession() {
+    window.localStorage.removeItem(SESSION_KEY);
+  }
+
+  function buildAppUser(authUser, profile) {
+    return {
+      ...authUser,
+      uid: authUser.uid,
+      email: profile.email,
+      displayName: profile.name,
+      identity_key: profile.identity_key,
+      auth_uid: authUser.uid,
+      isAnonymous: authUser.isAnonymous
+    };
+  }
+
+  async function getOrCreateAnonymousUser() {
+    let user = firebaseAuth.currentUser;
+
+    if (user && !user.isAnonymous) {
+      await firebaseAuth.signOut();
+      user = null;
+    }
+
+    if (!user) {
+      const credential = await firebaseAuth.signInAnonymously();
+      user = credential.user;
+    }
+
+    return user;
+  }
+
+  async function loadProfile(authUser) {
+    const userRef = firebaseDb.collection("users").doc(authUser.uid);
+    const snapshot = await userRef.get();
+    return { userRef, snapshot };
+  }
+
+  async function activateSession(authUser, name, email) {
+    const normalizedName = normalizeName(name);
+    const normalizedEmail = normalizeEmail(email);
+    const identityKey = makeIdentityKey(normalizedName, normalizedEmail);
+    const { userRef, snapshot } = await loadProfile(authUser);
+
+    const existingData = snapshot.exists ? snapshot.data() : null;
+
+    if (existingData && existingData.status === "banned") {
+      clearSession();
+      setMessage("Akses akun ini telah dinonaktifkan.");
+      return null;
+    }
+
+    /*
+       The app identity is name + email. The Firebase anonymous UID is kept
+       only as the technical owner of the Firestore records. We never expose
+       this UID to the user and we do not sign it out when the user logs out.
+    */
+    const profileData = {
+      name: normalizedName,
+      email: normalizedEmail,
+      identity_key: identityKey,
+      status: existingData?.status || "active",
+      access_type: "self_registered",
+      last_login: firebase.firestore.FieldValue.serverTimestamp(),
+      updated_at: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (!snapshot.exists) {
+      profileData.first_login = firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    await userRef.set(profileData, { merge: true });
+
+    const profile = {
+      name: normalizedName,
+      email: normalizedEmail,
+      identity_key: identityKey
+    };
+
+    writeSession(authUser, profile);
+
+    currentUser = buildAppUser(authUser, profile);
+    updateUserUI(currentUser);
+    showPage("home");
+    setMessage("");
+
+    await loadPdfLibrary();
+    await loadCarbFoods();
+    await loadBloodSugarRecords();
+    await loadWeightRecords();
+
+    return currentUser;
+  }
+
+  /*
+     Keep Firebase Authentication as an invisible technical session so the
+     existing Firestore security rules continue to protect tracker data.
+     The user-facing login is still only name + email.
+  */
+  initializeAuth = function () {
+    firebaseAuth.onAuthStateChanged(async (authUser) => {
+      if (!authUser) {
+        currentUser = null;
+        updateUserUI(null);
+        return;
+      }
+
+      const session = readSession();
+
+      if (!session || session.uid !== authUser.uid) {
+        currentUser = null;
+        updateUserUI(null);
+        return;
+      }
+
+      try {
+        const { snapshot } = await loadProfile(authUser);
+
+        if (!snapshot.exists || snapshot.data().status === "banned") {
+          clearSession();
+          currentUser = null;
+          updateUserUI(null);
+          if (snapshot.exists && snapshot.data().status === "banned") {
+            setMessage("Akses akun ini telah dinonaktifkan.");
+          }
+          return;
+        }
+
+        const data = snapshot.data();
+        const profile = {
+          name: data.name || session.name,
+          email: data.email || session.email,
+          identity_key: data.identity_key || makeIdentityKey(data.name || session.name, data.email || session.email)
+        };
+
+        /* Sliding 30-day session: every app open resets the 30-day window. */
+        writeSession(authUser, profile);
+
+        currentUser = buildAppUser(authUser, profile);
+        updateUserUI(currentUser);
+
+        await loadPdfLibrary();
+        await loadCarbFoods();
+        await loadBloodSugarRecords();
+        await loadWeightRecords();
+      } catch (error) {
+        console.error("MPD session restore error:", error);
+        clearSession();
+        currentUser = null;
+        updateUserUI(null);
+      }
+    });
+  };
+
+  /*
+     Override logout before script.js registers its original handler.
+     Logout is app-level only: Firebase anonymous auth stays alive so the
+     same name + email can reconnect to the same Firestore data.
+  */
+  setupLogout = function () {
+    const logoutButtons = document.querySelectorAll(
+      "#logout-btn, #logout, .logout-btn, [data-logout]"
+    );
+
+    logoutButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        clearSession();
+        currentUser = null;
+        updateUserUI(null);
+        showPage("home");
+      }, true);
+    });
+  };
 
   function setupLoginForm() {
     const form = document.querySelector("#login-form");
@@ -72,7 +300,7 @@
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      const name = nameInput.value.trim();
+      const name = normalizeName(nameInput.value);
       const email = normalizeEmail(emailInput.value);
 
       if (!name) {
@@ -105,43 +333,8 @@
       }
 
       try {
-        let user = firebaseAuth.currentUser;
-
-        if (user && !user.isAnonymous) {
-          await firebaseAuth.signOut();
-          user = null;
-        }
-
-        if (!user) {
-          const credential = await firebaseAuth.signInAnonymously();
-          user = credential.user;
-        }
-
-        await user.updateProfile({ displayName: name });
-
-        const userRef = firebaseDb.collection("users").doc(user.uid);
-        const existingUser = await userRef.get();
-
-        const profileData = {
-          name,
-          email,
-          status: "active",
-          access_type: "self_registered",
-          last_login: firebase.firestore.FieldValue.serverTimestamp(),
-          updated_at: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        if (!existingUser.exists) {
-          profileData.first_login = firebase.firestore.FieldValue.serverTimestamp();
-        }
-
-        await userRef.set(profileData, { merge: true });
-
-        currentUser = user;
-        updateUserUI(user);
-        showPage("home");
-        setMessage("");
-
+        const user = await getOrCreateAnonymousUser();
+        await activateSession(user, name, email);
       } catch (error) {
         console.error("Direct login error:", error);
 
