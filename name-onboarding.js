@@ -462,8 +462,8 @@
       event.preventDefault();
     };
 
-    const onTouchEnd = () => {
-      if (event?.touches?.length >= 2) return;
+    const onTouchEnd = (event) => {
+      if (event.touches.length >= 2) return;
       startDistance = 0;
     };
 
