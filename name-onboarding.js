@@ -293,17 +293,15 @@
     content.appendChild(pagesContainer);
 
     const availableWidth = Math.max(280, content.clientWidth - 24);
+    const deviceScale = window.devicePixelRatio || 1;
+    const totalPages = activeDocument.numPages;
+    const pageItems = [];
 
-    for (let pageNumber = 1; pageNumber <= activeDocument.numPages; pageNumber += 1) {
-      const page = await activeDocument.getPage(pageNumber);
-      const baseViewport = page.getViewport({ scale: 1 });
-      const scale = availableWidth / baseViewport.width;
-      const viewport = page.getViewport({ scale });
-      const deviceScale = window.devicePixelRatio || 1;
-
+    /* Create all page shells first so the first page can appear immediately. */
+    for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
       const pageWrapper = document.createElement("div");
       pageWrapper.className = "mpd-pdf-page";
-      pageWrapper.style.width = `${Math.ceil(viewport.width)}px`;
+      pageWrapper.style.width = "100%";
       pageWrapper.style.maxWidth = "100%";
       pageWrapper.style.background = "#fff";
       pageWrapper.style.boxShadow = "0 1px 5px rgba(0,0,0,0.08)";
@@ -313,19 +311,31 @@
       canvas.className = "mpd-pdf-canvas";
       canvas.setAttribute(
         "aria-label",
-        `PDF Viewer, halaman ${pageNumber} dari ${activeDocument.numPages}`
+        `PDF Viewer, halaman ${pageNumber} dari ${totalPages}`
       );
-      canvas.width = Math.ceil(viewport.width * deviceScale);
-      canvas.height = Math.ceil(viewport.height * deviceScale);
       canvas.style.display = "block";
-      canvas.style.width = `${Math.ceil(viewport.width)}px`;
-      canvas.style.height = `${Math.ceil(viewport.height)}px`;
+      canvas.style.width = "100%";
+      canvas.style.height = "auto";
       canvas.style.maxWidth = "100%";
 
       pageWrapper.appendChild(canvas);
       pagesContainer.appendChild(pageWrapper);
+      pageItems.push({ pageNumber, pageWrapper, canvas });
+    }
 
-      const context = canvas.getContext("2d", { alpha: false });
+    async function renderPage(item) {
+      const page = await activeDocument.getPage(item.pageNumber);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const scale = availableWidth / baseViewport.width;
+      const viewport = page.getViewport({ scale });
+
+      item.pageWrapper.style.width = `${Math.ceil(viewport.width)}px`;
+      item.canvas.width = Math.ceil(viewport.width * deviceScale);
+      item.canvas.height = Math.ceil(viewport.height * deviceScale);
+      item.canvas.style.width = `${Math.ceil(viewport.width)}px`;
+      item.canvas.style.height = `${Math.ceil(viewport.height)}px`;
+
+      const context = item.canvas.getContext("2d", { alpha: false });
       context.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
 
       const renderTask = page.render({
@@ -337,12 +347,34 @@
 
       try {
         await renderTask.promise;
-      } catch (error) {
-        if (error?.name !== "RenderingCancelledException") throw error;
       } finally {
         activeRenderTasks = activeRenderTasks.filter((task) => task !== renderTask);
       }
     }
+
+    /* Render page 1 first. This is the only page the viewer waits for. */
+    await renderPage(pageItems[0]);
+
+    /* Render the remaining pages in small concurrent batches in the background. */
+    const remainingItems = pageItems.slice(1);
+    const concurrency = 3;
+
+    (async () => {
+      for (let index = 0; index < remainingItems.length; index += concurrency) {
+        const batch = remainingItems.slice(index, index + concurrency);
+        await Promise.all(
+          batch.map(async (item) => {
+            try {
+              await renderPage(item);
+            } catch (error) {
+              if (error?.name !== "RenderingCancelledException") {
+                console.error(`PDF page ${item.pageNumber} render error:`, error);
+              }
+            }
+          })
+        );
+      }
+    })();
   }
 
   function resolvePdfUrl(pdfUrl) {
