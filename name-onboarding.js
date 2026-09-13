@@ -6,6 +6,11 @@
 (function () {
   "use strict";
 
+  /* Disable the old magic-link completion path. */
+  if (typeof completeMagicLinkLogin === "function") {
+    completeMagicLinkLogin = async function () {};
+  }
+
   function setMessage(message) {
     const element = document.querySelector("#login-message");
     if (element) element.textContent = message || "";
