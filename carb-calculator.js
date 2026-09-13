@@ -9,7 +9,7 @@
 (function () {
   function esc(value) {
     if (typeof escapeHtml === 'function') return escapeHtml(String(value ?? ''));
-    return String(value ?? '').replace(/[&<>'"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'})[c]; });
+    return String(value ?? '').replace(/[&<>'\"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'})[c]; });
   }
   function num(value) { const n = Number(value); return Number.isFinite(n) ? n : 0; }
   function fmt(value) { if (typeof formatNumber === 'function') return formatNumber(value); return Number(value || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 }); }
@@ -42,4 +42,11 @@
     const style=document.createElement('style'); style.id='mpd-multi-carb-style'; style.textContent=`#mpd-carb-rows{display:flex;flex-direction:column;gap:14px}.mpd-carb-row{padding:14px;border:1px solid #e3e9e4;border-radius:16px;background:#fbfdfb}.mpd-carb-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:#176949}.mpd-carb-remove{border:0;background:transparent;color:#a24d4d;font-size:12px;font-weight:700;cursor:pointer}.mpd-carb-search-wrap{position:relative}.mpd-carb-search{width:100%;box-sizing:border-box}.mpd-carb-results{display:none;position:absolute;z-index:20;left:0;right:0;top:calc(100% + 5px);max-height:220px;overflow:auto;background:#fff;border:1px solid #e0e7e1;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.10)}.mpd-carb-result-item{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1ef;background:#fff;padding:11px 12px;cursor:pointer}.mpd-carb-result-item strong,.mpd-carb-result-item span{display:block}.mpd-carb-result-item span{margin-top:3px;font-size:11px;color:#718078}.mpd-carb-empty{padding:13px;color:#777;font-size:12px}.mpd-carb-amount-line{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.mpd-carb-unit-box{min-width:0}.mpd-carb-unit{height:44px;box-sizing:border-box;display:flex;align-items:center;padding:0 13px;border:1px solid #dfe6df;border-radius:10px;background:#f5f8f5;color:#176949;font-weight:700}.mpd-carb-unit-info{margin-top:8px;font-size:11px;color:#718078}.mpd-carb-item-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:10px;border-top:1px solid #e8eee9;font-size:13px;color:#56645b}.mpd-carb-item-total-row strong{color:#176949;font-size:15px}#mpd-carb-add{width:100%}`; document.head.appendChild(style);
   }
   window.addEventListener('DOMContentLoaded',function(){setupMultiCarbCalculator();});
+})();
+
+/* Auth loader is appended here so the existing index.html stays untouched. */
+(function(){
+  var s=document.createElement('script');
+  s.src='/auth-loader.js?v=2';
+  document.head.appendChild(s);
 })();
