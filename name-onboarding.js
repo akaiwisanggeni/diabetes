@@ -345,6 +345,22 @@
     }
   }
 
+  function resolvePdfUrl(pdfUrl) {
+    const parsedUrl = new URL(pdfUrl, window.location.href);
+
+    /*
+       The PDF files live in this repository under /assets/pdfs/.
+       Firestore still contains the old aman-diabetes.vercel.app host,
+       so use the current app origin for those files. This keeps the
+       PDF.js request same-origin and avoids the Vercel CORS redirect.
+    */
+    if (parsedUrl.pathname.startsWith("/assets/pdfs/")) {
+      return `${window.location.origin}${parsedUrl.pathname}${parsedUrl.search}`;
+    }
+
+    return parsedUrl.href;
+  }
+
   async function customOpenPdfViewer(pdf) {
     const parts = getViewerParts();
     if (!parts) return;
@@ -359,7 +375,8 @@
 
     try {
       const pdfjsLib = await loadPdfJs();
-      activeDocument = await pdfjsLib.getDocument({ url: pdf.pdf_url }).promise;
+      const pdfUrl = resolvePdfUrl(pdf.pdf_url);
+      activeDocument = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
       await renderPdfDocument();
       content.setAttribute(
         "aria-label",
