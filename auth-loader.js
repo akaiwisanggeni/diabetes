@@ -11,6 +11,13 @@
   const msg = (v) => { const el = document.querySelector("#login-message"); if (el) el.textContent = v || ""; };
   const key = (n, e) => `${normName(n).toLowerCase()}|${normEmail(e)}`;
 
+  // Explicitly keep Firebase Auth persistent across browser restarts.
+  // Firebase defaults to local persistence on the web, but setting it here
+  // makes the intended MPD behavior explicit for future logins as well.
+  const persistenceReady = firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch((error) => {
+    console.warn("MPD auth persistence setup skipped:", error);
+  });
+
   // Wait until Firebase has restored the persisted auth state after a refresh.
   // Without this, a fast submit can see currentUser as null and start the
   // anonymous -> legacy-account migration flow again.
@@ -80,6 +87,57 @@
     await loadPdfLibrary(); await loadCarbFoods(); await loadBloodSugarRecords(); await loadWeightRecords();
   }
 
+  // Restore the app from Firebase Auth even if the app-level session record
+  // was lost. Firebase Auth is the real persistent identity; the local
+  // session is only an app convenience/cache.
+  async function restorePersistentUser(user) {
+    if (!user || user.isAnonymous) return;
+
+    try {
+      const ref = firebaseDb.collection("users").doc(user.uid);
+      const snap = await ref.get();
+
+      if (!snap.exists || snap.data()?.status === "banned") {
+        localStorage.removeItem(SESSION_KEY);
+        currentUser = null;
+        updateUserUI(null);
+        if (snap.exists && snap.data()?.status === "banned") {
+          msg("Akses akun ini telah dinonaktifkan.");
+        }
+        return;
+      }
+
+      const data = snap.data();
+      const name = normName(data.name || user.displayName || "");
+      const email = normEmail(data.email || user.email || "");
+      const profile = {
+        name,
+        email,
+        identity_key: data.identity_key || key(name, email)
+      };
+
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        uid: user.uid,
+        name: profile.name,
+        email: profile.email,
+        identity_key: profile.identity_key,
+        lastActive: Date.now()
+      }));
+
+      currentUser = { ...user, uid: user.uid, email: profile.email, displayName: profile.name, identity_key: profile.identity_key, auth_uid: user.uid, isAnonymous: user.isAnonymous };
+      updateUserUI(currentUser);
+      showPage("home");
+      msg("");
+
+      await loadPdfLibrary();
+      await loadCarbFoods();
+      await loadBloodSugarRecords();
+      await loadWeightRecords();
+    } catch (error) {
+      console.error("MPD persistent session restore error:", error);
+    }
+  }
+
   function errorText(error) {
     const c = error?.code || "unknown-error";
     const map = {
@@ -107,10 +165,20 @@
       else msg("Email terverifikasi. Masukkan kata sandi yang ingin Anda gunakan.");
       localStorage.setItem(PASSWORD_SETUP_KEY, "1");
       localStorage.removeItem(EMAIL_KEY); window.history.replaceState({}, document.title, window.location.pathname); localStorage.removeItem(SESSION_KEY); currentUser = null; updateUserUI(null);
-    } catch (error) { errorText(error); }
+    } catch (error) {
+      errorText(error);
+      // A used/expired email-link URL must not keep triggering the migration
+      // handler on every refresh. Clean the one-time action parameters.
+      if (error?.code === "auth/invalid-action-code" || error?.code === "auth/expired-action-code") {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
   }
 
   async function login(n, e, p) {
+    // Ensure new sign-ins use LOCAL persistence as well.
+    await persistenceReady;
+
     // Firebase can take a moment to restore LOCAL persistence after refresh.
     // Always wait for that first so an existing permanent account is not
     // mistaken for a fresh anonymous session.
@@ -151,6 +219,16 @@
 
   // Run immediately; this file may be loaded after DOMContentLoaded.
   finishLink();
+
+  // The app-level session can disappear while Firebase Auth remains signed in.
+  // Restore the real persistent account once Auth finishes initializing.
+  authReady.then(async (user) => {
+    await persistenceReady;
+    await restorePersistentUser(user);
+  }).catch((error) => {
+    console.error("MPD persistent auth restore error:", error);
+  });
+
   document.addEventListener("submit", async (event) => {
     if (event.target?.id !== "login-form") return;
     event.preventDefault(); event.stopImmediatePropagation();
