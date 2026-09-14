@@ -246,6 +246,22 @@
       return;
     }
 
+    // If Firebase restored an anonymous session, first check whether the
+    // entered email/password already belongs to a permanent account. This
+    // avoids falling into the email-link migration path (and its quota) for
+    // users who already have an existing Email/Password account.
+    if (user && user.isAnonymous) {
+      try {
+        const signedIn = await firebaseAuth.signInWithEmailAndPassword(e, p);
+        await activate(signedIn.user, n, e);
+        return;
+      } catch (error) {
+        if (error?.code !== "auth/user-not-found" && error?.code !== "auth/invalid-credential") {
+          throw error;
+        }
+      }
+    }
+
     if (user && !user.isAnonymous) await firebaseAuth.signOut();
     user = firebaseAuth.currentUser || (await firebaseAuth.signInAnonymously()).user;
     try {
