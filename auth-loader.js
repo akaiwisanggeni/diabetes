@@ -270,6 +270,20 @@
     console.error("MPD persistent auth restore error:", error);
   });
 
+  // name-onboarding.js restores Firebase state during DOMContentLoaded, but its
+  // legacy restore path does not call showPage("home"). Run one final restore
+  // after the app initialization callbacks so a valid persistent MPD session
+  // cannot be left visually stuck on the login screen.
+  const restoreAfterAppInit = () => {
+    const user = firebaseAuth.currentUser;
+    if (user) restorePersistentUser(user);
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", restoreAfterAppInit, { once: true });
+  } else {
+    setTimeout(restoreAfterAppInit, 0);
+  }
+
   document.addEventListener("submit", async (event) => {
     if (event.target?.id !== "login-form") return;
     event.preventDefault(); event.stopImmediatePropagation();
