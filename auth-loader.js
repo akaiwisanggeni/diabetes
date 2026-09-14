@@ -91,9 +91,50 @@
   // was lost. Firebase Auth is the real persistent identity; the local
   // session is only an app convenience/cache.
   async function restorePersistentUser(user) {
-    if (!user || user.isAnonymous) return;
+    if (!user) return;
 
     try {
+      // Existing MPD accounts may still use Firebase's anonymous UID as their
+      // persistent Auth identity. In that case, restore the app-level identity
+      // from mpdAppSession instead of treating the user as logged out.
+      if (user.isAnonymous) {
+        let session = null;
+        try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch (_) {}
+        if (!session || session.uid !== user.uid || !session.email || !session.name) return;
+
+        const ref = firebaseDb.collection("users").doc(user.uid);
+        const snap = await ref.get();
+        if (snap.exists && snap.data()?.status === "banned") {
+          localStorage.removeItem(SESSION_KEY);
+          currentUser = null;
+          updateUserUI(null);
+          msg("Akses akun ini telah dinonaktifkan.");
+          return;
+        }
+
+        const name = normName(session.name);
+        const email = normEmail(session.email);
+        const identityKey = session.identity_key || key(name, email);
+
+        currentUser = { ...user, uid: user.uid, email, displayName: name, identity_key: identityKey, auth_uid: user.uid, isAnonymous: true };
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+          uid: user.uid,
+          name,
+          email,
+          identity_key: identityKey,
+          lastActive: Date.now()
+        }));
+        updateUserUI(currentUser);
+        showPage("home");
+        msg("");
+
+        await loadPdfLibrary();
+        await loadCarbFoods();
+        await loadBloodSugarRecords();
+        await loadWeightRecords();
+        return;
+      }
+
       const ref = firebaseDb.collection("users").doc(user.uid);
       const snap = await ref.get();
 
