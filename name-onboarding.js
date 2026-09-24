@@ -85,10 +85,37 @@
   }
 
   async function getOrCreateAuthUser(email, password) {
-    let user = firebaseAuth.currentUser;
+    const currentAuthUser = firebaseAuth.currentUser;
 
-    if (user && !user.isAnonymous) {
-      if (normalizeEmail(user.email) === email) {
+    /*
+     * Existing anonymous sessions are still supported so any future
+     * anonymous data can be linked to Email/Password without changing UID.
+     */
+    if (currentAuthUser?.isAnonymous) {
+      const emailCredential = firebase.auth.EmailAuthProvider.credential(
+        email,
+        password
+      );
+
+      try {
+        const linked = await currentAuthUser.linkWithCredential(emailCredential);
+        return linked.user;
+      } catch (error) {
+        if (error && error.code === "auth/credential-already-in-use") {
+          await firebaseAuth.signOut();
+          const signedIn = await firebaseAuth.signInWithEmailAndPassword(
+            email,
+            password
+          );
+          return signedIn.user;
+        }
+
+        throw error;
+      }
+    }
+
+    if (currentAuthUser && !currentAuthUser.isAnonymous) {
+      if (normalizeEmail(currentAuthUser.email) === email) {
         const signedIn = await firebaseAuth.signInWithEmailAndPassword(
           email,
           password
@@ -97,34 +124,29 @@
       }
 
       await firebaseAuth.signOut();
-      user = null;
     }
 
-    if (!user) {
-      const credential = await firebaseAuth.signInAnonymously();
-      user = credential.user;
+    /*
+     * Email/Password is now the primary path.
+     * Anonymous Auth is only kept as a compatibility path above.
+     */
+    try {
+      const signedIn = await firebaseAuth.signInWithEmailAndPassword(
+        email,
+        password
+      );
+      return signedIn.user;
+    } catch (error) {
+      if (error && error.code !== "auth/user-not-found") {
+        throw error;
+      }
     }
 
-    const emailCredential = firebase.auth.EmailAuthProvider.credential(
+    const created = await firebaseAuth.createUserWithEmailAndPassword(
       email,
       password
     );
-
-    try {
-      const linked = await user.linkWithCredential(emailCredential);
-      return linked.user;
-    } catch (error) {
-      if (error && error.code === "auth/credential-already-in-use") {
-        await firebaseAuth.signOut();
-        const signedIn = await firebaseAuth.signInWithEmailAndPassword(
-          email,
-          password
-        );
-        return signedIn.user;
-      }
-
-      throw error;
-    }
+    return created.user;
   }
 
   async function loadProfile(authUser) {
@@ -246,18 +268,25 @@
     });
   };
 
-  /* App-level logout only. Keep Firebase auth available for the next login. */
+  /* Fully sign out Firebase and clear the app session. */
   setupLogout = function () {
     const logoutButtons = document.querySelectorAll(
       "#logout-btn, #logout, .logout-btn, [data-logout]"
     );
 
     logoutButtons.forEach((button) => {
-      button.addEventListener("click", (event) => {
+      button.addEventListener("click", async (event) => {
         event.preventDefault();
         event.stopImmediatePropagation();
 
         clearSession();
+
+        try {
+          await firebaseAuth.signOut();
+        } catch (error) {
+          console.error("MPD Firebase logout error:", error);
+        }
+
         currentUser = null;
         updateUserUI(null);
         showPage("home");
@@ -339,6 +368,49 @@
       passwordHelper.style.lineHeight = "1.4";
       form.insertBefore(passwordHelper, passwordInput.nextSibling);
     }
+
+    let forgotPasswordButton = form.querySelector("#forgot-password");
+    if (!forgotPasswordButton) {
+      forgotPasswordButton = document.createElement("button");
+      forgotPasswordButton.id = "forgot-password";
+      forgotPasswordButton.type = "button";
+      forgotPasswordButton.textContent = "Lupa kata sandi?";
+      forgotPasswordButton.style.display = "block";
+      forgotPasswordButton.style.margin = "-2px 0 16px auto";
+      forgotPasswordButton.style.padding = "0";
+      forgotPasswordButton.style.border = "0";
+      forgotPasswordButton.style.background = "transparent";
+      forgotPasswordButton.style.color = "#2B7A78";
+      forgotPasswordButton.style.fontSize = "12px";
+      forgotPasswordButton.style.cursor = "pointer";
+      form.insertBefore(forgotPasswordButton, passwordInput.nextSibling);
+    }
+
+    forgotPasswordButton.addEventListener("click", async () => {
+      const email = normalizeEmail(emailInput.value);
+
+      if (!email || !emailInput.checkValidity()) {
+        setMessage("Masukkan email yang valid terlebih dahulu.");
+        emailInput.focus();
+        return;
+      }
+
+      forgotPasswordButton.disabled = true;
+      try {
+        await firebaseAuth.sendPasswordResetEmail(email);
+        setMessage("Link reset kata sandi sudah dikirim ke email Anda.");
+      } catch (error) {
+        console.error("Password reset error:", error);
+
+        if (error && error.code === "auth/user-not-found") {
+          setMessage("Email tersebut belum terdaftar.");
+        } else {
+          setMessage("Gagal mengirim link reset. Coba lagi.");
+        }
+      } finally {
+        forgotPasswordButton.disabled = false;
+      }
+    });
 
     const submitButton = form.querySelector("button[type='submit']");
     if (submitButton) submitButton.textContent = "Masuk ke MPD";
