@@ -651,6 +651,17 @@ function setupPdfViewer() {
 }
 
 
+function isValidPdfUrl(value) {
+  try {
+    const url = new URL(String(value || ""), window.location.href);
+    return ["http:", "https:"].includes(url.protocol)
+      && url.pathname.toLowerCase().endsWith(".pdf");
+  } catch (error) {
+    return false;
+  }
+}
+
+
 function openPdfViewer(pdf) {
   const viewer =
     document.querySelector("#pdf-viewer") ||
@@ -671,6 +682,11 @@ function openPdfViewer(pdf) {
     viewer.querySelector("#pdf-viewer-title") ||
     viewer.querySelector(".pdf-viewer-title") ||
     viewer.querySelector('[data-pdf-title]');
+
+  if (!isValidPdfUrl(pdf?.pdf_url)) {
+    console.warn("PDF URL tidak valid:", pdf?.pdf_url);
+    return;
+  }
 
   if (iframe) {
     iframe.src = pdf.pdf_url;
