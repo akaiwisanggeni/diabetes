@@ -13,7 +13,9 @@
 (function (global) {
   'use strict';
 
-  const STORAGE_KEY = 'mpd_streak';
+  function storageKeyForUser(uid) {
+    return uid ? `mpd_streak_${uid}` : 'mpd_streak';
+  }
 
   function localDateKey(date) {
     const d = date instanceof Date ? date : new Date(date);
@@ -41,7 +43,7 @@
 
   function read() {
     try {
-      const raw = global.localStorage.getItem(STORAGE_KEY);
+      const raw = global.localStorage.getItem(storageKeyForUser(global.currentUser?.uid || global.firebaseAuth?.currentUser?.uid));
       if (!raw) return { count: 0, lastActiveDate: null };
 
       const parsed = JSON.parse(raw);
@@ -54,7 +56,7 @@
   }
 
   function write(state) {
-    global.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    global.localStorage.setItem(storageKeyForUser(global.currentUser?.uid || global.firebaseAuth?.currentUser?.uid), JSON.stringify(state));
     return state;
   }
 
@@ -83,7 +85,7 @@
   }
 
   function reset() {
-    global.localStorage.removeItem(STORAGE_KEY);
+    global.localStorage.removeItem(storageKeyForUser(global.currentUser?.uid || global.firebaseAuth?.currentUser?.uid));
   }
 
   function getState() {
