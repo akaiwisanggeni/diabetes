@@ -173,7 +173,7 @@
 
       <div id="pdf-viewer" class="pdf-viewer" data-pdf-viewer style="display: none;">
         <header class="pdf-viewer-header"><button type="button" id="pdf-back" class="pdf-back">‹ Kembali</button><h1 id="pdf-viewer-title" class="pdf-viewer-title">Materi</h1></header>
-        <div class="pdf-viewer-content"><iframe id="pdf-frame" title="PDF Viewer"></iframe></div>
+        <div class="pdf-viewer-content" id="pdf-renderer" aria-label="Materi PDF"></div>
       </div>
 
       <nav class="bottom-nav">
@@ -200,6 +200,7 @@
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="script.js?v=20260926-2"></script>
   <script src="auth.js?v=20260926-3"></script>
   <script src="carb-calculator.js?v=20260926-2"></script>
