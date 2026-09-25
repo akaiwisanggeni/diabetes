@@ -270,6 +270,21 @@
     const loginCard = form.closest(".login-card");
     const subtitle = loginCard ? loginCard.querySelector("h1 + p") : null;
 
+    /* Remove the legacy Instagram/DM password-recovery text if an older cached
+       login template is still present. Firebase now handles password reset by email. */
+    if (loginCard) {
+      loginCard.querySelectorAll("p").forEach((paragraph) => {
+        const text = (paragraph.textContent || "").toLowerCase();
+        if (
+          text.includes("dm @panduandiabetes") ||
+          text.includes("lupa password") ||
+          text.includes("lupa kata sandi? dm")
+        ) {
+          paragraph.remove();
+        }
+      });
+    }
+
     let nameInput = form.querySelector("#name");
     if (!nameInput) {
       const emailLabel = form.querySelector("label[for='email']");
