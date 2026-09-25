@@ -367,9 +367,12 @@
       submitButton.textContent = "Membuat akun...";
       setMessage("Sedang membuat akun...");
 
+      let accountCreated = false;
+
       try {
         await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         const credential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+        accountCreated = true;
         rememberLoginStart();
         await credential.user.updateProfile({ displayName: name });
 
@@ -387,7 +390,11 @@
         setMessage("");
       } catch (error) {
         console.error("Firebase register gagal:", error?.code, error?.message);
-        setMessage(firebaseErrorMessage(error, "membuat akun"), "error");
+        if (accountCreated) {
+          setMessage("Akun sudah dibuat, tetapi profil belum selesai disiapkan. Silakan masuk kembali.", "error");
+        } else {
+          setMessage(firebaseErrorMessage(error, "membuat akun"), "error");
+        }
       } finally {
         authBusy = false;
         submitButton.disabled = false;
