@@ -7,6 +7,37 @@
 
   let authBusy = false;
 
+  const LOGIN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+  const LOGIN_STARTED_AT_KEY = "mpdLoginStartedAt";
+
+  function rememberLoginStart() {
+    try {
+      localStorage.setItem(LOGIN_STARTED_AT_KEY, String(Date.now()));
+    } catch (error) {
+      console.warn("Login timestamp tidak dapat disimpan:", error);
+    }
+  }
+
+  function clearLoginStart() {
+    try {
+      localStorage.removeItem(LOGIN_STARTED_AT_KEY);
+    } catch (error) {
+      console.warn("Login timestamp tidak dapat dihapus:", error);
+    }
+  }
+
+  function isLoginExpired() {
+    try {
+      const raw = localStorage.getItem(LOGIN_STARTED_AT_KEY);
+      if (!raw) return false;
+
+      const startedAt = Number(raw);
+      return !Number.isFinite(startedAt) || Date.now() - startedAt >= LOGIN_MAX_AGE_MS;
+    } catch (error) {
+      return false;
+    }
+  }
+
   function normalizeEmail(value) {
     return String(value || "").trim().toLowerCase();
   }
@@ -277,6 +308,7 @@
       try {
         await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         const credential = await firebaseAuth.signInWithEmailAndPassword(email, password);
+        rememberLoginStart();
         await migratePendingBundle(credential.user);
         await openApp(credential.user);
         setMessage("");
@@ -339,6 +371,7 @@
       try {
         await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         const credential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+        rememberLoginStart();
         await credential.user.updateProfile({ displayName: name });
 
         await firebaseDb.collection("users").doc(credential.user.uid).set({
@@ -407,10 +440,28 @@
 
       if (user.isAnonymous) {
         await firebaseAuth.signOut();
+        clearLoginStart();
         currentUser = null;
         updateUserUI(null);
         showLoginScreen();
         return;
+      }
+
+      if (isLoginExpired()) {
+        await firebaseAuth.signOut();
+        clearLoginStart();
+        currentUser = null;
+        updateUserUI(null);
+        showLoginScreen();
+        setMessage("Sesi login sudah 30 hari. Silakan masuk kembali.", "error");
+        return;
+      }
+
+      try {
+        const raw = localStorage.getItem(LOGIN_STARTED_AT_KEY);
+        if (!raw) rememberLoginStart();
+      } catch (error) {
+        rememberLoginStart();
       }
 
       await openApp(user);
@@ -425,6 +476,7 @@
 
         try {
           await firebaseAuth.signOut();
+          clearLoginStart();
         } catch (error) {
           console.error("Logout gagal:", error);
           setMessage("Gagal keluar. Silakan coba lagi.", "error");
