@@ -561,12 +561,13 @@
       submitButton.disabled = true;
       submitButton.textContent = mode === "login" ? "Masuk..." : "Membuat akun...";
 
+      let user = null;
+
       try {
         const authMode = isLogin ? "login" : "signup";
-        const user = await getOrCreateAuthUser(email, password, authMode);
-        await activateSession(user, isLogin ? "" : name, email);
+        user = await getOrCreateAuthUser(email, password, authMode);
       } catch (error) {
-        console.error("Authentication error:", {
+        console.error("Firebase Authentication error:", {
           code: error?.code,
           message: error?.message,
           mode: isLogin ? "login" : "signup"
@@ -580,7 +581,7 @@
           } else if (error?.code === "auth/operation-not-allowed") {
             setMessage("Aktifkan Email/Password dan Anonymous Authentication di Firebase.");
           } else {
-            setMessage("Gagal membuat akun. Coba lagi.");
+            setMessage("Gagal membuat akun (" + (error?.code || "unknown") + "). Coba lagi.");
           }
         } else {
           if (["auth/wrong-password", "auth/invalid-credential", "auth/user-not-found"].includes(error?.code)) {
@@ -590,9 +591,21 @@
           } else if (error?.code === "auth/operation-not-allowed") {
             setMessage("Login email/password belum aktif di Firebase.");
           } else {
-            setMessage("Gagal masuk. Coba lagi.");
+            setMessage("Gagal masuk (" + (error?.code || "unknown") + "). Coba lagi.");
           }
         }
+
+        return;
+      }
+
+      try {
+        await activateSession(user, isLogin ? "" : name, email);
+      } catch (error) {
+        console.error("Session activation error:", {
+          code: error?.code,
+          message: error?.message
+        });
+        setMessage("Login berhasil, tapi data profil belum bisa dimuat. Coba refresh halaman.");
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = mode === "login" ? "Masuk" : "Buat Akun";
