@@ -64,7 +64,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupNavigation();
   setupLogout();
-  setupMagicLinkForm();
   setupPdfViewer();
 
   ensureBloodSugarChartUI();
@@ -116,8 +115,6 @@ document.addEventListener("DOMContentLoaded", async () => {
      ======================================================= */
 
   initializeAuth();
-
-  completeMagicLinkLogin();
 
   console.log("MPD App ready.");
 });
