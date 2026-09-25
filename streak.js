@@ -56,7 +56,16 @@
   }
 
   function write(state) {
-    global.localStorage.setItem(storageKeyForUser(global.currentUser?.uid || global.firebaseAuth?.currentUser?.uid), JSON.stringify(state));
+    try {
+      global.localStorage.setItem(
+        storageKeyForUser(
+          global.currentUser?.uid || global.firebaseAuth?.currentUser?.uid
+        ),
+        JSON.stringify(state)
+      );
+    } catch (error) {
+      console.error('Streak storage write gagal:', error);
+    }
     return state;
   }
 
