@@ -44,9 +44,3 @@
   window.addEventListener('DOMContentLoaded',function(){setupMultiCarbCalculator();});
 })();
 
-/* PDF page zoom is appended here so the existing PDF viewer code stays untouched. */
-(function(){
-  var s=document.createElement('script');
-  s.src='/pdf-page-zoom.js?v=1';
-  document.head.appendChild(s);
-})();
