@@ -523,7 +523,11 @@
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      const isLogin = mode === "login";
+      /*
+         Read the current form state from the DOM instead of the local closure.
+         This keeps login/signup detection correct even if setup runs more than once.
+      */
+      const isLogin = !nameInput.required;
       const name = normalizeName(nameInput.value);
       const email = normalizeEmail(emailInput.value);
       const password = String(passwordInput.value || "");
