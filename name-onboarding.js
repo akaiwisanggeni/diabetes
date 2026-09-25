@@ -411,6 +411,10 @@
     const submitButton = form.querySelector("button[type='submit']");
     if (!submitButton) return;
 
+    /* The form fields are managed dynamically, so native browser validation
+       must not block the custom login/signup handler. */
+    form.noValidate = true;
+
     let modeSwitch = form.querySelector("#auth-mode-switch");
     if (!modeSwitch) {
       modeSwitch = document.createElement("div");
@@ -524,10 +528,10 @@
       event.stopImmediatePropagation();
 
       /*
-         Read the current form state from the DOM instead of the local closure.
-         This keeps login/signup detection correct even if setup runs more than once.
+         Use the actual submit button state. This is the final UI state after
+         setMode() and avoids stale closure/native-validation state.
       */
-      const isLogin = !nameInput.required;
+      const isLogin = submitButton.textContent.trim().startsWith("Masuk");
       const name = normalizeName(nameInput.value);
       const email = normalizeEmail(emailInput.value);
       const password = String(passwordInput.value || "");
