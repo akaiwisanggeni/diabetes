@@ -84,16 +84,17 @@
     };
   }
 
-  async function getOrCreateAuthUser(email, password) {
+  async function getOrCreateAuthUser(email, password, mode) {
+    if (mode === "login") {
+      const signedIn = await firebaseAuth.signInWithEmailAndPassword(email, password);
+      return signedIn.user;
+    }
+
     let user = firebaseAuth.currentUser;
 
     if (user && !user.isAnonymous) {
       if (normalizeEmail(user.email) === email) {
-        const signedIn = await firebaseAuth.signInWithEmailAndPassword(
-          email,
-          password
-        );
-        return signedIn.user;
+        throw { code: "auth/credential-already-in-use" };
       }
 
       await firebaseAuth.signOut();
@@ -115,12 +116,7 @@
       return linked.user;
     } catch (error) {
       if (error && error.code === "auth/credential-already-in-use") {
-        await firebaseAuth.signOut();
-        const signedIn = await firebaseAuth.signInWithEmailAndPassword(
-          email,
-          password
-        );
-        return signedIn.user;
+        throw error;
       }
 
       throw error;
@@ -134,11 +130,11 @@
   }
 
   async function activateSession(authUser, name, email) {
-    const normalizedName = normalizeName(name);
-    const normalizedEmail = normalizeEmail(email);
-    const identityKey = makeIdentityKey(normalizedName, normalizedEmail);
     const { userRef, snapshot } = await loadProfile(authUser);
     const existingData = snapshot.exists ? snapshot.data() : null;
+    const normalizedName = normalizeName(name || existingData?.name || authUser.displayName || "");
+    const normalizedEmail = normalizeEmail(email || existingData?.email || authUser.email);
+    const identityKey = makeIdentityKey(normalizedName, normalizedEmail);
 
     if (existingData && existingData.status === "banned") {
       clearSession();
@@ -269,6 +265,11 @@
     const form = document.querySelector("#login-form");
     if (!form) return;
 
+    let mode = "signup";
+
+    const loginCard = form.closest(".login-card");
+    const subtitle = loginCard ? loginCard.querySelector("h1 + p") : null;
+
     let nameInput = form.querySelector("#name");
     if (!nameInput) {
       const emailLabel = form.querySelector("label[for='email']");
@@ -319,7 +320,7 @@
       passwordInput.id = "password";
       passwordInput.type = "password";
       passwordInput.minLength = 6;
-      passwordInput.autocomplete = "current-password";
+      passwordInput.autocomplete = "new-password";
       passwordInput.placeholder = "Minimal 6 karakter";
       passwordInput.required = true;
       passwordInput.style.marginBottom = "12px";
@@ -341,7 +342,111 @@
     }
 
     const submitButton = form.querySelector("button[type='submit']");
-    if (submitButton) submitButton.textContent = "Masuk ke MPD";
+    if (!submitButton) return;
+
+    let modeSwitch = form.querySelector("#auth-mode-switch");
+    if (!modeSwitch) {
+      modeSwitch = document.createElement("div");
+      modeSwitch.id = "auth-mode-switch";
+      modeSwitch.style.margin = "14px 0 0";
+      modeSwitch.style.textAlign = "center";
+      modeSwitch.style.color = "#7A9E9B";
+      modeSwitch.style.fontSize = "12px";
+
+      const modeSwitchButton = document.createElement("button");
+      modeSwitchButton.type = "button";
+      modeSwitchButton.id = "auth-mode-switch-button";
+      modeSwitchButton.style.width = "auto";
+      modeSwitchButton.style.padding = "0";
+      modeSwitchButton.style.margin = "0";
+      modeSwitchButton.style.background = "transparent";
+      modeSwitchButton.style.color = "#2B7A78";
+      modeSwitchButton.style.fontSize = "12px";
+      modeSwitchButton.style.fontWeight = "600";
+
+      modeSwitch.appendChild(document.createTextNode("Sudah punya akun? "));
+      modeSwitch.appendChild(modeSwitchButton);
+      form.appendChild(modeSwitch);
+    }
+
+    const modeSwitchButton = modeSwitch.querySelector("#auth-mode-switch-button");
+
+    let resetLink = form.querySelector("#forgot-password");
+    if (!resetLink) {
+      resetLink = document.createElement("button");
+      resetLink.type = "button";
+      resetLink.id = "forgot-password";
+      resetLink.textContent = "Lupa kata sandi? Reset melalui email";
+      resetLink.style.display = "none";
+      resetLink.style.width = "auto";
+      resetLink.style.margin = "12px auto 0";
+      resetLink.style.padding = "0";
+      resetLink.style.background = "transparent";
+      resetLink.style.color = "#2B7A78";
+      resetLink.style.fontSize = "12px";
+      resetLink.style.fontWeight = "500";
+      form.appendChild(resetLink);
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode === "login" ? "login" : "signup";
+      const isLogin = mode === "login";
+
+      if (nameInput) {
+        nameInput.style.display = isLogin ? "none" : "";
+        nameInput.required = !isLogin;
+        const nameLabel = form.querySelector("label[for='name']");
+        if (nameLabel) nameLabel.style.display = isLogin ? "none" : "";
+      }
+
+      if (subtitle) {
+        subtitle.textContent = isLogin
+          ? "Masuk untuk mengakses materi dan tracker kesehatanmu."
+          : "Buat akun untuk mengakses materi dan tracker kesehatanmu.";
+      }
+
+      submitButton.textContent = isLogin ? "Masuk" : "Buat Akun";
+      modeSwitchButton.textContent = isLogin ? "Buat akun" : "Masuk";
+      modeSwitch.firstChild.textContent = isLogin ? "Belum punya akun? " : "Sudah punya akun? ";
+      resetLink.style.display = isLogin ? "block" : "none";
+      passwordInput.autocomplete = isLogin ? "current-password" : "new-password";
+      passwordInput.placeholder = isLogin ? "Masukkan kata sandi" : "Minimal 6 karakter";
+      setMessage("");
+    }
+
+    modeSwitchButton.addEventListener("click", () => {
+      setMode(mode === "signup" ? "login" : "signup");
+      passwordInput.value = "";
+      if (mode === "signup") nameInput.focus();
+      else emailInput.focus();
+    });
+
+    resetLink.addEventListener("click", async () => {
+      const email = normalizeEmail(emailInput.value);
+
+      if (!email || !emailInput.checkValidity()) {
+        setMessage("Masukkan email yang valid terlebih dahulu.");
+        emailInput.focus();
+        return;
+      }
+
+      resetLink.disabled = true;
+      try {
+        await firebaseAuth.sendPasswordResetEmail(email);
+        setMessage("Link reset kata sandi sudah dikirim ke email Anda. Cek inbox atau folder spam.");
+      } catch (error) {
+        console.error("Password reset error:", error);
+        if (error?.code === "auth/user-not-found") {
+          setMessage("Email tersebut belum terdaftar.");
+        } else if (error?.code === "auth/invalid-email") {
+          setMessage("Masukkan alamat email yang valid.");
+        } else {
+          setMessage("Gagal mengirim link reset. Coba lagi.");
+        }
+      } finally {
+        resetLink.disabled = false;
+      }
+    });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -351,7 +456,7 @@
       const email = normalizeEmail(emailInput.value);
       const password = String(passwordInput.value || "");
 
-      if (!name) {
+      if (mode === "signup" && !name) {
         setMessage("Masukkan nama Anda.");
         nameInput.focus();
         return;
@@ -363,7 +468,7 @@
         return;
       }
 
-      if (name.length > 60) {
+      if (mode === "signup" && name.length > 60) {
         setMessage("Nama maksimal 60 karakter.");
         nameInput.focus();
         return;
@@ -381,40 +486,44 @@
         return;
       }
 
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = "Masuk...";
-      }
+      submitButton.disabled = true;
+      submitButton.textContent = mode === "login" ? "Masuk..." : "Membuat akun...";
 
       try {
-        const user = await getOrCreateAuthUser(email, password);
-        await activateSession(user, name, email);
+        const user = await getOrCreateAuthUser(email, password, mode);
+        await activateSession(user, mode === "signup" ? name : "", email);
       } catch (error) {
-        console.error("Direct login error:", error);
+        console.error("Authentication error:", error);
 
-        if (error && error.code === "auth/operation-not-allowed") {
-          setMessage("Aktifkan Email/Password dan Anonymous Authentication di Firebase.");
-        } else if (
-          error &&
-          ["auth/wrong-password", "auth/invalid-credential", "auth/user-disabled"].includes(error.code)
-        ) {
-          setMessage("Email atau kata sandi salah.");
-        } else if (error && error.code === "auth/email-already-in-use") {
-          setMessage("Email ini sudah terdaftar. Gunakan kata sandi akun tersebut.");
-        } else if (error && error.code === "auth/weak-password") {
-          setMessage("Kata sandi terlalu lemah. Gunakan minimal 6 karakter.");
+        if (mode === "signup") {
+          if (error?.code === "auth/credential-already-in-use" || error?.code === "auth/email-already-in-use") {
+            setMessage("Email ini sudah terdaftar. Pilih Masuk untuk menggunakan akun tersebut.");
+          } else if (error?.code === "auth/weak-password") {
+            setMessage("Kata sandi terlalu lemah. Gunakan minimal 6 karakter.");
+          } else if (error?.code === "auth/operation-not-allowed") {
+            setMessage("Aktifkan Email/Password dan Anonymous Authentication di Firebase.");
+          } else {
+            setMessage("Gagal membuat akun. Coba lagi.");
+          }
         } else {
-          setMessage("Gagal masuk. Coba lagi.");
+          if (["auth/wrong-password", "auth/invalid-credential", "auth/user-not-found"].includes(error?.code)) {
+            setMessage("Email atau kata sandi salah.");
+          } else if (error?.code === "auth/user-disabled") {
+            setMessage("Akun ini telah dinonaktifkan.");
+          } else if (error?.code === "auth/operation-not-allowed") {
+            setMessage("Login email/password belum aktif di Firebase.");
+          } else {
+            setMessage("Gagal masuk. Coba lagi.");
+          }
         }
       } finally {
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = "Masuk ke MPD";
-        }
+        submitButton.disabled = false;
+        submitButton.textContent = mode === "login" ? "Masuk" : "Buat Akun";
       }
     }, true);
-  }
 
+    setMode("signup");
+  }
   /* =========================================================
      CUSTOM PDF.JS VIEWER
      Keeps the existing PDF viewer UI and fixes loading,
