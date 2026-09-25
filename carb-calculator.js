@@ -44,13 +44,6 @@
   window.addEventListener('DOMContentLoaded',function(){setupMultiCarbCalculator();});
 })();
 
-/* Auth loader is appended here so the existing index.html stays untouched. */
-(function(){
-  var s=document.createElement('script');
-  s.src='/auth-loader.js?v=2';
-  document.head.appendChild(s);
-})();
-
 /* PDF page zoom is appended here so the existing PDF viewer code stays untouched. */
 (function(){
   var s=document.createElement('script');
