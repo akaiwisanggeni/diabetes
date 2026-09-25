@@ -101,8 +101,7 @@
         const data = snapshot.data() || {};
         if (data.status === "banned" || data.status === "revoked") {
           await firebaseAuth.signOut();
-          currentUser = null;
-          showLoginScreen();
+          clearUserDataState();
           setMessage("Akun ini telah dinonaktifkan.", "error");
           return;
         }
@@ -141,15 +140,15 @@
       console.warn("Display name update skipped:", error);
     }
 
-    updateUserUI(currentUser);
-    showPage("home");
-
     await Promise.allSettled([
       Promise.resolve().then(() => loadPdfLibrary()),
       Promise.resolve().then(() => loadCarbFoods()),
       Promise.resolve().then(() => loadBloodSugarRecords()),
       Promise.resolve().then(() => loadWeightRecords())
     ]);
+
+    updateUserUI(currentUser);
+    showPage("home");
   }
 
   async function migratePendingBundle(user) {
@@ -425,6 +424,39 @@
     });
   }
 
+  function clearUserDataState() {
+    bloodSugarRecords = [];
+    weightRecords = [];
+
+    if (typeof renderBloodSugarChart === "function") {
+      renderBloodSugarChart();
+    }
+    if (typeof renderWeightProgress === "function") {
+      renderWeightProgress();
+    }
+
+    const summaryBloodSugarDate = document.getElementById("summary-blood-sugar-date");
+    const summaryBloodSugarValue = document.getElementById("summary-blood-sugar-value");
+    const summaryBloodSugarSub = document.getElementById("summary-blood-sugar-sub");
+    const summaryWeightDate = document.getElementById("summary-weight-date");
+    const summaryWeightValue = document.getElementById("summary-weight-value");
+    const summaryWeightSub = document.getElementById("summary-weight-sub");
+
+    if (summaryBloodSugarDate) summaryBloodSugarDate.textContent = "Belum ada catatan";
+    if (summaryBloodSugarValue && summaryBloodSugarValue.firstChild) summaryBloodSugarValue.firstChild.nodeValue = "—";
+    if (summaryBloodSugarSub) summaryBloodSugarSub.textContent = "Belum ada catatan";
+    if (summaryWeightDate) summaryWeightDate.textContent = "Belum ada catatan";
+    if (summaryWeightValue && summaryWeightValue.firstChild) summaryWeightValue.firstChild.nodeValue = "—";
+    if (summaryWeightSub) summaryWeightSub.textContent = "Belum ada catatan";
+
+    const streakElement = document.getElementById("streak-count");
+    if (streakElement) streakElement.textContent = "0";
+
+    currentUser = null;
+    updateUserUI(null);
+    showLoginScreen();
+  }
+
   window.initializeAuth = function initializeAuth() {
     firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch((error) => {
       console.warn("Persistence setup gagal:", error);
@@ -432,27 +464,25 @@
 
     firebaseAuth.onAuthStateChanged(async (user) => {
       if (!user) {
-        currentUser = null;
-        updateUserUI(null);
-        showLoginScreen();
+        clearUserDataState();
         return;
+      }
+
+      if (currentUser && currentUser.uid !== user.uid) {
+        clearUserDataState();
       }
 
       if (user.isAnonymous) {
         await firebaseAuth.signOut();
         clearLoginStart();
-        currentUser = null;
-        updateUserUI(null);
-        showLoginScreen();
+        clearUserDataState();
         return;
       }
 
       if (isLoginExpired()) {
         await firebaseAuth.signOut();
         clearLoginStart();
-        currentUser = null;
-        updateUserUI(null);
-        showLoginScreen();
+        clearUserDataState();
         setMessage("Sesi login sudah 30 hari. Silakan masuk kembali.", "error");
         return;
       }
