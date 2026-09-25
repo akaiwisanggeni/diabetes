@@ -176,10 +176,17 @@
     showPage("home");
     setMessage("");
 
-    await loadPdfLibrary();
-    await loadCarbFoods();
-    await loadBloodSugarRecords();
-    await loadWeightRecords();
+    /*
+       Data loading is secondary to authentication.
+       A failure in one library/tracker must not make a valid login
+       look like it failed.
+    */
+    await Promise.allSettled([
+      Promise.resolve().then(() => loadPdfLibrary()),
+      Promise.resolve().then(() => loadCarbFoods()),
+      Promise.resolve().then(() => loadBloodSugarRecords()),
+      Promise.resolve().then(() => loadWeightRecords())
+    ]);
 
     return currentUser;
   }
@@ -356,6 +363,36 @@
       form.insertBefore(passwordHelper, passwordInput.nextSibling);
     }
 
+    let passwordToggle = form.querySelector("#password-toggle");
+    if (!passwordToggle) {
+      passwordToggle = document.createElement("button");
+      passwordToggle.type = "button";
+      passwordToggle.id = "password-toggle";
+      passwordToggle.textContent = "Tampilkan";
+      passwordToggle.setAttribute("aria-label", "Tampilkan kata sandi");
+      passwordToggle.setAttribute("aria-pressed", "false");
+      passwordToggle.style.display = "block";
+      passwordToggle.style.width = "auto";
+      passwordToggle.style.margin = "-4px 0 12px auto";
+      passwordToggle.style.padding = "0";
+      passwordToggle.style.background = "transparent";
+      passwordToggle.style.color = "#2B7A78";
+      passwordToggle.style.fontSize = "12px";
+      passwordToggle.style.fontWeight = "600";
+      form.insertBefore(passwordToggle, passwordHelper.nextSibling);
+
+      passwordToggle.addEventListener("click", () => {
+        const visible = passwordInput.type === "text";
+        passwordInput.type = visible ? "password" : "text";
+        passwordToggle.textContent = visible ? "Tampilkan" : "Sembunyikan";
+        passwordToggle.setAttribute(
+          "aria-label",
+          visible ? "Tampilkan kata sandi" : "Sembunyikan kata sandi"
+        );
+        passwordToggle.setAttribute("aria-pressed", String(!visible));
+      });
+    }
+
     const submitButton = form.querySelector("button[type='submit']");
     if (!submitButton) return;
 
@@ -426,6 +463,10 @@
       resetLink.style.display = isLogin ? "block" : "none";
       passwordInput.autocomplete = isLogin ? "current-password" : "new-password";
       passwordInput.placeholder = isLogin ? "Masukkan kata sandi" : "Minimal 6 karakter";
+      passwordInput.type = "password";
+      passwordToggle.textContent = "Tampilkan";
+      passwordToggle.setAttribute("aria-label", "Tampilkan kata sandi");
+      passwordToggle.setAttribute("aria-pressed", "false");
       setMessage("");
     }
 
