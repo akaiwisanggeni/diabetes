@@ -1105,15 +1105,41 @@ button {
   background: #E1EBE9;
 }
 
-.pdf-viewer-content iframe {
-  width: 100%;
-  height: 100%;
+.pdf-viewer-content {
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  padding: 8px;
+  box-sizing: border-box;
+}
 
-  display: block;
-
-  border: 0;
-
+.mpd-pdf-page {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto 10px;
   background: #FFFFFF;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+  transform-origin: center top;
+  will-change: auto;
+}
+
+.mpd-pdf-canvas {
+  display: block;
+  max-width: none;
+  background: #FFFFFF;
+}
+
+.pdf-render-status {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  color: #56645B;
+  font-size: 13px;
+  text-align: center;
 }
 
 /* =========================================================
