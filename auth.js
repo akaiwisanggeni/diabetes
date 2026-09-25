@@ -191,6 +191,8 @@
         }
 
         await commitBatch();
+      }
+
       localStorage.removeItem("mpdAuthMigration");
     } catch (error) {
       console.warn("Migrasi data lama dilewati:", error);
