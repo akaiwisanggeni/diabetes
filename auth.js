@@ -424,7 +424,11 @@
         setMessage("Jika email tersebut terdaftar, link reset kata sandi sudah dikirim. Cek inbox atau folder spam.", "success");
       } catch (error) {
         console.error("Reset password gagal:", error?.code, error?.message);
-        setMessage(firebaseErrorMessage(error, "mengirim link reset"), "error");
+        if (error?.code === "auth/user-not-found") {
+          setMessage("Jika email tersebut terdaftar, link reset kata sandi sudah dikirim. Cek inbox atau folder spam.", "success");
+        } else {
+          setMessage(firebaseErrorMessage(error, "mengirim link reset"), "error");
+        }
       } finally {
         button.disabled = false;
       }
