@@ -280,14 +280,15 @@
     /* Remove the legacy Instagram/DM password-recovery text if an older cached
        login template is still present. Firebase now handles password reset by email. */
     if (loginCard) {
-      loginCard.querySelectorAll("p").forEach((paragraph) => {
-        const text = (paragraph.textContent || "").toLowerCase();
+      loginCard.querySelectorAll("*").forEach((element) => {
+        const text = (element.textContent || "").trim().toLowerCase();
         if (
           text.includes("dm @panduandiabetes") ||
           text.includes("lupa password") ||
-          text.includes("lupa kata sandi? dm")
+          text.includes("lupa kata sandi? dm") ||
+          text.includes("dengan email yang anda gunakan saat mendaftar")
         ) {
-          paragraph.remove();
+          element.remove();
         }
       });
     }
@@ -508,11 +509,12 @@
       event.preventDefault();
       event.stopImmediatePropagation();
 
+      const isLogin = submitButton.textContent.trim().startsWith("Masuk");
       const name = normalizeName(nameInput.value);
       const email = normalizeEmail(emailInput.value);
       const password = String(passwordInput.value || "");
 
-      if (mode === "signup" && !name) {
+      if (!isLogin && !name) {
         setMessage("Masukkan nama Anda.");
         nameInput.focus();
         return;
@@ -524,7 +526,7 @@
         return;
       }
 
-      if (mode === "signup" && name.length > 60) {
+      if (!isLogin && name.length > 60) {
         setMessage("Nama maksimal 60 karakter.");
         nameInput.focus();
         return;
@@ -546,12 +548,17 @@
       submitButton.textContent = mode === "login" ? "Masuk..." : "Membuat akun...";
 
       try {
-        const user = await getOrCreateAuthUser(email, password, mode);
-        await activateSession(user, mode === "signup" ? name : "", email);
+        const authMode = isLogin ? "login" : "signup";
+        const user = await getOrCreateAuthUser(email, password, authMode);
+        await activateSession(user, isLogin ? "" : name, email);
       } catch (error) {
-        console.error("Authentication error:", error);
+        console.error("Authentication error:", {
+          code: error?.code,
+          message: error?.message,
+          mode: isLogin ? "login" : "signup"
+        });
 
-        if (mode === "signup") {
+        if (!isLogin) {
           if (error?.code === "auth/credential-already-in-use" || error?.code === "auth/email-already-in-use") {
             setMessage("Email ini sudah terdaftar. Pilih Masuk untuk menggunakan akun tersebut.");
           } else if (error?.code === "auth/weak-password") {
