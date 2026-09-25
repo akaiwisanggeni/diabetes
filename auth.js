@@ -150,7 +150,15 @@
         };
 
         const profile = restore(raw.profile || {});
-        const batch = firebaseDb.batch();
+        let batch = firebaseDb.batch();
+        let count = 0;
+
+        const commitBatch = async () => {
+          if (!count) return;
+          await batch.commit();
+          batch = firebaseDb.batch();
+          count = 0;
+        };
 
         batch.set(targetRef, {
           ...profile,
@@ -161,8 +169,8 @@
           updated_at: firebase.firestore.FieldValue.serverTimestamp(),
           access_type: "self_registered"
         }, { merge: true });
+        count++;
 
-        let count = 1;
         for (const [collectionName, records] of Object.entries(raw.records || {})) {
           for (const record of records || []) {
             const data = restore(record.data || {});
@@ -175,16 +183,14 @@
               { merge: true }
             );
             count++;
-            if (count >= 450) {
-              await batch.commit();
-              break;
+
+            if (count >= 400) {
+              await commitBatch();
             }
           }
         }
 
-        await batch.commit();
-      }
-
+        await commitBatch();
       localStorage.removeItem("mpdAuthMigration");
     } catch (error) {
       console.warn("Migrasi data lama dilewati:", error);
