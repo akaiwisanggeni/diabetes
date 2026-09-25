@@ -788,7 +788,7 @@ async function renderPdfDocument(url, content) {
   pages.slice(0, 2).forEach((item) => renderPage(item));
 }
 
-function openPdfViewer(pdf) {
+async function openPdfViewer(pdf) {
   const viewer =
     document.querySelector("#pdf-viewer") ||
     document.querySelector(".pdf-viewer") ||
@@ -798,11 +798,6 @@ function openPdfViewer(pdf) {
     console.warn("PDF viewer tidak ditemukan.");
     return;
   }
-
-  const iframe =
-    viewer.querySelector("iframe") ||
-    viewer.querySelector("#pdf-frame") ||
-    viewer.querySelector('[data-pdf-frame]');
 
   const title =
     viewer.querySelector("#pdf-viewer-title") ||
