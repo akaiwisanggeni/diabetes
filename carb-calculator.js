@@ -11,7 +11,7 @@
     if (typeof escapeHtml === 'function') return escapeHtml(String(value ?? ''));
     return String(value ?? '').replace(/[&<>'\"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'})[c]; });
   }
-  function num(value) { const n = Number(value); return Number.isFinite(n) ? n : 0; }
+  function num(value) { const n = Number(value); return Number.isFinite(n) ? Math.max(0, n) : 0; }
   function fmt(value) { if (typeof formatNumber === 'function') return formatNumber(value); return Number(value || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 }); }
   function carbPerUnit(food) { return (num(food.serving_size) / 100) * num(food.carbs_per_100g); }
 
