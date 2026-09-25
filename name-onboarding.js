@@ -280,7 +280,7 @@
     /* Remove the legacy Instagram/DM password-recovery text if an older cached
        login template is still present. Firebase now handles password reset by email. */
     if (loginCard) {
-      loginCard.querySelectorAll("*").forEach((element) => {
+      loginCard.querySelectorAll("p, span, small, div").forEach((element) => {
         const text = (element.textContent || "").trim().toLowerCase();
         if (
           text.includes("dm @panduandiabetes") ||
