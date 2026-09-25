@@ -277,11 +277,12 @@
     const loginCard = form.closest(".login-card");
     const subtitle = loginCard ? loginCard.querySelector("h1 + p") : null;
 
-    /* Remove the legacy Instagram/DM password-recovery text if an older cached
-       login template is still present. Firebase now handles password reset by email. */
-    if (loginCard) {
+    function removeLegacyRecoveryText() {
+      if (!loginCard) return;
+
       loginCard.querySelectorAll("p, span, small, div").forEach((element) => {
         const text = (element.textContent || "").trim().toLowerCase();
+
         if (
           text.includes("dm @panduandiabetes") ||
           text.includes("lupa password") ||
@@ -290,6 +291,19 @@
         ) {
           element.remove();
         }
+      });
+    }
+
+    removeLegacyRecoveryText();
+
+    if (loginCard) {
+      const legacyTextObserver = new MutationObserver(() => {
+        removeLegacyRecoveryText();
+      });
+
+      legacyTextObserver.observe(loginCard, {
+        childList: true,
+        subtree: true
       });
     }
 
@@ -509,7 +523,7 @@
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      const isLogin = submitButton.textContent.trim().startsWith("Masuk");
+      const isLogin = mode === "login";
       const name = normalizeName(nameInput.value);
       const email = normalizeEmail(emailInput.value);
       const password = String(passwordInput.value || "");
@@ -585,7 +599,7 @@
       }
     }, true);
 
-    setMode("signup");
+    setMode("login");
   }
   /* =========================================================
      CUSTOM PDF.JS VIEWER
