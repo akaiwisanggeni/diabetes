@@ -662,6 +662,132 @@ function isValidPdfUrl(value) {
 }
 
 
+let activePdfLoadingTask = null;
+let activePdfDocument = null;
+let pdfRenderToken = 0;
+
+async function renderPdfDocument(url, content) {
+  const token = ++pdfRenderToken;
+
+  if (activePdfLoadingTask) {
+    try {
+      await activePdfLoadingTask.destroy();
+    } catch (error) {}
+    activePdfLoadingTask = null;
+  }
+
+  if (activePdfDocument) {
+    try {
+      await activePdfDocument.destroy();
+    } catch (error) {}
+    activePdfDocument = null;
+  }
+
+  if (!window.pdfjsLib) {
+    throw new Error("PDF.js belum tersedia.");
+  }
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  content.innerHTML = `
+    <div class="pdf-render-status">Memuat materi...</div>
+  `;
+  content.scrollTop = 0;
+
+  activePdfLoadingTask = pdfjsLib.getDocument(url);
+  const pdf = await activePdfLoadingTask.promise;
+
+  if (token !== pdfRenderToken) {
+    await pdf.destroy();
+    return;
+  }
+
+  activePdfLoadingTask = null;
+  activePdfDocument = pdf;
+  content.innerHTML = "";
+
+  const availableWidth = Math.max(280, content.clientWidth - 16);
+  const pages = [];
+
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const baseViewport = page.getViewport({ scale: 1 });
+    const scale = Math.min(
+      1.5,
+      Math.max(0.5, availableWidth / baseViewport.width)
+    );
+
+    const viewport = page.getViewport({ scale });
+    const wrapper = document.createElement("div");
+    wrapper.className = "mpd-pdf-page";
+    wrapper.dataset.pageNumber = String(pageNumber);
+    wrapper.style.width = `${viewport.width}px`;
+    wrapper.style.height = `${viewport.height}px`;
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "mpd-pdf-canvas";
+    canvas.setAttribute("aria-label", `Halaman ${pageNumber}`);
+    wrapper.appendChild(canvas);
+    content.appendChild(wrapper);
+
+    pages.push({
+      pageNumber,
+      wrapper,
+      canvas,
+      scale,
+      rendered: false
+    });
+  }
+
+  const renderPage = async (item) => {
+    if (item.rendered || token !== pdfRenderToken) return;
+
+    item.rendered = true;
+
+    try {
+      const page = await pdf.getPage(item.pageNumber);
+      if (token !== pdfRenderToken) return;
+
+      const viewport = page.getViewport({ scale: item.scale });
+      const outputScale = Math.min(window.devicePixelRatio || 1, 1.5);
+      const context = item.canvas.getContext("2d");
+
+      item.canvas.width = Math.floor(viewport.width * outputScale);
+      item.canvas.height = Math.floor(viewport.height * outputScale);
+      item.canvas.style.width = `${viewport.width}px`;
+      item.canvas.style.height = `${viewport.height}px`;
+
+      await page.render({
+        canvasContext: context,
+        viewport,
+        transform: outputScale !== 1
+          ? [outputScale, 0, 0, outputScale, 0, 0]
+          : null
+      }).promise;
+    } catch (error) {
+      item.rendered = false;
+      console.error(`PDF page ${item.pageNumber} render error:`, error);
+    }
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const item = pages.find((page) => page.wrapper === entry.target);
+        if (item) renderPage(item);
+      }
+    });
+  }, {
+    root: content,
+    rootMargin: "700px 0px"
+  });
+
+  pages.forEach((item) => observer.observe(item.wrapper));
+
+  pages.slice(0, 2).forEach((item) => renderPage(item));
+}
+
 function openPdfViewer(pdf) {
   const viewer =
     document.querySelector("#pdf-viewer") ||
@@ -688,9 +814,11 @@ function openPdfViewer(pdf) {
     return;
   }
 
-  if (iframe) {
-    iframe.src = pdf.pdf_url;
-  }
+  const content =
+    viewer.querySelector("#pdf-renderer") ||
+    viewer.querySelector(".pdf-viewer-content");
+
+  if (!content) return;
 
   if (title) {
     title.textContent =
@@ -698,15 +826,21 @@ function openPdfViewer(pdf) {
   }
 
   viewer.style.display = "";
-
-  document.body.classList.add(
-    "pdf-viewer-open"
-  );
+  document.body.classList.add("pdf-viewer-open");
 
   window.scrollTo({
     top: 0,
     behavior: "instant"
   });
+
+  try {
+    await renderPdfDocument(pdf.pdf_url, content);
+  } catch (error) {
+    console.error("PDF render error:", error);
+    content.innerHTML = `
+      <div class="pdf-render-status">Gagal memuat materi.</div>
+    `;
+  }
 }
 
 
@@ -718,13 +852,25 @@ function closePdfViewer() {
 
   if (!viewer) return;
 
-  const iframe =
-    viewer.querySelector("iframe") ||
-    viewer.querySelector("#pdf-frame") ||
-    viewer.querySelector('[data-pdf-frame]');
+  pdfRenderToken += 1;
 
-  if (iframe) {
-    iframe.src = "";
+  if (activePdfLoadingTask) {
+    activePdfLoadingTask.destroy().catch(() => {});
+    activePdfLoadingTask = null;
+  }
+
+  if (activePdfDocument) {
+    activePdfDocument.destroy().catch(() => {});
+    activePdfDocument = null;
+  }
+
+  const content =
+    viewer.querySelector("#pdf-renderer") ||
+    viewer.querySelector(".pdf-viewer-content");
+
+  if (content) {
+    content.innerHTML = "";
+    content.scrollTop = 0;
   }
 
   viewer.style.display = "none";
