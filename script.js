@@ -608,7 +608,7 @@ function renderPdfLibrary(container, pdfs) {
 
 
 function formatPdfTitle(title) {
-  if (!title) return "";
+  if (typeof title !== "string" || !title.trim()) return "";
 
   return title
     .replace(/-/g, " ")
